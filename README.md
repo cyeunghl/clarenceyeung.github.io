@@ -1,77 +1,57 @@
-# Clarence Yeung · Portfolio
+# Clarence Yeung · Portfolio Mise en Place
 
-A minimalist, motion-forward personal website for Clarence Yeung. Built for GitHub Pages with HTML, CSS, and modular JavaScript powered by Three.js visualizations.
+A single-page portfolio presented like a minimalist recipe card. The layout highlights Clarence's
+links as "ingredients", a narrative blurb as the "instructions", an interactive Strava globe, and a
+scroll-driven DNA helix — all powered directly inside `index.html` with Three.js.
 
-## 📁 Project Structure
+## Getting Started
 
-```
-├── index.html          # Single-page layout for all sections
-├── style.css           # Global styling and responsive layout
-├── main.js             # Entry script, lazy loading, scroll interactions
-├── globe.js            # Three.js Strava globe component
-├── dna.js              # Three.js DNA helix animation
-├── assets/
-│   ├── cv.pdf          # CV placeholder (replace with live document)
-│   ├── mock-strava.json# Mock response for Strava data
-│   ├── profile-placeholder.svg # Drop-in hero portrait placeholder
-│   └── papers/         # Placeholder directory for publications/PDFs
-├── cloud/
-│   ├── README.md       # Backend architecture & deployment notes
-│   └── strava-proxy/   # Sample proxy skeleton for Strava OAuth + data fetch
-└── README.md           # This file
-```
-
-## 🚀 Getting Started
-
-1. **Install a local static server** (any option works):
-   - Python: `python3 -m http.server 8000`
-   - Node: `npx serve`
-   - Ruby: `ruby -run -e httpd . -p 8000`
-
-2. **Run the site locally**:
+1. Clone the repository.
+2. Serve the site locally with any static file server. Examples:
    ```bash
-   python3 -m http.server 8000
+   npx serve .
    ```
-   Then open [http://localhost:8000](http://localhost:8000) in your browser.
+   or open `index.html` directly in a modern browser.
+3. Replace placeholder assets inside `assets/` such as `profile-placeholder.svg` and
+   `cv.pdf` with personal files.
 
-3. **Edit content**:
-   - Update copy in `index.html` (hero headline, About paragraph, footer links).
-   - Replace `assets/profile-placeholder.svg` with your photo and update the `<img>` `src` if you prefer another filename.
-   - Replace `assets/cv.pdf` with the live document.
-   - Add additional PDFs inside `assets/papers/` and link them from the page.
+## Editing the Recipe Layout
 
-## 🌐 GitHub Pages Deployment
+The entire layout, styles, and scripts are contained inside `index.html` for easy tweaking:
 
-This repository is ready for GitHub Pages. Push to the `main` branch and enable Pages in your repository settings (Source: `main` branch, `/ (root)` folder). Changes will publish automatically.
+- Update the hero content, tagline, and recipe-style notes at the top of the file.
+- Add or edit links within the "Ingredients" list.
+- Replace the instructions text with a personal biography or project summary.
+- Adjust colors and typography by editing the `:root` variables inside the inline `<style>` block.
 
-## 🧭 Strava Globe Integration
+## Strava Activity Globe
 
-- The globe component fetches activity data from `assets/mock-strava.json` by default.
-- Set `window.STRAVA_API_BASE` (and optionally `window.STRAVA_CONNECT_URL`) before loading `main.js` to point at your proxy service. When defined, the UI enables the **Connect Strava Account** button and the globe will request `GET {STRAVA_API_BASE}/activities` with credentials included.
-- A dedicated backend architecture and sample implementation live in [`cloud/`](cloud/README.md). The scaffold mirrors a Cloud Run/Cloud Functions style deployment with OAuth handshake, periodic refresh, and cache fan-out.
-- The module still honors the `mockDataUrl` fallback. If the proxy is unreachable the cached payload or mock JSON keeps rendering the visualization.
-- Data is cached in `localStorage` for 10 days (configurable via `refreshIntervalDays`).
-- Activities closer than ~500 meters are clustered and surfaced as a single glowing point with the most recent ride highlighted in the tooltip.
+A lightweight Three.js scene renders a rotating sphere with activity markers sourced from
+`assets/mock-strava.json`. Swap this file with real activity data or hook it into the provided proxy
+scaffold.
 
-## 🧬 DNA Helix Interaction
+Supporting documentation for a Strava OAuth proxy remains in [`cloud/`](cloud/) for future backend
+integration.
 
-- The helix now lives in a fixed overlay anchored to the bottom-right corner of the viewport. It continues rotating clockwise as you scroll down and counterclockwise on scroll up, remaining visible across sections.
-- Motion respects the user’s `prefers-reduced-motion` settings and pauses when the tab is backgrounded.
-- A fallback badge appears in browsers without WebGL.
+## DNA Helix Animation
 
-## ♿ Accessibility & Fallbacks
+The DNA helix is a scroll-responsive Three.js scene pinned within a 400vh section. As visitors
+scroll, the helix rotates smoothly around the Y-axis. Customize the geometry by editing the
+"DNA Helix" block near the bottom of the inline script.
 
-- Smooth scrolling and animations degrade gracefully for browsers without WebGL (fallback messages are displayed instead of canvases).
-- Animations pause when the tab is inactive.
+## Deployment
 
-## 🔧 Customization Tips
+1. Commit and push changes to the `main` branch.
+2. Ensure GitHub Pages is enabled for the repository (Settings → Pages → Deploy from branch).
+3. The site will be served from `https://clarenceyeung.github.io/`.
 
-- Colors and typography live in `style.css` under the `:root` variables.
-- The hero portrait container accepts any aspect ratio; update `.hero__portrait` styles if you prefer circular framing.
-- All About links are laid out in a single horizontal line. Adjust the `.link-grid` flex styles if you want different spacing or wrapping.
-- Update outbound links in both the About section and footer.
-- Replace placeholder copy with the final narrative.
+## Accessibility & Performance Notes
 
-## 📝 License
+- Links feature subtle underlines and focus states for keyboard navigation.
+- Layout adapts responsively down to mobile widths.
+- WebGL features gracefully degrade by relying on static fallback copy if disabled (no explicit
+  fallback canvas is rendered, so consider adding one if needed).
 
-Content © Clarence Yeung. Code is provided under the MIT License unless otherwise specified.
+## License
+
+This project is published under the MIT License. Feel free to adapt and remix.

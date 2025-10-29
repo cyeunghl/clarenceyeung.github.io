@@ -3,121 +3,651 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Clarence Yeung | Portfolio</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="style.css" />
+    <title>Clarence Yeung · Portfolio Mise en Place</title>
+    <script src="https://unpkg.com/three@0.158.0/build/three.min.js"></script>
+    <style>
+      :root {
+        color-scheme: light;
+        --olive: #5f6f52;
+        --ink: #1c1d21;
+        --cream: #f9f6f0;
+        --muted: #8b8d91;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        background: var(--cream);
+        color: var(--ink);
+        line-height: 1.6;
+        scroll-behavior: smooth;
+      }
+
+      img {
+        max-width: 100%;
+        display: block;
+      }
+
+      a {
+        color: var(--olive);
+        text-decoration: none;
+        font-weight: 500;
+        position: relative;
+      }
+
+      a::after {
+        content: "";
+        position: absolute;
+        inset: auto 0 -0.15em;
+        height: 2px;
+        background: currentColor;
+        opacity: 0.2;
+        transition: opacity 0.2s ease;
+      }
+
+      a:focus-visible,
+      a:hover {
+        color: #3f5038;
+      }
+
+      a:hover::after,
+      a:focus-visible::after {
+        opacity: 0.7;
+      }
+
+      header.recipe-header {
+        padding: clamp(2rem, 6vw, 4rem) clamp(1.5rem, 8vw, 6rem);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        background: white;
+      }
+
+      .recipe-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2rem;
+        align-items: flex-start;
+      }
+
+      .recipe-meta figure {
+        margin: 0;
+        width: min(180px, 40vw);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 1rem;
+      }
+
+      .portrait {
+        width: 100%;
+        border-radius: 50%;
+        overflow: hidden;
+        box-shadow: 0 20px 45px rgba(31, 41, 55, 0.15);
+        aspect-ratio: 1 / 1;
+        background: linear-gradient(135deg, rgba(95, 111, 82, 0.15), rgba(95, 111, 82, 0.05));
+        display: grid;
+        place-items: center;
+      }
+
+      .portrait span {
+        color: var(--muted);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .recipe-meta .headline {
+        flex: 1 1 300px;
+        max-width: 640px;
+      }
+
+      .recipe-meta h1 {
+        font-size: clamp(2.4rem, 6vw, 4.2rem);
+        margin: 0;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+      }
+
+      .recipe-meta .tagline {
+        text-transform: uppercase;
+        font-size: 0.95rem;
+        letter-spacing: 0.24em;
+        margin-top: 0.75rem;
+        color: var(--muted);
+      }
+
+      .recipe-notes {
+        margin-top: clamp(1.5rem, 5vw, 2.5rem);
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 1.25rem;
+        font-size: 0.95rem;
+        color: var(--muted);
+      }
+
+      .recipe-notes span {
+        display: block;
+        font-weight: 600;
+        color: var(--olive);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-size: 0.78rem;
+        margin-bottom: 0.35rem;
+      }
+
+      main {
+        padding: clamp(2rem, 5vw, 4rem) clamp(1.5rem, 8vw, 6rem);
+        display: grid;
+        gap: clamp(3rem, 6vw, 5rem);
+      }
+
+      .recipe-body {
+        display: grid;
+        gap: 2.5rem;
+        align-items: start;
+      }
+
+      .columns {
+        display: grid;
+        grid-template-columns: minmax(240px, 300px) minmax(260px, 1fr);
+        gap: clamp(1.5rem, 4vw, 3rem);
+      }
+
+      .card {
+        background: white;
+        border-radius: 20px;
+        padding: clamp(1.5rem, 4vw, 2.2rem);
+        box-shadow: 0 20px 45px rgba(17, 24, 39, 0.08);
+        border: 1px solid rgba(12, 18, 28, 0.05);
+      }
+
+      .ingredients h2,
+      .instructions h2 {
+        margin: 0 0 1rem;
+        font-size: 1.1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        color: var(--olive);
+      }
+
+      .ingredients ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+      }
+
+      .ingredients li {
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .ingredients li::before {
+        content: "•";
+        color: rgba(95, 111, 82, 0.6);
+        font-size: 1.2rem;
+      }
+
+      .instructions p {
+        margin: 0 0 1rem;
+      }
+
+      .instructions p:last-child {
+        margin-bottom: 0;
+      }
+
+      .strava-section {
+        display: grid;
+        gap: clamp(1.5rem, 4vw, 3rem);
+      }
+
+      .strava-section header {
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        font-size: 0.9rem;
+        color: var(--muted);
+      }
+
+      .strava-card {
+        display: grid;
+        grid-template-columns: minmax(240px, 1fr) minmax(300px, 1fr);
+        gap: clamp(1.5rem, 4vw, 3rem);
+        align-items: center;
+        background: white;
+        border-radius: 24px;
+        padding: clamp(1.75rem, 4vw, 2.5rem);
+        box-shadow: 0 25px 60px rgba(12, 18, 28, 0.08);
+        border: 1px solid rgba(12, 18, 28, 0.06);
+      }
+
+      #globe-canvas {
+        width: 100%;
+        aspect-ratio: 1;
+        display: block;
+        border-radius: 18px;
+        background: radial-gradient(circle at 30% 30%, rgba(95, 111, 82, 0.1), rgba(12, 18, 28, 0.08));
+      }
+
+      .strava-copy h3 {
+        margin: 0 0 0.6rem;
+        font-size: 1.4rem;
+        letter-spacing: -0.01em;
+      }
+
+      .strava-copy p {
+        margin: 0 0 1rem;
+        color: var(--muted);
+      }
+
+      .strava-actions {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+      }
+
+      .strava-actions a {
+        border-radius: 999px;
+        padding: 0.65rem 1.4rem;
+        border: 1px solid rgba(95, 111, 82, 0.35);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .strava-actions a:hover,
+      .strava-actions a:focus-visible {
+        transform: translateY(-1px);
+        box-shadow: 0 12px 30px rgba(95, 111, 82, 0.2);
+      }
+
+      .dna-wrapper {
+        position: relative;
+        height: 400vh;
+        margin-top: clamp(3rem, 8vw, 6rem);
+      }
+
+      .dna-fixed {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(120deg, rgba(95, 111, 82, 0.05), rgba(255, 255, 255, 0.7));
+      }
+
+      #dna-canvas {
+        width: min(480px, 80vw);
+        height: min(520px, 80vh);
+      }
+
+      .dna-caption {
+        position: absolute;
+        bottom: clamp(1rem, 5vw, 3rem);
+        right: clamp(1rem, 5vw, 4rem);
+        font-size: 0.85rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: rgba(12, 18, 28, 0.5);
+        mix-blend-mode: multiply;
+      }
+
+      footer {
+        padding: clamp(2.5rem, 6vw, 4rem) clamp(1.5rem, 8vw, 6rem);
+        background: white;
+        border-top: 1px solid rgba(0, 0, 0, 0.08);
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        font-size: 0.9rem;
+        color: var(--muted);
+      }
+
+      footer .links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+
+      @media (max-width: 900px) {
+        .strava-card {
+          grid-template-columns: 1fr;
+        }
+
+        .columns {
+          grid-template-columns: 1fr;
+        }
+
+        .recipe-meta {
+          justify-content: center;
+          text-align: center;
+        }
+
+        .recipe-meta .headline {
+          text-align: center;
+        }
+
+        .recipe-notes {
+          justify-items: center;
+        }
+
+        .dna-caption {
+          right: 50%;
+          transform: translateX(50%);
+          text-align: center;
+        }
+      }
+    </style>
   </head>
   <body>
-    <noscript>
-      <div class="no-js-warning">
-        This site uses WebGL-powered animations. Enable JavaScript for the full
-        experience.
-      </div>
-    </noscript>
-    <header class="hero" id="hero">
-      <div class="hero__overlay"></div>
-      <div class="hero__content">
-        <figure class="hero__portrait">
-          <img
-            src="assets/profile-placeholder.svg"
-            alt="Portrait of Clarence Yeung"
-            class="hero__portrait-image"
-            loading="lazy"
-          />
+    <header class="recipe-header">
+      <div class="recipe-meta">
+        <figure>
+          <div class="portrait">
+            <img src="assets/profile-placeholder.svg" alt="Portrait placeholder" />
+          </div>
+          <figcaption>Fresh portrait coming soon</figcaption>
         </figure>
-        <h1 class="hero__title">Clarence Yeung</h1>
-        <p class="hero__subtitle">scientist | biker | baker</p>
-        <button class="scroll-indicator" data-scroll-target="#about" aria-label="Scroll to About section">
-          <span class="scroll-indicator__dot"></span>
-        </button>
+        <div class="headline">
+          <h1>Clarence Yeung</h1>
+          <div class="tagline">Scientist · Biker · Baker</div>
+          <div class="recipe-notes">
+            <div><span>Prep</span>Ongoing curiosity &amp; exploration</div>
+            <div><span>Cook</span>Hands-on experimentation</div>
+            <div><span>Serves</span>Collaborators, teams, and curious minds</div>
+          </div>
+        </div>
       </div>
     </header>
 
     <main>
-      <section class="section section--about" id="about">
-        <div class="section__inner section__inner--card">
-          <h2 class="section__title">About Me</h2>
-          <p class="section__description">
-            I am an interdisciplinary explorer blending science, design, and
-            storytelling. This is placeholder text that can be updated with
-            Clarence's biography, research interests, and ongoing projects.
-          </p>
-          <div class="link-grid">
-            <a href="https://www.linkedin.com" target="_blank" rel="noopener" class="link-grid__item">LinkedIn</a>
-            <a href="https://github.com" target="_blank" rel="noopener" class="link-grid__item">GitHub</a>
-            <a href="https://scholar.google.com" target="_blank" rel="noopener" class="link-grid__item">Google Scholar</a>
-            <a href="https://substack.com" target="_blank" rel="noopener" class="link-grid__item">Substack</a>
-            <a href="assets/cv.pdf" class="link-grid__item" download>Download CV</a>
-          </div>
+      <section class="recipe-body">
+        <div class="columns">
+          <article class="card ingredients">
+            <h2>Ingredients</h2>
+            <ul>
+              <li><a href="https://www.linkedin.com" target="_blank" rel="noopener">LinkedIn</a></li>
+              <li><a href="https://github.com" target="_blank" rel="noopener">GitHub</a></li>
+              <li><a href="https://scholar.google.com" target="_blank" rel="noopener">Google Scholar</a></li>
+              <li><a href="https://substack.com" target="_blank" rel="noopener">Substack</a></li>
+              <li><a href="assets/cv.pdf" target="_blank" rel="noopener">Download CV</a></li>
+            </ul>
+          </article>
+          <article class="card instructions">
+            <h2>Instructions</h2>
+            <p>
+              Combine curiosity for living systems, kinetic storytelling, and the joy of making with
+              your preferred measure of collaboration. Stir in new datasets, long bike rides, and a
+              pinch of fermentation to taste. Continue iterating until the ideas rise.
+            </p>
+            <p>
+              Reserve a portion for ongoing research, another for product development, and a final
+              portion for playful experiments. Serve warm conversations generously.
+            </p>
+          </article>
         </div>
       </section>
 
-      <section class="section section--globe" id="globe">
-        <div class="section__inner section__inner--wide">
-          <div class="section__header">
-            <h2 class="section__title">Strava Rides Around the Globe</h2>
-            <p class="section__description">
-              A real-time view of Clarence's adventures. Strava activities are
-              clustered and refreshed every 10 days. Hover a point to reveal the
-              latest ride in that area.
+      <section class="strava-section">
+        <header>Serving Suggestion</header>
+        <div class="strava-card">
+          <canvas id="globe-canvas" aria-label="Strava activity globe visualization"></canvas>
+          <div class="strava-copy">
+            <h3>Strava Activity Mise en Place</h3>
+            <p>
+              A preview of an interactive globe that batches activity data within 500&nbsp;meters and
+              keeps a fresh cache every ten days. Swap the mock JSON with authenticated fetches when
+              the Strava kitchen is ready.
             </p>
             <div class="strava-actions">
-              <button type="button" class="strava-actions__cta" id="strava-connect">
-                Connect Strava Account
-              </button>
-              <p class="strava-actions__note">
-                Authenticate securely to refresh activities via the protected Strava proxy.
-              </p>
+              <a href="cloud/README.md" target="_blank" rel="noopener">View data pipeline</a>
+              <a href="assets/mock-strava.json" target="_blank" rel="noopener">Inspect mock data</a>
             </div>
-          </div>
-          <div class="webgl-wrapper" data-lazy="globe">
-            <div class="webgl-placeholder">
-              <p>Loading interactive globe…</p>
-            </div>
-            <div class="webgl-fallback" hidden>
-              WebGL is unavailable. View the activity log on Strava instead.
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="section section--dna" id="dna">
-        <div class="section__inner section__inner--wide">
-          <div class="section__header">
-            <h2 class="section__title">Designing Motion in Molecules</h2>
-            <p class="section__description">
-              The helix hovering in the corner is rendered in real time with Three.js.
-              It remains anchored as you scroll, reacting to motion cues to echo the
-              rhythm of Clarence's research practice.
-            </p>
           </div>
         </div>
       </section>
     </main>
 
-    <footer class="footer">
-      <div class="footer__inner">
-        <p class="footer__title">Let&apos;s Collaborate</p>
-        <div class="footer__links">
-          <a href="mailto:hello@clarenceyeung.github.io">Email</a>
-          <a href="https://www.linkedin.com" target="_blank" rel="noopener">LinkedIn</a>
-          <a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
-          <a href="https://substack.com" target="_blank" rel="noopener">Substack</a>
-          <a href="assets/cv.pdf" download>CV</a>
-        </div>
-        <p class="footer__copyright">
-          &copy; <span id="year"></span> Clarence Yeung. All rights reserved.
-        </p>
+    <section class="dna-wrapper" aria-label="DNA helix animation">
+      <div class="dna-fixed">
+        <canvas id="dna-canvas"></canvas>
+        <div class="dna-caption">Scroll to rotate</div>
       </div>
+    </section>
+
+    <footer>
+      <div class="links">
+        <a href="mailto:hello@example.com">hello@example.com</a>
+        <a href="https://www.linkedin.com" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
+        <a href="assets/cv.pdf" target="_blank" rel="noopener">CV</a>
+      </div>
+      <div>© <span id="year"></span> Clarence Yeung. Crafted with Three.js &amp; care.</div>
     </footer>
 
-    <div class="dna-overlay" id="dna-overlay" aria-hidden="true"></div>
+    <script type="module">
+      const yearEl = document.getElementById("year");
+      if (yearEl) {
+        yearEl.textContent = new Date().getFullYear();
+      }
 
-    <script type="module" src="main.js"></script>
+      // --- Strava Globe (simplified) ---
+      const globeCanvas = document.getElementById("globe-canvas");
+      const globeRenderer = new THREE.WebGLRenderer({
+        canvas: globeCanvas,
+        antialias: true,
+        alpha: true,
+      });
+      globeRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+      const globeScene = new THREE.Scene();
+      globeScene.background = null;
+      const globeCamera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
+      globeCamera.position.set(0, 0, 5);
+      globeScene.add(globeCamera);
+
+      const globeLight = new THREE.HemisphereLight(0xffffff, 0x222233, 1);
+      globeScene.add(globeLight);
+
+      const globeGroup = new THREE.Group();
+      globeScene.add(globeGroup);
+
+      const sphereGeom = new THREE.SphereGeometry(1.4, 48, 48);
+      const sphereMat = new THREE.MeshStandardMaterial({
+        color: 0x25303b,
+        roughness: 0.6,
+        metalness: 0.1,
+        transparent: true,
+        opacity: 0.92,
+      });
+      const sphere = new THREE.Mesh(sphereGeom, sphereMat);
+      globeGroup.add(sphere);
+
+      const glowGeom = new THREE.SphereGeometry(1.45, 48, 48);
+      const glowMat = new THREE.MeshBasicMaterial({
+        color: 0x5f6f52,
+        transparent: true,
+        opacity: 0.18,
+        wireframe: true,
+      });
+      globeGroup.add(new THREE.Mesh(glowGeom, glowMat));
+
+      const fetchActivities = async () => {
+        try {
+          const res = await fetch("assets/mock-strava.json");
+          if (!res.ok) throw new Error("Unable to fetch mock data");
+          return res.json();
+        } catch (error) {
+          console.warn(error);
+          return [];
+        }
+      };
+
+      const activityPoints = new THREE.Group();
+      globeGroup.add(activityPoints);
+
+      const toCartesian = (lat, lon, radius = 1.4) => {
+        const phi = (90 - lat) * (Math.PI / 180);
+        const theta = (lon + 180) * (Math.PI / 180);
+        return new THREE.Vector3(
+          -(radius * Math.sin(phi) * Math.cos(theta)),
+          radius * Math.cos(phi),
+          radius * Math.sin(phi) * Math.sin(theta)
+        );
+      };
+
+      const loadActivities = async () => {
+        const activities = await fetchActivities();
+        const pointGeom = new THREE.SphereGeometry(0.025, 16, 16);
+        activities.slice(0, 120).forEach((activity) => {
+          const { latitude, longitude } = activity.location;
+          const pointMat = new THREE.MeshBasicMaterial({
+            color: new THREE.Color().setHSL(0.3, 0.4, 0.6),
+          });
+          const point = new THREE.Mesh(pointGeom, pointMat);
+          point.position.copy(toCartesian(latitude, longitude, 1.45));
+          activityPoints.add(point);
+        });
+      };
+
+      loadActivities();
+
+      const resizeGlobe = () => {
+        const { clientWidth, clientHeight } = globeCanvas;
+        globeRenderer.setSize(clientWidth, clientHeight, false);
+        globeCamera.aspect = clientWidth / clientHeight;
+        globeCamera.updateProjectionMatrix();
+      };
+
+      const globeObserver = new ResizeObserver(resizeGlobe);
+      globeObserver.observe(globeCanvas);
+      resizeGlobe();
+
+      let globeRotation = 0;
+      const renderGlobe = () => {
+        globeRotation += 0.0015;
+        globeGroup.rotation.y = globeRotation;
+        globeRenderer.render(globeScene, globeCamera);
+        requestAnimationFrame(renderGlobe);
+      };
+      renderGlobe();
+
+      // --- DNA Helix ---
+      const dnaCanvas = document.getElementById("dna-canvas");
+      const dnaRenderer = new THREE.WebGLRenderer({
+        canvas: dnaCanvas,
+        alpha: true,
+        antialias: true,
+      });
+      dnaRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+      const dnaScene = new THREE.Scene();
+      const dnaCamera = new THREE.PerspectiveCamera(40, 1, 0.1, 50);
+      dnaCamera.position.set(0, 0, 8);
+      dnaScene.add(dnaCamera);
+
+      const ambient = new THREE.AmbientLight(0xffffff, 0.8);
+      const directional = new THREE.DirectionalLight(0xffffff, 0.7);
+      directional.position.set(5, 7, 5);
+      dnaScene.add(ambient, directional);
+
+      const dnaGroup = new THREE.Group();
+      dnaScene.add(dnaGroup);
+
+      const helixMaterialA = new THREE.MeshStandardMaterial({
+        color: 0x5f6f52,
+        metalness: 0.1,
+        roughness: 0.3,
+      });
+      const helixMaterialB = new THREE.MeshStandardMaterial({
+        color: 0x9db17c,
+        metalness: 0.15,
+        roughness: 0.25,
+      });
+      const rungMaterial = new THREE.LineBasicMaterial({
+        color: 0x9db17c,
+        transparent: true,
+        opacity: 0.6,
+      });
+
+      const dotGeometry = new THREE.SphereGeometry(0.12, 16, 16);
+      const rungGeometry = new THREE.BufferGeometry();
+
+      const rungPositions = [];
+
+      for (let i = 0; i <= 220; i++) {
+        const angle = i * 0.18;
+        const radius = 1.2;
+        const height = (i - 110) * 0.08;
+
+        const xA = Math.cos(angle) * radius;
+        const zA = Math.sin(angle) * radius;
+        const y = height;
+
+        const xB = Math.cos(angle + Math.PI) * radius;
+        const zB = Math.sin(angle + Math.PI) * radius;
+
+        const atomA = new THREE.Mesh(dotGeometry, helixMaterialA);
+        atomA.position.set(xA, y, zA);
+        dnaGroup.add(atomA);
+
+        const atomB = new THREE.Mesh(dotGeometry, helixMaterialB);
+        atomB.position.set(xB, y, zB);
+        dnaGroup.add(atomB);
+
+        if (i % 6 === 0) {
+          rungPositions.push(xA, y, zA, xB, y, zB);
+        }
+      }
+
+      rungGeometry.setAttribute(
+        "position",
+        new THREE.Float32BufferAttribute(rungPositions, 3)
+      );
+      const rungs = new THREE.LineSegments(rungGeometry, rungMaterial);
+      dnaGroup.add(rungs);
+
+      const resizeDNA = () => {
+        const { clientWidth, clientHeight } = dnaCanvas;
+        dnaRenderer.setSize(clientWidth, clientHeight, false);
+        dnaCamera.aspect = clientWidth / clientHeight;
+        dnaCamera.updateProjectionMatrix();
+      };
+      const dnaObserver = new ResizeObserver(resizeDNA);
+      dnaObserver.observe(dnaCanvas);
+      resizeDNA();
+
+      let targetRotation = 0;
+      let currentRotation = 0;
+
+      const updateTargetRotation = () => {
+        targetRotation = window.scrollY * 0.0025;
+      };
+
+      updateTargetRotation();
+
+      const animateDNA = () => {
+        currentRotation += (targetRotation - currentRotation) * 0.08;
+        dnaGroup.rotation.y = currentRotation;
+        dnaRenderer.render(dnaScene, dnaCamera);
+        requestAnimationFrame(animateDNA);
+      };
+
+      animateDNA();
+      window.addEventListener("scroll", updateTargetRotation, { passive: true });
+      window.addEventListener("resize", () => {
+        resizeGlobe();
+        resizeDNA();
+      });
+    </script>
   </body>
 </html>
