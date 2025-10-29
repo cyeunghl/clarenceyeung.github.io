@@ -1,0 +1,6 @@
+<svg width="400" height="400" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="400" rx="40" fill="#3F4C3B"/>
+  <circle cx="200" cy="150" r="92" fill="#5F7261" opacity="0.8"/>
+  <path d="M200 230C137 230 80 270 60 330C60 342 69 350 82 350H318C331 350 340 342 340 330C320 270 263 230 200 230Z" fill="#2F3729"/>
+  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#F2F0E9" font-family="'Inter', sans-serif" font-size="32" letter-spacing="6">CY</text>
+</svg>
