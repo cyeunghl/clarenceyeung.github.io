@@ -139,24 +139,362 @@
 
       const globeRadius = 3.2;
 
-      const gradientTexture = (() => {
-        const size = 1024;
+      const createLandSeaTexture = () => {
+        const width = 2048;
+        const height = 1024;
         const texCanvas = document.createElement('canvas');
-        texCanvas.width = texCanvas.height = size;
+        texCanvas.width = width;
+        texCanvas.height = height;
         const ctx = texCanvas.getContext('2d');
-        const gradient = ctx.createRadialGradient(size * 0.32, size * 0.38, size * 0.1, size * 0.68, size * 0.68, size * 0.85);
-        gradient.addColorStop(0, '#f5f4ef');
-        gradient.addColorStop(0.55, '#e4e7d5');
-        gradient.addColorStop(1, '#d1d7bd');
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, size, size);
+
+        const seaGradient = ctx.createLinearGradient(0, 0, 0, height);
+        seaGradient.addColorStop(0, '#f2f3ea');
+        seaGradient.addColorStop(0.5, '#e6ead7');
+        seaGradient.addColorStop(1, '#dde2c6');
+        ctx.fillStyle = seaGradient;
+        ctx.fillRect(0, 0, width, height);
+
+        const toXY = (lon, lat) => [((lon + 180) / 360) * width, ((90 - lat) / 180) * height];
+
+        const landPolygons = [
+          {
+            points: [
+              [-168, 72],
+              [-156, 76],
+              [-138, 77],
+              [-118, 73],
+              [-100, 68],
+              [-84, 60],
+              [-66, 50],
+              [-74, 36],
+              [-86, 26],
+              [-98, 16],
+              [-112, 14],
+              [-126, 24],
+              [-138, 34],
+              [-150, 48],
+              [-160, 60],
+              [-168, 72],
+            ],
+          },
+          {
+            points: [
+              [-60, 72],
+              [-46, 78],
+              [-24, 76],
+              [-26, 66],
+              [-38, 60],
+              [-52, 62],
+              [-60, 72],
+            ],
+          },
+          {
+            points: [
+              [-82, 12],
+              [-72, 8],
+              [-62, -4],
+              [-54, -22],
+              [-52, -34],
+              [-58, -48],
+              [-68, -56],
+              [-78, -36],
+              [-82, -6],
+              [-82, 12],
+            ],
+          },
+          {
+            points: [
+              [-18, 37],
+              [-6, 35],
+              [12, 38],
+              [30, 32],
+              [42, 20],
+              [50, 6],
+              [48, -8],
+              [40, -30],
+              [22, -34],
+              [6, -28],
+              [-6, -22],
+              [-14, -6],
+              [-18, 12],
+              [-18, 37],
+            ],
+          },
+          {
+            points: [
+              [-10, 72],
+              [12, 75],
+              [44, 74],
+              [82, 72],
+              [116, 68],
+              [142, 70],
+              [170, 60],
+              [170, 44],
+              [150, 38],
+              [128, 28],
+              [116, 18],
+              [96, 12],
+              [80, 18],
+              [60, 8],
+              [48, 4],
+              [44, -12],
+              [62, -24],
+              [84, -8],
+              [104, -2],
+              [126, 12],
+              [150, 24],
+              [170, 38],
+              [180, 48],
+              [180, 72],
+              [120, 80],
+              [78, 80],
+              [36, 78],
+              [4, 74],
+              [-10, 72],
+            ],
+          },
+          {
+            points: [
+              [135, 46],
+              [142, 43],
+              [144, 38],
+              [140, 32],
+              [134, 34],
+              [132, 40],
+              [135, 46],
+            ],
+          },
+          {
+            points: [
+              [112, -6],
+              [122, -12],
+              [138, -8],
+              [146, -12],
+              [134, -18],
+              [118, -16],
+              [112, -6],
+            ],
+          },
+          {
+            points: [
+              [112, -10],
+              [154, -10],
+              [154, -36],
+              [136, -44],
+              [118, -40],
+              [112, -26],
+              [112, -10],
+            ],
+          },
+          {
+            points: [
+              [170, -34],
+              [178, -36],
+              [176, -44],
+              [168, -42],
+              [170, -34],
+            ],
+          },
+          {
+            points: [
+              [46, -12],
+              [50, -12],
+              [50, -22],
+              [44, -24],
+              [46, -12],
+            ],
+          },
+          {
+            points: [
+              [81, 9],
+              [83, 6],
+              [80, 5],
+              [79, 7],
+              [81, 9],
+            ],
+          },
+          {
+            points: [
+              [-8, 59],
+              [2, 60],
+              [2, 54],
+              [-4, 52],
+              [-7, 55],
+              [-8, 59],
+            ],
+          },
+          {
+            points: [
+              [-24, 67],
+              [-14, 67],
+              [-12, 64],
+              [-20, 63],
+              [-24, 67],
+            ],
+          },
+          {
+            points: [
+              [-180, -60],
+              [-150, -66],
+              [-108, -72],
+              [-60, -78],
+              [0, -82],
+              [60, -78],
+              [120, -72],
+              [158, -66],
+              [180, -60],
+              [-180, -60],
+            ],
+          },
+        ];
+
+        ctx.fillStyle = '#d8dcc3';
+        ctx.strokeStyle = 'rgba(99, 107, 47, 0.62)';
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+        ctx.lineWidth = width * 0.0024;
+
+        landPolygons.forEach(({ points }) => {
+          if (!points.length) return;
+          ctx.beginPath();
+          const [startX, startY] = toXY(points[0][0], points[0][1]);
+          ctx.moveTo(startX, startY);
+          for (let i = 1; i < points.length; i++) {
+            const [lon, lat] = points[i];
+            const [x, y] = toXY(lon, lat);
+            ctx.lineTo(x, y);
+          }
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+        });
+
+        const borderPolylines = [
+          [
+            [-140, 55],
+            [-118, 52],
+            [-100, 49],
+            [-86, 50],
+            [-72, 51],
+          ],
+          [
+            [-98, 23],
+            [-90, 18],
+            [-84, 12],
+          ],
+          [
+            [-70, -14],
+            [-62, -20],
+            [-56, -32],
+          ],
+          [
+            [10, 36],
+            [16, 28],
+            [24, 18],
+            [30, 8],
+            [32, -2],
+            [30, -12],
+          ],
+          [
+            [38, 58],
+            [52, 52],
+            [66, 44],
+            [80, 36],
+          ],
+          [
+            [46, 4],
+            [58, 10],
+            [72, 18],
+            [86, 24],
+          ],
+          [
+            [92, 40],
+            [104, 34],
+            [118, 28],
+            [132, 26],
+          ],
+          [
+            [-4, 60],
+            [8, 56],
+            [20, 52],
+          ],
+          [
+            [118, -16],
+            [132, -18],
+            [146, -20],
+          ],
+        ];
+
+        ctx.save();
+        ctx.strokeStyle = 'rgba(99, 107, 47, 0.45)';
+        ctx.lineWidth = width * 0.0014;
+        borderPolylines.forEach((polyline) => {
+          if (polyline.length < 2) return;
+          ctx.beginPath();
+          const [startLon, startLat] = polyline[0];
+          const [startX, startY] = toXY(startLon, startLat);
+          ctx.moveTo(startX, startY);
+          for (let i = 1; i < polyline.length; i++) {
+            const [lon, lat] = polyline[i];
+            const [x, y] = toXY(lon, lat);
+            ctx.lineTo(x, y);
+          }
+          ctx.stroke();
+        });
+        ctx.restore();
+
+        ctx.save();
+        ctx.strokeStyle = 'rgba(99, 107, 47, 0.2)';
+        ctx.lineWidth = width * 0.0008;
+        for (let lon = -120; lon <= 120; lon += 60) {
+          const [x] = toXY(lon, 0);
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, height);
+          ctx.stroke();
+        }
+        for (let lat = -60; lat <= 60; lat += 30) {
+          const [, y] = toXY(0, lat);
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(width, y);
+          ctx.stroke();
+        }
+        ctx.restore();
+
+        const shading = ctx.createRadialGradient(
+          width * 0.35,
+          height * 0.42,
+          width * 0.1,
+          width * 0.7,
+          height * 0.68,
+          width * 0.65
+        );
+        shading.addColorStop(0, 'rgba(255, 255, 255, 0.45)');
+        shading.addColorStop(0.6, 'rgba(240, 242, 228, 0.2)');
+        shading.addColorStop(1, 'rgba(200, 206, 183, 0.1)');
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.fillStyle = shading;
+        ctx.fillRect(0, 0, width, height);
+        ctx.globalCompositeOperation = 'source-over';
+
         const texture = new THREE.CanvasTexture(texCanvas);
+        const maxAniso =
+          globeRenderer &&
+          globeRenderer.capabilities &&
+          typeof globeRenderer.capabilities.getMaxAnisotropy === 'function'
+            ? globeRenderer.capabilities.getMaxAnisotropy()
+            : 8;
+        texture.anisotropy = Math.min(8, maxAniso || 8);
         texture.colorSpace = THREE.SRGBColorSpace;
+        texture.needsUpdate = true;
         return texture;
-      })();
+      };
+
+      const landSeaTexture = createLandSeaTexture();
 
       const globeMaterial = new THREE.MeshStandardMaterial({
-        map: gradientTexture,
+        map: landSeaTexture,
         roughness: 0.35,
         metalness: 0.25,
         emissive: new THREE.Color('#d9ddca'),
