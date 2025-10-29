@@ -110,18 +110,22 @@
       const helixGroup = new THREE.Group();
       scene.add(helixGroup);
 
-      const segments = 420;
+      const segments = 560;
       const turns = 6;
-      const helixHeight = 10;
-      const helixRadius = 1.8;
-      const rungInterval = 6;
+      const helixHeight = 10.5;
+      const helixRadius = 1.9;
+      const rungInterval = 5;
 
       const helixPositions = [];
       const helixColors = [];
       const helixLinePositions = [];
       const helixLineColors = [];
+      const thickLinePositions = [];
+      const thickLineColors = [];
       const rungPositions = [];
       const rungColors = [];
+      const haloPositions = [];
+      const haloColors = [];
 
       const colorStart = new THREE.Color('#a5b2d6');
       const colorEnd = new THREE.Color('#dce1f0');
@@ -133,10 +137,13 @@
         const angle = progress * Math.PI * 2 * turns;
         const y = (progress - 0.5) * helixHeight;
 
-        const x1 = Math.cos(angle) * helixRadius;
-        const z1 = Math.sin(angle) * helixRadius;
-        const x2 = -x1;
-        const z2 = -z1;
+        const baseX = Math.cos(angle) * helixRadius;
+        const baseZ = Math.sin(angle) * helixRadius;
+
+        const x1 = baseX;
+        const z1 = baseZ;
+        const x2 = -baseX;
+        const z2 = -baseZ;
 
         tempColorA.copy(colorStart).lerp(colorEnd, progress);
 
@@ -177,10 +184,58 @@
             tempColorB.g,
             tempColorB.b
           );
+
+          const jitter = 0.08;
+          const offsetAX = x1 + (Math.random() - 0.5) * jitter;
+          const offsetAZ = z1 + (Math.random() - 0.5) * jitter;
+          const offsetBX = x2 + (Math.random() - 0.5) * jitter;
+          const offsetBZ = z2 + (Math.random() - 0.5) * jitter;
+          const offsetNX1 = nx1 + (Math.random() - 0.5) * jitter;
+          const offsetNZ1 = nz1 + (Math.random() - 0.5) * jitter;
+          const offsetNX2 = nx2 + (Math.random() - 0.5) * jitter;
+          const offsetNZ2 = nz2 + (Math.random() - 0.5) * jitter;
+
+          thickLinePositions.push(
+            offsetAX,
+            y + (Math.random() - 0.5) * jitter,
+            offsetAZ,
+            offsetNX1,
+            nextY + (Math.random() - 0.5) * jitter,
+            offsetNZ1,
+            offsetBX,
+            y + (Math.random() - 0.5) * jitter,
+            offsetBZ,
+            offsetNX2,
+            nextY + (Math.random() - 0.5) * jitter,
+            offsetNZ2
+          );
+
+          thickLineColors.push(
+            tempColorA.r,
+            tempColorA.g,
+            tempColorA.b,
+            tempColorB.r,
+            tempColorB.g,
+            tempColorB.b,
+            tempColorA.r,
+            tempColorA.g,
+            tempColorA.b,
+            tempColorB.r,
+            tempColorB.g,
+            tempColorB.b
+          );
         }
 
         if (i % rungInterval === 0) {
-          rungPositions.push(x1, y, z1, x2, y, z2);
+          const rungJitter = 0.05;
+          rungPositions.push(
+            x1 + (Math.random() - 0.5) * rungJitter,
+            y + (Math.random() - 0.5) * rungJitter,
+            z1 + (Math.random() - 0.5) * rungJitter,
+            x2 + (Math.random() - 0.5) * rungJitter,
+            y + (Math.random() - 0.5) * rungJitter,
+            z2 + (Math.random() - 0.5) * rungJitter
+          );
           rungColors.push(
             tempColorA.r,
             tempColorA.g,
@@ -189,6 +244,23 @@
             tempColorA.g,
             tempColorA.b
           );
+        }
+
+        for (let j = 0; j < 3; j++) {
+          const spread = 0.22;
+          haloPositions.push(
+            x1 + (Math.random() - 0.5) * spread,
+            y + (Math.random() - 0.5) * spread,
+            z1 + (Math.random() - 0.5) * spread
+          );
+          haloColors.push(tempColorA.r, tempColorA.g, tempColorA.b);
+
+          haloPositions.push(
+            x2 + (Math.random() - 0.5) * spread,
+            y + (Math.random() - 0.5) * spread,
+            z2 + (Math.random() - 0.5) * spread
+          );
+          haloColors.push(tempColorA.r, tempColorA.g, tempColorA.b);
         }
       }
 
@@ -206,6 +278,16 @@
       );
       strandGeometry.setAttribute('color', new THREE.Float32BufferAttribute(helixLineColors, 3));
 
+      const strandGlowGeometry = new THREE.BufferGeometry();
+      strandGlowGeometry.setAttribute(
+        'position',
+        new THREE.Float32BufferAttribute(thickLinePositions, 3)
+      );
+      strandGlowGeometry.setAttribute(
+        'color',
+        new THREE.Float32BufferAttribute(thickLineColors, 3)
+      );
+
       const rungGeometry = new THREE.BufferGeometry();
       rungGeometry.setAttribute(
         'position',
@@ -213,10 +295,26 @@
       );
       rungGeometry.setAttribute('color', new THREE.Float32BufferAttribute(rungColors, 3));
 
+      const haloGeometry = new THREE.BufferGeometry();
+      haloGeometry.setAttribute(
+        'position',
+        new THREE.Float32BufferAttribute(haloPositions, 3)
+      );
+      haloGeometry.setAttribute('color', new THREE.Float32BufferAttribute(haloColors, 3));
+
       const pointsMaterial = new THREE.PointsMaterial({
-        size: 0.06,
+        size: 0.095,
         transparent: true,
-        opacity: 0.6,
+        opacity: 0.7,
+        vertexColors: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+      });
+
+      const haloMaterial = new THREE.PointsMaterial({
+        size: 0.18,
+        transparent: true,
+        opacity: 0.18,
         vertexColors: true,
         depthWrite: false,
         blending: THREE.AdditiveBlending,
@@ -224,13 +322,13 @@
 
       const strandMaterial = new THREE.LineBasicMaterial({
         transparent: true,
-        opacity: 0.18,
+        opacity: 0.26,
         vertexColors: true,
         blending: THREE.AdditiveBlending,
         depthWrite: false,
       });
 
-      const rungMaterial = new THREE.LineBasicMaterial({
+      const strandGlowMaterial = new THREE.LineBasicMaterial({
         transparent: true,
         opacity: 0.12,
         vertexColors: true,
@@ -238,14 +336,22 @@
         depthWrite: false,
       });
 
+      const rungMaterial = new THREE.LineBasicMaterial({
+        transparent: true,
+        opacity: 0.18,
+        vertexColors: true,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      });
+
       helixGroup.add(new THREE.Points(helixGeometry, pointsMaterial));
+      helixGroup.add(new THREE.Points(haloGeometry, haloMaterial));
       helixGroup.add(new THREE.LineSegments(strandGeometry, strandMaterial));
+      helixGroup.add(new THREE.LineSegments(strandGlowGeometry, strandGlowMaterial));
       helixGroup.add(new THREE.LineSegments(rungGeometry, rungMaterial));
 
-      helixGroup.rotation.x = Math.PI / 5;
-      helixGroup.rotation.y = Math.PI / 4;
-      helixGroup.rotation.z = Math.PI / 4;
-      helixGroup.scale.set(1.35, 1.35, 1.35);
+      helixGroup.rotation.set(Math.PI / 5, Math.PI / 4, -Math.PI / 4);
+      helixGroup.scale.set(1.45, 1.45, 1.45);
 
       const resizeRenderer = () => {
         const width = canvas.clientWidth;
@@ -260,19 +366,20 @@
       window.addEventListener('resize', resizeRenderer);
       resizeRenderer();
 
-      let scrollVelocity = 0;
-      let lastScrollY = window.scrollY;
+      const baseCameraRotation = { x: -0.12, y: 0.15 };
+      camera.rotation.x = baseCameraRotation.x;
+      camera.rotation.y = baseCameraRotation.y;
+
+      let targetTiltX = 0;
+      let targetTiltY = 0;
 
       const updateScrollEffects = () => {
-        const currentY = window.scrollY;
-        const delta = currentY - lastScrollY;
-        lastScrollY = currentY;
-
-        scrollVelocity = THREE.MathUtils.clamp(scrollVelocity + delta * 0.0004, -0.25, 0.25);
-
         const maxScroll = document.body.scrollHeight - window.innerHeight;
-        const ratio = maxScroll > 0 ? currentY / maxScroll : 0;
-        const opacity = 0.22 + (1 - ratio) * 0.28;
+        const ratio = maxScroll > 0 ? window.scrollY / maxScroll : 0;
+        targetTiltX = (ratio - 0.5) * 0.12;
+        targetTiltY = (ratio - 0.5) * 0.08;
+
+        const opacity = 0.28 + (1 - ratio) * 0.14;
         canvas.style.opacity = opacity.toFixed(2);
       };
 
@@ -282,8 +389,8 @@
       const animate = () => {
         requestAnimationFrame(animate);
 
-        helixGroup.rotation.y += 0.0006 + scrollVelocity;
-        scrollVelocity *= 0.9;
+        camera.rotation.x += (baseCameraRotation.x + targetTiltX - camera.rotation.x) * 0.05;
+        camera.rotation.y += (baseCameraRotation.y + targetTiltY - camera.rotation.y) * 0.05;
 
         renderer.render(scene, camera);
       };

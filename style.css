@@ -81,13 +81,13 @@ a:focus-visible {
 
 /* ---------- Content Column ---------- */
 .page-header {
-  margin-bottom: clamp(0.75rem, 2vw, 1.25rem);
+  margin-bottom: clamp(0.4rem, 1.2vw, 0.85rem);
 }
 
 .header-inner {
   display: flex;
   align-items: center;
-  gap: clamp(0.65rem, 1.6vw, 1rem);
+  gap: clamp(0.45rem, 1.2vw, 0.85rem);
 }
 
 .hero-portrait {
@@ -114,12 +114,12 @@ h1 {
 
 .content-section {
   border-top: 1px solid var(--border);
-  padding: clamp(1.25rem, 3.5vw, 2rem) 0;
+  padding: clamp(1rem, 3vw, 1.75rem) 0;
 }
 
 .content-section:first-of-type {
   border-top: none;
-  padding-top: clamp(0.35rem, 1.5vw, 0.75rem);
+  padding-top: clamp(0.2rem, 1vw, 0.5rem);
 }
 
 .content-section h2 {
@@ -182,8 +182,8 @@ h1 {
   position: fixed;
   bottom: clamp(1.5rem, 5vw, 3rem);
   right: clamp(1.25rem, 5vw, 3rem);
-  width: min(42vw, 520px);
-  height: min(60vh, 520px);
+  width: min(48vw, 580px);
+  height: min(65vh, 560px);
   pointer-events: none;
   z-index: 10;
   opacity: 0.4;
