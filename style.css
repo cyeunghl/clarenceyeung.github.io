@@ -51,30 +51,49 @@ a:focus-visible {
 
 /* ---------- Visual Placeholder ---------- */
 .visual-container {
-  position: relative;
-  width: 100%;
-  padding-bottom: 120%;
+  position: sticky;
+  top: clamp(2rem, 6vw, 3rem);
   background: var(--card);
-  border-radius: 24px;
+  border-radius: 32px;
   border: 1px solid var(--border);
   box-shadow: 0 18px 45px rgba(15, 15, 15, 0.08);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  min-height: min(80vh, 640px);
+  padding: clamp(2rem, 6vw, 3rem);
+  display: grid;
+  place-items: center;
   overflow: hidden;
 }
 
 .visual-placeholder {
-  display: inline-flex;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  border-radius: 24px;
+  border: 1px dashed rgba(99, 107, 47, 0.35);
+  background: rgba(99, 107, 47, 0.08);
+  display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.75rem 1.5rem;
-  border-radius: 999px;
-  background: rgba(99, 107, 47, 0.1);
   color: var(--accent);
   font-size: 0.85rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+}
+
+.portrait-frame {
+  position: absolute;
+  top: clamp(2rem, 6vw, 3rem);
+  width: clamp(6rem, 20vw, 10rem);
+  aspect-ratio: 1 / 1;
+  border-radius: 999px;
+  border: 3px solid rgba(99, 107, 47, 0.4);
+  background: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-muted);
 }
 
 /* ---------- Content Column ---------- */
@@ -92,15 +111,9 @@ a:focus-visible {
 
 h1 {
   margin: 0;
-  font-size: clamp(2.5rem, 5vw, 3.6rem);
+  font-size: clamp(2.1rem, 4vw, 2.8rem);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-}
-
-.lede {
-  margin: 1rem 0 0;
-  max-width: 32ch;
-  color: var(--text-muted);
 }
 
 .content-section {
@@ -153,6 +166,21 @@ h1 {
   font-weight: 500;
 }
 
+.about-links {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 500;
+}
+
+.about-links a {
+  font-weight: 600;
+}
+
+.about-links span {
+  color: var(--text-muted);
+}
+
 /* ---------- Responsive ---------- */
 @media (max-width: 900px) {
   .page {
@@ -160,7 +188,15 @@ h1 {
   }
 
   .visual-container {
-    padding-bottom: 70%;
+    position: relative;
+    top: 0;
+    min-height: 320px;
+  }
+
+  .portrait-frame {
+    position: relative;
+    margin-bottom: clamp(1.5rem, 6vw, 2rem);
+    margin-inline: auto;
   }
 }
 
