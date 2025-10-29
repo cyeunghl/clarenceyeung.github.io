@@ -139,441 +139,287 @@
 
       const globeRadius = 3.2;
 
-      const createLandSeaTexture = () => {
+      const createEarthTextureUrl = () => {
         const width = 2048;
         const height = 1024;
-        const texCanvas = document.createElement('canvas');
-        texCanvas.width = width;
-        texCanvas.height = height;
-        const ctx = texCanvas.getContext('2d');
-
-        const seaGradient = ctx.createLinearGradient(0, 0, 0, height);
-        seaGradient.addColorStop(0, '#f2f3ea');
-        seaGradient.addColorStop(0.5, '#e6ead7');
-        seaGradient.addColorStop(1, '#dde2c6');
-        ctx.fillStyle = seaGradient;
-        ctx.fillRect(0, 0, width, height);
-
-        const toXY = (lon, lat) => [((lon + 180) / 360) * width, ((90 - lat) / 180) * height];
+        const toXY = (lon, lat) => {
+          const x = ((lon + 180) / 360) * width;
+          const y = ((90 - lat) / 180) * height;
+          return [x.toFixed(1), y.toFixed(1)];
+        };
 
         const landPolygons = [
           {
             points: [
               [-168, 72],
-              [-156, 76],
-              [-138, 77],
-              [-118, 73],
-              [-100, 68],
-              [-84, 60],
-              [-66, 50],
-              [-74, 36],
-              [-86, 26],
-              [-98, 16],
-              [-112, 14],
-              [-126, 24],
-              [-138, 34],
-              [-150, 48],
-              [-160, 60],
+              [-152, 78],
+              [-130, 79],
+              [-110, 73],
+              [-94, 66],
+              [-78, 56],
+              [-70, 46],
+              [-74, 34],
+              [-84, 20],
+              [-98, 10],
+              [-118, 10],
+              [-136, 22],
+              [-150, 42],
+              [-162, 58],
               [-168, 72],
             ],
           },
           {
             points: [
-              [-60, 72],
-              [-46, 78],
-              [-24, 76],
-              [-26, 66],
-              [-38, 60],
-              [-52, 62],
-              [-60, 72],
+              [-64, 72],
+              [-50, 78],
+              [-30, 76],
+              [-26, 64],
+              [-38, 58],
+              [-52, 60],
+              [-64, 72],
             ],
           },
           {
             points: [
-              [-82, 12],
-              [-72, 8],
-              [-62, -4],
-              [-54, -22],
-              [-52, -34],
-              [-58, -48],
-              [-68, -56],
-              [-78, -36],
-              [-82, -6],
-              [-82, 12],
+              [-90, 16],
+              [-78, 12],
+              [-66, -4],
+              [-56, -22],
+              [-56, -38],
+              [-66, -54],
+              [-80, -56],
+              [-88, -40],
+              [-92, -18],
+              [-90, 16],
             ],
           },
           {
             points: [
-              [-18, 37],
-              [-6, 35],
-              [12, 38],
-              [30, 32],
-              [42, 20],
-              [50, 6],
-              [48, -8],
-              [40, -30],
-              [22, -34],
-              [6, -28],
-              [-6, -22],
-              [-14, -6],
+              [-20, 38],
+              [-4, 38],
+              [16, 36],
+              [32, 30],
+              [46, 18],
+              [50, 4],
+              [40, -26],
+              [20, -34],
+              [4, -26],
+              [-10, -10],
               [-18, 12],
-              [-18, 37],
+              [-20, 38],
             ],
           },
           {
             points: [
-              [-10, 72],
-              [12, 75],
-              [44, 74],
-              [82, 72],
-              [116, 68],
-              [142, 70],
-              [170, 60],
-              [170, 44],
-              [150, 38],
-              [128, 28],
-              [116, 18],
-              [96, 12],
-              [80, 18],
-              [60, 8],
-              [48, 4],
-              [44, -12],
+              [-8, 72],
+              [18, 76],
+              [52, 74],
+              [88, 70],
+              [120, 66],
+              [148, 70],
+              [170, 58],
+              [170, 40],
+              [150, 30],
+              [126, 20],
+              [102, 12],
+              [82, 12],
+              [60, 4],
+              [46, -12],
               [62, -24],
-              [84, -8],
-              [104, -2],
-              [126, 12],
-              [150, 24],
-              [170, 38],
-              [180, 48],
-              [180, 72],
-              [120, 80],
-              [78, 80],
-              [36, 78],
+              [90, -10],
+              [112, -2],
+              [134, 12],
+              [156, 26],
+              [174, 42],
+              [182, 58],
+              [180, 76],
+              [142, 80],
+              [96, 80],
+              [44, 78],
               [4, 74],
-              [-10, 72],
+              [-8, 72],
             ],
           },
           {
             points: [
-              [135, 46],
-              [142, 43],
-              [144, 38],
-              [140, 32],
-              [134, 34],
-              [132, 40],
-              [135, 46],
+              [130, 46],
+              [138, 42],
+              [140, 36],
+              [134, 32],
+              [130, 36],
+              [130, 46],
             ],
           },
           {
             points: [
-              [112, -6],
-              [122, -12],
-              [138, -8],
-              [146, -12],
-              [134, -18],
-              [118, -16],
-              [112, -6],
+              [110, -6],
+              [122, -14],
+              [140, -10],
+              [150, -18],
+              [138, -26],
+              [120, -22],
+              [110, -6],
             ],
           },
           {
             points: [
-              [112, -10],
-              [154, -10],
-              [154, -36],
-              [136, -44],
-              [118, -40],
-              [112, -26],
-              [112, -10],
+              [112, -12],
+              [152, -12],
+              [154, -34],
+              [140, -42],
+              [122, -38],
+              [112, -22],
+              [112, -12],
             ],
           },
           {
             points: [
-              [170, -34],
+              [168, -34],
               [178, -36],
               [176, -44],
-              [168, -42],
-              [170, -34],
+              [166, -42],
+              [168, -34],
             ],
           },
           {
             points: [
-              [46, -12],
-              [50, -12],
+              [44, -12],
+              [48, -12],
               [50, -22],
-              [44, -24],
-              [46, -12],
+              [42, -24],
+              [44, -12],
             ],
           },
           {
             points: [
-              [81, 9],
-              [83, 6],
-              [80, 5],
-              [79, 7],
-              [81, 9],
+              [80, 8],
+              [84, 6],
+              [82, 4],
+              [78, 6],
+              [80, 8],
             ],
           },
           {
             points: [
-              [-8, 59],
-              [2, 60],
-              [2, 54],
-              [-4, 52],
-              [-7, 55],
-              [-8, 59],
+              [-10, 58],
+              [4, 58],
+              [4, 52],
+              [-6, 50],
+              [-10, 58],
             ],
           },
           {
             points: [
-              [-24, 67],
-              [-14, 67],
-              [-12, 64],
-              [-20, 63],
-              [-24, 67],
+              [-26, 66],
+              [-14, 66],
+              [-12, 62],
+              [-22, 62],
+              [-26, 66],
             ],
           },
           {
             points: [
               [-180, -60],
-              [-150, -66],
-              [-108, -72],
-              [-60, -78],
-              [0, -82],
-              [60, -78],
-              [120, -72],
-              [158, -66],
-              [180, -60],
+              [-144, -66],
+              [-96, -72],
+              [-40, -78],
+              [20, -80],
+              [80, -74],
+              [132, -68],
+              [166, -62],
+              [180, -58],
+              [180, -90],
+              [-180, -90],
               [-180, -60],
             ],
           },
         ];
 
-        ctx.fillStyle = '#d8dcc3';
-        ctx.strokeStyle = 'rgba(99, 107, 47, 0.62)';
-        ctx.lineJoin = 'round';
-        ctx.lineCap = 'round';
-        ctx.lineWidth = width * 0.0024;
+        const svgPaths = landPolygons
+          .map(({ points }) => {
+            if (!points.length) return '';
+            const commands = points
+              .map(([lon, lat], index) => {
+                const [x, y] = toXY(lon, lat);
+                return `${index === 0 ? 'M' : 'L'}${x} ${y}`;
+              })
+              .join(' ');
+            return `<path d="${commands} Z" />`;
+          })
+          .join('');
 
-        landPolygons.forEach(({ points }) => {
-          if (!points.length) return;
-          ctx.beginPath();
-          const [startX, startY] = toXY(points[0][0], points[0][1]);
-          ctx.moveTo(startX, startY);
-          for (let i = 1; i < points.length; i++) {
-            const [lon, lat] = points[i];
-            const [x, y] = toXY(lon, lat);
-            ctx.lineTo(x, y);
-          }
-          ctx.closePath();
-          ctx.fill();
-          ctx.stroke();
-        });
-
-        const borderPolylines = [
-          [
-            [-140, 55],
-            [-118, 52],
-            [-100, 49],
-            [-86, 50],
-            [-72, 51],
-          ],
-          [
-            [-98, 23],
-            [-90, 18],
-            [-84, 12],
-          ],
-          [
-            [-70, -14],
-            [-62, -20],
-            [-56, -32],
-          ],
-          [
-            [10, 36],
-            [16, 28],
-            [24, 18],
-            [30, 8],
-            [32, -2],
-            [30, -12],
-          ],
-          [
-            [38, 58],
-            [52, 52],
-            [66, 44],
-            [80, 36],
-          ],
-          [
-            [46, 4],
-            [58, 10],
-            [72, 18],
-            [86, 24],
-          ],
-          [
-            [92, 40],
-            [104, 34],
-            [118, 28],
-            [132, 26],
-          ],
-          [
-            [-4, 60],
-            [8, 56],
-            [20, 52],
-          ],
-          [
-            [118, -16],
-            [132, -18],
-            [146, -20],
-          ],
-        ];
-
-        ctx.save();
-        ctx.strokeStyle = 'rgba(99, 107, 47, 0.45)';
-        ctx.lineWidth = width * 0.0014;
-        borderPolylines.forEach((polyline) => {
-          if (polyline.length < 2) return;
-          ctx.beginPath();
-          const [startLon, startLat] = polyline[0];
-          const [startX, startY] = toXY(startLon, startLat);
-          ctx.moveTo(startX, startY);
-          for (let i = 1; i < polyline.length; i++) {
-            const [lon, lat] = polyline[i];
-            const [x, y] = toXY(lon, lat);
-            ctx.lineTo(x, y);
-          }
-          ctx.stroke();
-        });
-        ctx.restore();
-
-        ctx.save();
-        ctx.strokeStyle = 'rgba(99, 107, 47, 0.2)';
-        ctx.lineWidth = width * 0.0008;
+        const meridians = [];
+        const latitudeLines = [];
         for (let lon = -120; lon <= 120; lon += 60) {
           const [x] = toXY(lon, 0);
-          ctx.beginPath();
-          ctx.moveTo(x, 0);
-          ctx.lineTo(x, height);
-          ctx.stroke();
+          meridians.push(`<line x1="${x}" y1="0" x2="${x}" y2="${height}" />`);
         }
         for (let lat = -60; lat <= 60; lat += 30) {
           const [, y] = toXY(0, lat);
-          ctx.beginPath();
-          ctx.moveTo(0, y);
-          ctx.lineTo(width, y);
-          ctx.stroke();
+          latitudeLines.push(`<line x1="0" y1="${y}" x2="${width}" y2="${y}" />`);
         }
-        ctx.restore();
 
-        const shading = ctx.createRadialGradient(
-          width * 0.35,
-          height * 0.42,
-          width * 0.1,
-          width * 0.7,
-          height * 0.68,
-          width * 0.65
-        );
-        shading.addColorStop(0, 'rgba(255, 255, 255, 0.45)');
-        shading.addColorStop(0.6, 'rgba(240, 242, 228, 0.2)');
-        shading.addColorStop(1, 'rgba(200, 206, 183, 0.1)');
-        ctx.globalCompositeOperation = 'lighter';
-        ctx.fillStyle = shading;
-        ctx.fillRect(0, 0, width, height);
-        ctx.globalCompositeOperation = 'source-over';
+        const svg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+  <defs>
+    <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#edf0e0" />
+      <stop offset="100%" stop-color="#dfe6ca" />
+    </linearGradient>
+  </defs>
+  <rect width="${width}" height="${height}" fill="url(#sea)" />
+  <g fill="#c9cfb2" stroke="#636B2F" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" opacity="0.95">
+    ${svgPaths}
+  </g>
+  <g stroke="#a7af87" stroke-width="1.5" opacity="0.35">
+    ${meridians.join('')}
+    ${latitudeLines.join('')}
+  </g>
+</svg>`;
 
-        const texture = new THREE.CanvasTexture(texCanvas);
-        const maxAniso =
-          globeRenderer &&
-          globeRenderer.capabilities &&
-          typeof globeRenderer.capabilities.getMaxAnisotropy === 'function'
-            ? globeRenderer.capabilities.getMaxAnisotropy()
-            : 8;
-        texture.anisotropy = Math.min(8, maxAniso || 8);
-        texture.colorSpace = THREE.SRGBColorSpace;
-        texture.needsUpdate = true;
-        return texture;
+        return URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
       };
 
-      const landSeaTexture = createLandSeaTexture();
+      const textureLoader = new THREE.TextureLoader();
+      const earthTextureUrl = createEarthTextureUrl();
 
       const globeMaterial = new THREE.MeshStandardMaterial({
-        map: landSeaTexture,
-        roughness: 0.35,
-        metalness: 0.25,
-        emissive: new THREE.Color('#d9ddca'),
-        emissiveIntensity: 0.16,
+        color: '#d7dcc7',
+        roughness: 0.62,
+        metalness: 0.1,
       });
       const globeMesh = new THREE.Mesh(new THREE.SphereGeometry(globeRadius, 128, 128), globeMaterial);
       globeGroup.add(globeMesh);
 
-      const atmosphereMaterial = new THREE.MeshPhongMaterial({
-        color: new THREE.Color('#b4c0a0'),
-        transparent: true,
-        opacity: 0.18,
-        side: THREE.BackSide,
-        blending: THREE.AdditiveBlending,
-      });
-      const atmosphere = new THREE.Mesh(new THREE.SphereGeometry(globeRadius + 0.32, 64, 64), atmosphereMaterial);
-      globeGroup.add(atmosphere);
-
-      const horizonMaterial = new THREE.ShaderMaterial({
-        transparent: true,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false,
-        uniforms: {
-          glowColor: { value: new THREE.Color('#9aa776') },
+      textureLoader.load(
+        earthTextureUrl,
+        (texture) => {
+          texture.colorSpace = THREE.SRGBColorSpace;
+          const maxAniso =
+            globeRenderer.capabilities &&
+            typeof globeRenderer.capabilities.getMaxAnisotropy === 'function'
+              ? globeRenderer.capabilities.getMaxAnisotropy()
+              : 4;
+          texture.anisotropy = Math.min(8, maxAniso || 4);
+          globeMaterial.map = texture;
+          globeMaterial.needsUpdate = true;
+          URL.revokeObjectURL(earthTextureUrl);
         },
-        vertexShader: `
-          varying vec3 vNormal;
-          void main() {
-            vNormal = normalize(normalMatrix * normal);
-            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-          }
-        `,
-        fragmentShader: `
-          varying vec3 vNormal;
-          uniform vec3 glowColor;
-          void main() {
-            float intensity = pow(0.7 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 3.5);
-            gl_FragColor = vec4(glowColor, intensity * 0.35);
-          }
-        `,
-      });
-      const horizon = new THREE.Mesh(new THREE.SphereGeometry(globeRadius + 0.18, 96, 96), horizonMaterial);
-      globeGroup.add(horizon);
+        undefined,
+        (error) => {
+          console.warn('Failed to load Earth texture', error);
+          URL.revokeObjectURL(earthTextureUrl);
+        }
+      );
 
       const markerGroup = new THREE.Group();
       globeGroup.add(markerGroup);
 
-      const starGeometry = new THREE.BufferGeometry();
-      const starCount = 450;
-      const starPositions = new Float32Array(starCount * 3);
-      for (let i = 0; i < starCount; i++) {
-        const angle = Math.random() * Math.PI * 2;
-        const v = Math.random() * 2 - 1;
-        const radius = globeRadius * (3.5 + Math.random() * 1.2);
-        const sqrt = Math.sqrt(1 - v * v);
-        starPositions[i * 3] = radius * sqrt * Math.cos(angle);
-        starPositions[i * 3 + 1] = radius * v;
-        starPositions[i * 3 + 2] = radius * sqrt * Math.sin(angle);
-      }
-      starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
-      const starMaterial = new THREE.PointsMaterial({
-        size: 0.015,
-        color: '#d3d8c3',
-        transparent: true,
-        opacity: 0.45,
-        depthWrite: false,
-        blending: THREE.AdditiveBlending,
-      });
-      const starField = new THREE.Points(starGeometry, starMaterial);
-      globeScene.add(starField);
-
-      const ambientLight = new THREE.AmbientLight(0xf2f1ea, 0.65);
+      const ambientLight = new THREE.AmbientLight(0xf0efe6, 0.55);
       globeScene.add(ambientLight);
-      const keyLight = new THREE.DirectionalLight(0xfaf8f0, 0.85);
-      keyLight.position.set(-6.5, 7.5, 6.5);
-      globeScene.add(keyLight);
-      const rimLight = new THREE.DirectionalLight(0xcad1b1, 0.35);
-      rimLight.position.set(5, -3, -4);
-      globeScene.add(rimLight);
+      const sunLight = new THREE.DirectionalLight(0xffffff, 0.9);
+      sunLight.position.set(-6.5, 7.5, 6.5);
+      globeScene.add(sunLight);
 
       globeCamera.position.set(0, 0, globeRadius * 4.2);
 
@@ -612,11 +458,11 @@
         const material = new THREE.MeshStandardMaterial({
           color: new THREE.Color('#636B2F'),
           emissive: new THREE.Color('#636B2F'),
-          emissiveIntensity: 0.22,
+          emissiveIntensity: 0.08,
           transparent: true,
           opacity: 0.7,
-          roughness: 0.35,
-          metalness: 0.25,
+          roughness: 0.45,
+          metalness: 0.08,
         });
         const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.08, 28, 28), material);
         mesh.position.copy(position);
@@ -646,9 +492,9 @@
         if (hoveredMarker !== marker) {
           resetHover();
           hoveredMarker = marker;
-          marker.material.emissiveIntensity = 0.95;
+          marker.material.emissiveIntensity = 0.35;
           marker.material.opacity = 0.95;
-          marker.scale.set(1.65, 1.65, 1.65);
+          marker.scale.set(1.45, 1.45, 1.45);
           tooltip.textContent = marker.userData.name || 'Activity';
           tooltip.hidden = false;
         }
@@ -726,7 +572,6 @@
       const animateGlobe = () => {
         requestAnimationFrame(animateGlobe);
         controls.update();
-        starField.rotation.y += 0.0002;
         globeRenderer.render(globeScene, globeCamera);
       };
 
