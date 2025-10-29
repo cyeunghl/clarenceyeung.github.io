@@ -111,183 +111,159 @@
       const helixGroup = new THREE.Group();
       scene.add(helixGroup);
 
-      const segments = 480;
-      const turns = 6;
-      const helixHeight = 10.5;
-      const helixRadius = 1.9;
-      const rungInterval = 5;
+      const oliveColor = new THREE.Color('#636B2F');
+      const baseOpacity = 0.5;
 
-      const helixPositions = [];
-      const helixColors = [];
-      const helixLinePositions = [];
-      const helixLineColors = [];
+      const dotTexture = (() => {
+        const size = 128;
+        const texCanvas = document.createElement('canvas');
+        texCanvas.width = texCanvas.height = size;
+        const ctx = texCanvas.getContext('2d');
+        const gradient = ctx.createRadialGradient(
+          size / 2,
+          size / 2,
+          size * 0.1,
+          size / 2,
+          size / 2,
+          size * 0.5
+        );
+        gradient.addColorStop(0, 'rgba(255,255,255,0.8)');
+        gradient.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, size, size);
+        const texture = new THREE.CanvasTexture(texCanvas);
+        texture.wrapS = texture.wrapT = THREE.ClampToEdgeWrapping;
+        return texture;
+      })();
+
+      const segments = 420;
+      const turns = 3;
+      const helixHeight = 8.4;
+      const helixRadius = 2.4;
+      const rungInterval = 6;
+
+      const strandPositions = [];
       const rungPositions = [];
-      const rungColors = [];
-
-      const colorStart = new THREE.Color('#a5b2d6');
-      const colorEnd = new THREE.Color('#dce1f0');
-      const tempColorA = new THREE.Color();
-      const tempColorB = new THREE.Color();
+      const pointPositions = [];
+      const ambientPositions = [];
 
       for (let i = 0; i <= segments; i++) {
         const progress = i / segments;
         const angle = progress * Math.PI * 2 * turns;
         const y = (progress - 0.5) * helixHeight;
 
-        const jitter = (Math.random() - 0.5) * 0.12;
-        const x1 = Math.cos(angle) * helixRadius + jitter;
-        const z1 = Math.sin(angle) * helixRadius + jitter * 0.6;
-        const x2 = -x1 + (Math.random() - 0.5) * 0.08;
-        const z2 = -z1 + (Math.random() - 0.5) * 0.08;
+        const baseX = Math.cos(angle) * helixRadius;
+        const baseZ = Math.sin(angle) * helixRadius;
+        const jitter = (Math.random() - 0.5) * 0.22;
+        const x1 = baseX + jitter;
+        const z1 = baseZ + jitter * 0.4;
+        const x2 = -baseX + (Math.random() - 0.5) * 0.22;
+        const z2 = -baseZ + (Math.random() - 0.5) * 0.22;
 
-        tempColorA.copy(colorStart).lerp(colorEnd, progress);
-
-        helixPositions.push(x1, y, z1, x2, y, z2);
-        helixColors.push(
-          tempColorA.r,
-          tempColorA.g,
-          tempColorA.b,
-          tempColorA.r,
-          tempColorA.g,
-          tempColorA.b
-        );
+        pointPositions.push(x1, y, z1, x2, y, z2);
 
         if (i < segments) {
           const nextProgress = (i + 1) / segments;
           const nextAngle = nextProgress * Math.PI * 2 * turns;
           const nextY = (nextProgress - 0.5) * helixHeight;
+          const nextBaseX = Math.cos(nextAngle) * helixRadius;
+          const nextBaseZ = Math.sin(nextAngle) * helixRadius;
+          const nextJitter = (Math.random() - 0.5) * 0.22;
+          const nx1 = nextBaseX + nextJitter;
+          const nz1 = nextBaseZ + nextJitter * 0.4;
+          const nx2 = -nextBaseX + (Math.random() - 0.5) * 0.22;
+          const nz2 = -nextBaseZ + (Math.random() - 0.5) * 0.22;
 
-          const nextJitter = (Math.random() - 0.5) * 0.12;
-          const nx1 = Math.cos(nextAngle) * helixRadius + nextJitter;
-          const nz1 = Math.sin(nextAngle) * helixRadius + nextJitter * 0.6;
-          const nx2 = -nx1 + (Math.random() - 0.5) * 0.08;
-          const nz2 = -nz1 + (Math.random() - 0.5) * 0.08;
-
-          tempColorB.copy(colorStart).lerp(colorEnd, nextProgress);
-
-          helixLinePositions.push(x1, y, z1, nx1, nextY, nz1, x2, y, z2, nx2, nextY, nz2);
-          helixLineColors.push(
-            tempColorA.r,
-            tempColorA.g,
-            tempColorA.b,
-            tempColorB.r,
-            tempColorB.g,
-            tempColorB.b,
-            tempColorA.r,
-            tempColorA.g,
-            tempColorA.b,
-            tempColorB.r,
-            tempColorB.g,
-            tempColorB.b
-          );
+          strandPositions.push(x1, y, z1, nx1, nextY, nz1);
+          strandPositions.push(x2, y, z2, nx2, nextY, nz2);
         }
 
         if (i % rungInterval === 0) {
           rungPositions.push(x1, y, z1, x2, y, z2);
-          rungColors.push(
-            tempColorA.r,
-            tempColorA.g,
-            tempColorA.b,
-            tempColorA.r,
-            tempColorA.g,
-            tempColorA.b
-          );
         }
       }
 
-      const helixGeometry = new THREE.BufferGeometry();
-      helixGeometry.setAttribute(
+      const ambientCount = 900;
+      for (let i = 0; i < ambientCount; i++) {
+        const spread = helixRadius * (0.9 + Math.random() * 1.1);
+        const theta = Math.random() * Math.PI * 2 * turns;
+        const y = (Math.random() - 0.5) * helixHeight * 1.1;
+        const x = Math.cos(theta) * spread + (Math.random() - 0.5) * 0.7;
+        const z = Math.sin(theta) * spread + (Math.random() - 0.5) * 0.7;
+        ambientPositions.push(x, y, z);
+      }
+
+      const pointGeometry = new THREE.BufferGeometry();
+      pointGeometry.setAttribute(
         'position',
-        new THREE.Float32BufferAttribute(helixPositions, 3)
+        new THREE.Float32BufferAttribute(pointPositions, 3)
       );
-      helixGeometry.setAttribute('color', new THREE.Float32BufferAttribute(helixColors, 3));
 
       const strandGeometry = new THREE.BufferGeometry();
       strandGeometry.setAttribute(
         'position',
-        new THREE.Float32BufferAttribute(helixLinePositions, 3)
+        new THREE.Float32BufferAttribute(strandPositions, 3)
       );
-      strandGeometry.setAttribute('color', new THREE.Float32BufferAttribute(helixLineColors, 3));
 
       const rungGeometry = new THREE.BufferGeometry();
       rungGeometry.setAttribute(
         'position',
         new THREE.Float32BufferAttribute(rungPositions, 3)
       );
-      rungGeometry.setAttribute('color', new THREE.Float32BufferAttribute(rungColors, 3));
-
-      const pointsMaterial = new THREE.PointsMaterial({
-        size: 0.12,
-        transparent: true,
-        opacity: 0.7,
-        vertexColors: true,
-        depthWrite: false,
-        blending: THREE.AdditiveBlending,
-      });
-
-      const strandMaterial = new THREE.LineBasicMaterial({
-        transparent: true,
-        opacity: 0.3,
-        vertexColors: true,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false,
-        linewidth: 1.5,
-      });
-
-      const rungMaterial = new THREE.LineBasicMaterial({
-        transparent: true,
-        opacity: 0.22,
-        vertexColors: true,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false,
-        linewidth: 1.25,
-      });
-
-      helixGroup.add(new THREE.Points(helixGeometry, pointsMaterial));
-      helixGroup.add(new THREE.LineSegments(strandGeometry, strandMaterial));
-      helixGroup.add(new THREE.LineSegments(rungGeometry, rungMaterial));
-
-      const ambientPositions = [];
-      const ambientColors = [];
-      const ambientCount = 720;
-      for (let i = 0; i < ambientCount; i++) {
-        const progress = Math.random();
-        const angle = progress * Math.PI * 2 * turns + (Math.random() - 0.5) * 0.6;
-        const radius = helixRadius * (0.9 + Math.random() * 0.8);
-        const y = (progress - 0.5) * helixHeight + (Math.random() - 0.5) * 0.6;
-        const x = Math.cos(angle) * radius + (Math.random() - 0.5) * 0.55;
-        const z = Math.sin(angle) * radius + (Math.random() - 0.5) * 0.55;
-
-        tempColorA.copy(colorStart).lerp(colorEnd, progress + (Math.random() - 0.5) * 0.1);
-        ambientPositions.push(x, y, z);
-        ambientColors.push(tempColorA.r, tempColorA.g, tempColorA.b);
-      }
 
       const ambientGeometry = new THREE.BufferGeometry();
       ambientGeometry.setAttribute(
         'position',
         new THREE.Float32BufferAttribute(ambientPositions, 3)
       );
-      ambientGeometry.setAttribute('color', new THREE.Float32BufferAttribute(ambientColors, 3));
 
-      const ambientMaterial = new THREE.PointsMaterial({
-        size: 0.16,
+      const pointsMaterial = new THREE.PointsMaterial({
+        map: dotTexture,
+        alphaMap: dotTexture,
+        color: oliveColor,
+        size: 0.26,
         transparent: true,
-        opacity: 0.32,
-        vertexColors: true,
-        depthWrite: false,
+        opacity: baseOpacity,
         blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        sizeAttenuation: true,
       });
 
+      const strandMaterial = new THREE.LineBasicMaterial({
+        color: oliveColor,
+        transparent: true,
+        opacity: baseOpacity,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      });
+
+      const rungMaterial = strandMaterial.clone();
+
+      const ambientMaterial = new THREE.PointsMaterial({
+        map: dotTexture,
+        alphaMap: dotTexture,
+        color: oliveColor,
+        size: 0.18,
+        transparent: true,
+        opacity: baseOpacity,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        sizeAttenuation: true,
+      });
+
+      helixGroup.add(new THREE.Points(pointGeometry, pointsMaterial));
+      helixGroup.add(new THREE.LineSegments(strandGeometry, strandMaterial));
+      helixGroup.add(new THREE.LineSegments(rungGeometry, rungMaterial));
       helixGroup.add(new THREE.Points(ambientGeometry, ambientMaterial));
 
-      helixGroup.rotation.set(Math.PI / 5, Math.PI / 4, -Math.PI / 4);
-      helixGroup.scale.set(1.42, 1.42, 1.42);
+      helixGroup.scale.set(1.85, 1.2, 1.1);
+      const baseRotation = new THREE.Euler(Math.PI / 5, Math.PI / 4, -Math.PI / 4);
+      helixGroup.rotation.copy(baseRotation);
 
       const resizeRenderer = () => {
         const width = canvas.clientWidth;
         const height = canvas.clientHeight;
-        if (width === 0 || height === 0) return;
+        if (!width || !height) return;
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.setSize(width, height, false);
         camera.aspect = width / height;
@@ -298,15 +274,15 @@
       resizeRenderer();
 
       const maxScroll = () => document.body.scrollHeight - window.innerHeight;
-      let targetTiltX = 0;
-      let targetTiltZ = 0.18;
+      const baseRotationY = helixGroup.rotation.y;
 
       const updateScrollEffects = () => {
         const ratio = maxScroll() > 0 ? window.scrollY / maxScroll() : 0;
-        targetTiltX = THREE.MathUtils.lerp(-0.08, 0.06, ratio);
-        targetTiltZ = 0.18 + THREE.MathUtils.lerp(0.06, -0.04, ratio);
-        const opacity = 0.28 + (1 - ratio) * 0.18;
-        canvas.style.opacity = opacity.toFixed(2);
+        const rotationRange = 0.45;
+        helixGroup.rotation.y = baseRotationY + THREE.MathUtils.lerp(-rotationRange, rotationRange, ratio);
+        const cameraTilt = THREE.MathUtils.lerp(-0.05, 0.04, ratio);
+        camera.rotation.x = cameraTilt;
+        canvas.style.opacity = (0.3 + (1 - ratio) * 0.15).toFixed(2);
       };
 
       window.addEventListener('scroll', updateScrollEffects, { passive: true });
@@ -314,8 +290,6 @@
 
       const animate = () => {
         requestAnimationFrame(animate);
-        camera.rotation.x = THREE.MathUtils.lerp(camera.rotation.x, targetTiltX, 0.08);
-        camera.rotation.z = THREE.MathUtils.lerp(camera.rotation.z, targetTiltZ, 0.08);
         renderer.render(scene, camera);
       };
 
