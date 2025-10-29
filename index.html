@@ -90,5 +90,211 @@
         </section>
       </section>
     </main>
+    <canvas id="dna-helix" aria-hidden="true"></canvas>
+    <script src="https://unpkg.com/three@0.159.0/build/three.min.js"></script>
+    <script>
+      (function () {
+        const canvas = document.getElementById("dna-helix");
+        if (!canvas || !window.THREE) {
+          return;
+        }
+
+        const renderer = new THREE.WebGLRenderer({
+          canvas,
+          alpha: true,
+          antialias: true,
+        });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setClearColor(0x000000, 0);
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 100);
+        camera.position.set(0, 0, 6);
+
+        const helixGroup = new THREE.Group();
+        scene.add(helixGroup);
+
+        const steps = 180;
+        const turns = 5;
+        const height = 3.6;
+        const radius = 0.7;
+        const colorStart = new THREE.Color(0x4a7fd6);
+        const colorEnd = new THREE.Color(0x6ff7ff);
+        const colorHelper = new THREE.Color();
+
+        const positionsA = [];
+        const colorsA = [];
+        const positionsB = [];
+        const colorsB = [];
+        const pointPositions = [];
+        const pointColors = [];
+        const rungPositions = [];
+        const rungColors = [];
+
+        for (let i = 0; i <= steps; i += 1) {
+          const t = i / steps;
+          const angle = t * Math.PI * turns;
+          const y = (t - 0.5) * height;
+          const x1 = Math.cos(angle) * radius;
+          const z1 = Math.sin(angle) * radius;
+          const x2 = Math.cos(angle + Math.PI) * radius;
+          const z2 = Math.sin(angle + Math.PI) * radius;
+
+          colorHelper.copy(colorStart).lerp(colorEnd, t);
+
+          positionsA.push(x1, y, z1);
+          colorsA.push(colorHelper.r, colorHelper.g, colorHelper.b);
+          positionsB.push(x2, y, z2);
+          colorsB.push(colorHelper.r, colorHelper.g, colorHelper.b);
+
+          pointPositions.push(x1, y, z1, x2, y, z2);
+          pointColors.push(
+            colorHelper.r,
+            colorHelper.g,
+            colorHelper.b,
+            colorHelper.r,
+            colorHelper.g,
+            colorHelper.b
+          );
+
+          if (i % 6 === 0) {
+            rungPositions.push(x1, y, z1, x2, y, z2);
+            rungColors.push(
+              colorHelper.r,
+              colorHelper.g,
+              colorHelper.b,
+              colorHelper.r,
+              colorHelper.g,
+              colorHelper.b
+            );
+          }
+        }
+
+        const helixMaterial = new THREE.LineBasicMaterial({
+          transparent: true,
+          opacity: 0.55,
+          vertexColors: true,
+          blending: THREE.AdditiveBlending,
+        });
+
+        const helixGeometryA = new THREE.BufferGeometry();
+        helixGeometryA.setAttribute(
+          "position",
+          new THREE.Float32BufferAttribute(positionsA, 3)
+        );
+        helixGeometryA.setAttribute(
+          "color",
+          new THREE.Float32BufferAttribute(colorsA, 3)
+        );
+        helixGroup.add(new THREE.Line(helixGeometryA, helixMaterial));
+
+        const helixGeometryB = new THREE.BufferGeometry();
+        helixGeometryB.setAttribute(
+          "position",
+          new THREE.Float32BufferAttribute(positionsB, 3)
+        );
+        helixGeometryB.setAttribute(
+          "color",
+          new THREE.Float32BufferAttribute(colorsB, 3)
+        );
+        helixGroup.add(new THREE.Line(helixGeometryB, helixMaterial.clone()));
+
+        if (rungPositions.length > 0) {
+          const rungGeometry = new THREE.BufferGeometry();
+          rungGeometry.setAttribute(
+            "position",
+            new THREE.Float32BufferAttribute(rungPositions, 3)
+          );
+          rungGeometry.setAttribute(
+            "color",
+            new THREE.Float32BufferAttribute(rungColors, 3)
+          );
+          const rungMaterial = new THREE.LineBasicMaterial({
+            transparent: true,
+            opacity: 0.25,
+            vertexColors: true,
+            blending: THREE.AdditiveBlending,
+          });
+          helixGroup.add(new THREE.LineSegments(rungGeometry, rungMaterial));
+        }
+
+        const pointsGeometry = new THREE.BufferGeometry();
+        pointsGeometry.setAttribute(
+          "position",
+          new THREE.Float32BufferAttribute(pointPositions, 3)
+        );
+        pointsGeometry.setAttribute(
+          "color",
+          new THREE.Float32BufferAttribute(pointColors, 3)
+        );
+        const pointsMaterial = new THREE.PointsMaterial({
+          size: 0.08,
+          transparent: true,
+          opacity: 0.85,
+          vertexColors: true,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+        });
+        helixGroup.add(new THREE.Points(pointsGeometry, pointsMaterial));
+
+        function resizeRenderer() {
+          const width = Math.max(canvas.clientWidth, 1);
+          const height = Math.max(canvas.clientHeight || width, 1);
+          renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+          renderer.setSize(width, height, false);
+          camera.aspect = width / height;
+          camera.updateProjectionMatrix();
+        }
+
+        resizeRenderer();
+        window.addEventListener("resize", resizeRenderer);
+
+        let autoRotation = 0;
+        let scrollRotation = 0;
+        let mouseYaw = 0;
+        let mousePitch = 0;
+
+        function handleScroll() {
+          scrollRotation = window.scrollY * 0.0004;
+          const fade = Math.max(0.3, 1 - window.scrollY / 1400);
+          canvas.style.opacity = fade.toFixed(2);
+        }
+
+        window.addEventListener("scroll", handleScroll, { passive: true });
+        handleScroll();
+
+        window.addEventListener("mousemove", (event) => {
+          const nx = event.clientX / window.innerWidth - 0.5;
+          const ny = event.clientY / window.innerHeight - 0.5;
+          mouseYaw = nx * 0.18;
+          mousePitch = -ny * 0.12;
+        });
+
+        const clock = new THREE.Clock();
+
+        function animate() {
+          requestAnimationFrame(animate);
+          autoRotation += clock.getDelta() * 0.6;
+
+          const targetY = autoRotation * 0.2 + scrollRotation + mouseYaw;
+          helixGroup.rotation.y = THREE.MathUtils.lerp(
+            helixGroup.rotation.y,
+            targetY,
+            0.08
+          );
+          helixGroup.rotation.x = THREE.MathUtils.lerp(
+            helixGroup.rotation.x,
+            mousePitch,
+            0.08
+          );
+          helixGroup.rotation.z = Math.sin(autoRotation * 0.5) * 0.08;
+          helixGroup.position.y = Math.sin(autoRotation * 0.6) * 0.1;
+
+          renderer.render(scene, camera);
+        }
+
+        animate();
+      })();
+    </script>
   </body>
 </html>

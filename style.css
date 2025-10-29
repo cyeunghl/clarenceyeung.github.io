@@ -81,13 +81,13 @@ a:focus-visible {
 
 /* ---------- Content Column ---------- */
 .page-header {
-  margin-bottom: clamp(2rem, 5vw, 3rem);
+  margin-bottom: clamp(1.25rem, 3vw, 2rem);
 }
 
 .header-inner {
   display: flex;
   align-items: center;
-  gap: clamp(1.25rem, 3vw, 1.75rem);
+  gap: clamp(0.85rem, 2.5vw, 1.25rem);
 }
 
 .hero-portrait {
@@ -107,19 +107,19 @@ a:focus-visible {
 
 h1 {
   margin: 0;
-  font-size: clamp(1.9rem, 3.5vw, 2.4rem);
-  letter-spacing: 0.08em;
+  font-size: clamp(1.8rem, 3vw, 2.15rem);
+  letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 
 .content-section {
   border-top: 1px solid var(--border);
-  padding: clamp(1.75rem, 4vw, 2.5rem) 0;
+  padding: clamp(1.5rem, 3.5vw, 2rem) 0;
 }
 
 .content-section:first-of-type {
   border-top: none;
-  padding-top: 0;
+  padding-top: clamp(0.5rem, 2vw, 0.75rem);
 }
 
 .content-section h2 {
@@ -177,6 +177,17 @@ h1 {
   color: var(--text-muted);
 }
 
+#dna-helix {
+  position: fixed;
+  bottom: clamp(1.25rem, 4vw, 2.5rem);
+  right: clamp(1.25rem, 4vw, 2.5rem);
+  width: min(280px, 28vw);
+  height: min(280px, 28vw);
+  pointer-events: none;
+  z-index: 10;
+  opacity: 0.9;
+}
+
 /* ---------- Responsive ---------- */
 @media (max-width: 900px) {
   .page {
@@ -187,6 +198,11 @@ h1 {
     position: relative;
     top: 0;
     min-height: 320px;
+  }
+
+  #dna-helix {
+    width: min(240px, 40vw);
+    height: min(240px, 40vw);
   }
 
   .header-inner {
@@ -213,5 +229,12 @@ h1 {
 
   .visual-placeholder {
     font-size: 0.75rem;
+  }
+
+  #dna-helix {
+    width: min(200px, 55vw);
+    height: min(200px, 55vw);
+    bottom: 1rem;
+    right: 1rem;
   }
 }
