@@ -190,10 +190,66 @@
         return new THREE.Vector3(x, y, z);
       };
 
+      const ensureClosedRing = (ring) => {
+        if (ring.length < 3) return ring;
+        const first = ring[0];
+        const last = ring[ring.length - 1];
+        if (first[0] !== last[0] || first[1] !== last[1]) {
+          ring.push([...first]);
+        }
+        return ring;
+      };
+
+      const ringArea = (ring) => {
+        let sum = 0;
+        for (let i = 0; i < ring.length - 1; i++) {
+          const [x1, y1] = ring[i];
+          const [x2, y2] = ring[i + 1];
+          sum += x1 * y2 - x2 * y1;
+        }
+        return sum / 2;
+      };
+
+      const normalizePolygonRings = (rings) => {
+        if (!Array.isArray(rings) || rings.length === 0) return null;
+        const cleaned = rings
+          .map((ring) =>
+            Array.isArray(ring)
+              ? ensureClosedRing(
+                  ring
+                    .filter((coord) => Array.isArray(coord) && coord.length >= 2)
+                    .map(([lon, lat]) => [
+                      ((lon + 540) % 360) - 180,
+                      Math.max(-90, Math.min(90, lat)),
+                    ])
+                )
+              : null
+          )
+          .filter((ring) => ring && ring.length >= 4);
+        if (cleaned.length === 0) return null;
+
+        const outer = cleaned[0];
+        if (ringArea(outer) < 0) {
+          outer.reverse();
+        }
+
+        const removeInteriorHoles = true; // collapse lakes for filled silhouette
+        const holes = removeInteriorHoles
+          ? []
+          : cleaned.slice(1).map((hole) => {
+              if (ringArea(hole) > 0) {
+                hole.reverse();
+              }
+              return hole;
+            });
+
+        return { outer, holes };
+      };
+
       const buildPolygon = (rings) => {
-        if (!Array.isArray(rings) || rings.length === 0) return;
-        const [outer, ...holes] = rings;
-        if (!outer || outer.length < 3) return;
+        const normalized = normalizePolygonRings(rings);
+        if (!normalized) return;
+        const { outer, holes } = normalized;
 
         const shape = new THREE.Shape();
         outer.forEach(([lon, lat], index) => {
@@ -203,24 +259,24 @@
             shape.lineTo(lon, lat);
           }
         });
+        shape.closePath();
 
-        const holePaths = holes
-          .filter((hole) => Array.isArray(hole) && hole.length >= 3)
-          .map((hole) => {
-            const path = new THREE.Path();
-            hole.forEach(([lon, lat], index) => {
-              if (index === 0) {
-                path.moveTo(lon, lat);
-              } else {
-                path.lineTo(lon, lat);
-              }
-            });
-            return path;
+        const holePaths = holes.map((hole) => {
+          const path = new THREE.Path();
+          hole.forEach(([lon, lat], index) => {
+            if (index === 0) {
+              path.moveTo(lon, lat);
+            } else {
+              path.lineTo(lon, lat);
+            }
           });
+          path.closePath();
+          return path;
+        });
 
         const geometry = new THREE.ShapeGeometry(shape, holePaths);
         const position = geometry.attributes.position;
-        const landRadius = globeRadius + 0.01;
+        const landRadius = globeRadius + 0.018;
         for (let i = 0; i < position.count; i++) {
           const lon = position.getX(i);
           const lat = position.getY(i);
@@ -231,6 +287,7 @@
         geometry.computeVertexNormals();
 
         const mesh = new THREE.Mesh(geometry, landMaterial);
+        mesh.frustumCulled = false;
         landGroup.add(mesh);
       };
 
