@@ -191,6 +191,14 @@
       globeGroup.rotation.x = THREE.MathUtils.degToRad(18);
 
       const convertLatLonToXYZ = (lat, lon, radius) => {
+        if (!Number.isFinite(lat) || !Number.isFinite(lon) || !Number.isFinite(radius) || radius <= 0) {
+          console.warn('[Globe] Invalid lat/lon/radius supplied to convertLatLonToXYZ', {
+            lat,
+            lon,
+            radius,
+          });
+          return new THREE.Vector3(0, 0, 0);
+        }
         const phi = THREE.MathUtils.degToRad(90 - lat);
         const theta = THREE.MathUtils.degToRad(lon + 180);
         const x = -radius * Math.sin(phi) * Math.cos(theta);
@@ -311,6 +319,9 @@
         if (filtered.length < 3) return [];
         const closed = ensureClosedRing(filtered);
         const datelineSegments = splitRingByDateline(closed, featureId, ringIndex);
+        if (datelineSegments.length > 1) {
+          datelineSplitCount += datelineSegments.length - 1;
+        }
         return datelineSegments
           .map((segment) => unwrapRing(segment))
           .map((segment) => {
@@ -354,11 +365,96 @@
       };
 
       const landGeometries = [];
+      const fallbackRings = [];
+      const landStats = {
+        features: 0,
+        polygons: 0,
+        segments: 0,
+        rings: 0,
+        vertices: 0,
+      };
+      const landBounds = {
+        min: new THREE.Vector3(Infinity, Infinity, Infinity),
+        max: new THREE.Vector3(-Infinity, -Infinity, -Infinity),
+      };
+      let datelineSplitCount = 0;
+
+      const resetLandDiagnostics = () => {
+        landGeometries.length = 0;
+        fallbackRings.length = 0;
+        landStats.features = 0;
+        landStats.polygons = 0;
+        landStats.segments = 0;
+        landStats.rings = 0;
+        landStats.vertices = 0;
+        datelineSplitCount = 0;
+        landBounds.min.set(Infinity, Infinity, Infinity);
+        landBounds.max.set(-Infinity, -Infinity, -Infinity);
+      };
+
+      const updateBounds = (vertex) => {
+        landBounds.min.x = Math.min(landBounds.min.x, vertex.x);
+        landBounds.min.y = Math.min(landBounds.min.y, vertex.y);
+        landBounds.min.z = Math.min(landBounds.min.z, vertex.z);
+        landBounds.max.x = Math.max(landBounds.max.x, vertex.x);
+        landBounds.max.y = Math.max(landBounds.max.y, vertex.y);
+        landBounds.max.z = Math.max(landBounds.max.z, vertex.z);
+      };
+
+      const attributeHasInvalidValues = (attribute) => {
+        if (!attribute) return true;
+        for (let i = 0; i < attribute.count; i++) {
+          const x = attribute.getX(i);
+          const y = attribute.getY(i);
+          const z = attribute.getZ(i);
+          if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(z)) {
+            console.warn('[Globe] Invalid vertex encountered', { index: i, x, y, z });
+            return true;
+          }
+        }
+        return false;
+      };
+
+      const drawFallbackOutlines = () => {
+        if (!fallbackRings.length) return;
+        landDebugGroup.clear();
+        fallbackRings.forEach(({ coords, featureId }) => {
+          if (!Array.isArray(coords) || coords.length < 3) return;
+          const outlinePositions = [];
+          coords.forEach(([lon, lat]) => {
+            const normalizedLon = ((lon % 360) + 540) % 360 - 180;
+            const vertex = convertLatLonToXYZ(lat, normalizedLon, globeRadius + 0.04);
+            outlinePositions.push(vertex.x, vertex.y, vertex.z);
+          });
+          if (outlinePositions.length < 9) return;
+          const outlineGeometry = new THREE.BufferGeometry();
+          outlineGeometry.setAttribute(
+            'position',
+            new THREE.Float32BufferAttribute(outlinePositions, 3)
+          );
+          const outlineMaterial = new THREE.LineBasicMaterial({
+            color: 0x9aa07a,
+            transparent: true,
+            opacity: 0.9,
+          });
+          const outlineLoop = new THREE.LineLoop(outlineGeometry, outlineMaterial);
+          outlineLoop.name = `FallbackOutline-${featureId ?? 'unknown'}`;
+          landDebugGroup.add(outlineLoop);
+        });
+        if (landDebugGroup.children.length) {
+          console.warn('[Globe] Rendering fallback land outlines for debugging.');
+          landDebugGroup.visible = true;
+        }
+      };
 
       const buildPolygon = (rings, featureId) => {
         const segments = preparePolygonSegments(rings, featureId);
         if (!segments.length) return;
+        landStats.polygons += 1;
+        landStats.rings += Array.isArray(rings) ? rings.length : 0;
         segments.forEach(({ outer, holes }) => {
+          landStats.segments += 1;
+          fallbackRings.push({ coords: outer, featureId });
           const shape = new THREE.Shape();
           outer.forEach(([lon, lat], index) => {
             if (index === 0) {
@@ -384,27 +480,92 @@
 
           const geometry = new THREE.ShapeGeometry(shape, holePaths);
           const position = geometry.attributes.position;
+          if (!position || position.count === 0) {
+            console.warn('[Globe] Empty geometry after ShapeGeometry creation', { featureId });
+            geometry.dispose();
+            return;
+          }
           const landRadius = globeRadius + 0.02;
+          const convertedVertices = [];
+          let invalidVertexDetected = false;
           for (let i = 0; i < position.count; i++) {
             const lon = position.getX(i);
             const lat = position.getY(i);
+            if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+              console.warn('[Globe] Non-finite lat/lon detected', { featureId, lon, lat, index: i });
+              invalidVertexDetected = true;
+              break;
+            }
             const normalizedLon = ((lon % 360) + 540) % 360 - 180;
             const vertex = convertLatLonToXYZ(lat, normalizedLon, landRadius);
-            position.setXYZ(i, vertex.x, vertex.y, vertex.z);
+            if (!Number.isFinite(vertex.x) || !Number.isFinite(vertex.y) || !Number.isFinite(vertex.z)) {
+              console.warn('[Globe] Non-finite vertex produced during projection', {
+                featureId,
+                lon,
+                lat,
+                vertex,
+              });
+              invalidVertexDetected = true;
+              break;
+            }
+            convertedVertices.push(vertex);
           }
+          if (invalidVertexDetected || convertedVertices.length !== position.count) {
+            console.warn('[Globe] Discarding polygon with invalid vertices', { featureId });
+            geometry.dispose();
+            return;
+          }
+          convertedVertices.forEach((vertex, index) => {
+            updateBounds(vertex);
+            position.setXYZ(index, vertex.x, vertex.y, vertex.z);
+          });
           position.needsUpdate = true;
           geometry.computeVertexNormals();
           geometry.computeBoundingSphere();
+          landStats.vertices += position.count;
           landGeometries.push(geometry);
         });
       };
 
       const finalizeLandGeometry = () => {
-        if (!landGeometries.length) return;
+        if (!landGeometries.length) {
+          console.error('[Globe] No land geometries were generated.');
+          drawFallbackOutlines();
+          return;
+        }
         const merged = BufferGeometryUtils.mergeGeometries(landGeometries, false);
+        if (!merged) {
+          console.error('[Globe] Merging land geometries failed. Rendering fallback outlines.');
+          drawFallbackOutlines();
+          return;
+        }
+        const position = merged.attributes.position;
+        if (!position || position.count === 0 || attributeHasInvalidValues(position)) {
+          console.error('[Globe] Invalid merged land geometry detected.', {
+            vertexCount: position?.count ?? 0,
+          });
+          drawFallbackOutlines();
+          return;
+        }
+        merged.computeBoundingSphere();
+        merged.computeVertexNormals();
+        merged.clearGroups();
         const landMesh = new THREE.Mesh(merged, landMaterial);
+        landMesh.name = 'LandMesh';
         landMesh.frustumCulled = false;
         landGroup.add(landMesh);
+        console.info('[Globe] Land mesh added to scene', {
+          features: landStats.features,
+          polygons: landStats.polygons,
+          segments: landStats.segments,
+          rings: landStats.rings,
+          vertices: landStats.vertices,
+          datelineSplits: datelineSplitCount,
+          bounds: {
+            min: landBounds.min.toArray(),
+            max: landBounds.max.toArray(),
+          },
+        });
       };
 
       const loadLandPolygons = async () => {
@@ -415,10 +576,15 @@
           if (!response.ok) throw new Error('Failed to load land GeoJSON');
           const data = await response.json();
           const features = Array.isArray(data.features) ? data.features : [];
+          resetLandDiagnostics();
+          landStats.features = features.length;
+          console.info(`[Globe] Loaded ${features.length} GeoJSON features.`);
+          if (features.length === 0) {
+            console.warn('[Globe] GeoJSON dataset returned no features.');
+          }
           landGroup.clear();
           landDebugGroup.clear();
           landDebugGroup.visible = false;
-          landGeometries.length = 0;
           features.forEach((feature) => {
             const geometry = feature && feature.geometry;
             if (!geometry) return;
@@ -431,6 +597,10 @@
             }
           });
           finalizeLandGeometry();
+          if (landGroup.children.length < 1) {
+            console.warn('[Globe] Land mesh missing after finalize; showing fallback outlines.');
+            drawFallbackOutlines();
+          }
         } catch (error) {
           console.error('Unable to build land polygons', error);
         }
