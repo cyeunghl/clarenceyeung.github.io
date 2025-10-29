@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Clarence Yeung · Portfolio</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- Layout Wrapper -->
+    <main class="page">
+      <!-- Visual Placeholder Column -->
+      <section class="visual-column" aria-labelledby="visual-title">
+        <div class="visual-container" role="presentation">
+          <div class="visual-placeholder">
+            <span id="visual-title">Future Visual</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Content Column -->
+      <section class="content-column">
+        <header class="page-header">
+          <div class="header-inner">
+            <div class="hero-portrait" aria-hidden="true">
+              <span>Portrait</span>
+            </div>
+            <h1>Clarence Yeung</h1>
+          </div>
+        </header>
+
+        <!-- About Section -->
+        <section class="content-section" id="about">
+          <h2>About Me</h2>
+          <nav aria-label="Primary links" class="about-links">
+            <a href="https://www.linkedin.com" target="_blank" rel="noopener">LinkedIn</a>
+            <span aria-hidden="true">·</span>
+            <a href="https://scholar.google.com" target="_blank" rel="noopener"
+              >Google Scholar</a
+            >
+            <span aria-hidden="true">·</span>
+            <a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
+          </nav>
+        </section>
+
+        <!-- Projects Section -->
+        <section class="content-section" id="projects">
+          <h2>Projects</h2>
+          <ul class="project-list">
+            <li>
+              <h3>Motion Atlas</h3>
+              <p>
+                A generative study that maps cycling telemetry into kinetic sculptures, pairing
+                physics with visual storytelling.
+              </p>
+            </li>
+            <li>
+              <h3>Helix Studio</h3>
+              <p>
+                Interactive DNA narratives that invite visitors to manipulate molecular forms through
+                touch and gesture.
+              </p>
+            </li>
+            <li>
+              <h3>Living Recipes</h3>
+              <p>
+                Culinary experiments documented as responsive micro-sites, highlighting craft and
+                sensory memory.
+              </p>
+            </li>
+          </ul>
+        </section>
+
+        <!-- Contact Section -->
+        <section class="content-section" id="contact">
+          <h2>Contact</h2>
+          <p>
+            Reach out for collaborations, research inquiries, or to swap ride routes:
+            <a href="mailto:hello@clarenceyeung.com">hello@clarenceyeung.com</a>
+          </p>
+          <p class="contact-links">
+            <a href="https://www.linkedin.com" target="_blank" rel="noopener">LinkedIn</a>
+            <span aria-hidden="true">·</span>
+            <a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
+            <span aria-hidden="true">·</span>
+            <a href="https://scholar.google.com" target="_blank" rel="noopener">Google Scholar</a>
+            <span aria-hidden="true">·</span>
+            <a href="https://clarenceyeung.substack.com" target="_blank" rel="noopener">Substack</a>
+          </p>
+        </section>
+      </section>
+    </main>
+
+    <script type="module">
+      import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.158/build/three.module.js';
+
+      const canvas = document.createElement('canvas');
+      canvas.id = 'dna-helix';
+      canvas.setAttribute('aria-hidden', 'true');
+      document.body.appendChild(canvas);
+
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setClearColor(0x000000, 0);
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 50);
+      camera.position.set(0, 0, 6);
+
+      const helixGroup = new THREE.Group();
+      scene.add(helixGroup);
+
+      const segments = 220;
+      const height = 4;
+      const radius = 0.6;
+      const twist = Math.PI * 6;
+
+      const pointPositions = new Float32Array((segments + 1) * 2 * 3);
+      const pointColors = new Float32Array((segments + 1) * 2 * 3);
+      const colorStart = new THREE.Color('#4f9bff');
+      const colorEnd = new THREE.Color('#6fffdc');
+      const tempColor = new THREE.Color();
+
+      let positionIndex = 0;
+      let colorIndex = 0;
+
+      const rungPositions = [];
+
+      for (let i = 0; i <= segments; i++) {
+        const t = (i / segments) * twist;
+        const y = (i / segments - 0.5) * height;
+
+        const x1 = Math.cos(t) * radius;
+        const z1 = Math.sin(t) * radius;
+        const x2 = Math.cos(t + Math.PI) * radius;
+        const z2 = Math.sin(t + Math.PI) * radius;
+
+        pointPositions[positionIndex++] = x1;
+        pointPositions[positionIndex++] = y;
+        pointPositions[positionIndex++] = z1;
+
+        tempColor.copy(colorStart).lerp(colorEnd, (Math.sin(t) + 1) / 2);
+        pointColors[colorIndex++] = tempColor.r;
+        pointColors[colorIndex++] = tempColor.g;
+        pointColors[colorIndex++] = tempColor.b;
+
+        pointPositions[positionIndex++] = x2;
+        pointPositions[positionIndex++] = y;
+        pointPositions[positionIndex++] = z2;
+
+        tempColor.copy(colorStart).lerp(colorEnd, (Math.cos(t) + 1) / 2);
+        pointColors[colorIndex++] = tempColor.r;
+        pointColors[colorIndex++] = tempColor.g;
+        pointColors[colorIndex++] = tempColor.b;
+
+        if (i % 8 === 0) {
+          rungPositions.push(x1, y, z1, x2, y, z2);
+        }
+      }
+
+      const helixGeometry = new THREE.BufferGeometry();
+      helixGeometry.setAttribute('position', new THREE.BufferAttribute(pointPositions, 3));
+      helixGeometry.setAttribute('color', new THREE.BufferAttribute(pointColors, 3));
+
+      const helixMaterial = new THREE.PointsMaterial({
+        size: 0.055,
+        transparent: true,
+        opacity: 0.9,
+        vertexColors: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+      });
+
+      const helixPoints = new THREE.Points(helixGeometry, helixMaterial);
+      helixGroup.add(helixPoints);
+
+      const rungGeometry = new THREE.BufferGeometry();
+      rungGeometry.setAttribute(
+        'position',
+        new THREE.Float32BufferAttribute(rungPositions, 3)
+      );
+
+      const rungMaterial = new THREE.LineBasicMaterial({
+        color: 0x8feaff,
+        transparent: true,
+        opacity: 0.35,
+        blending: THREE.AdditiveBlending,
+      });
+
+      const rungLines = new THREE.LineSegments(rungGeometry, rungMaterial);
+      helixGroup.add(rungLines);
+
+      const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+      const fill = new THREE.PointLight(0xb7ffff, 0.4);
+      fill.position.set(3, 4, 6);
+      scene.add(ambient, fill);
+
+      const resizeRenderer = () => {
+        const width = canvas.clientWidth;
+        const height = canvas.clientHeight;
+        if (width === 0 || height === 0) return;
+        renderer.setSize(width, height, false);
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+      };
+
+      const handlePixelRatio = () => {
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        resizeRenderer();
+      };
+
+      if ('ResizeObserver' in window) {
+        const observer = new ResizeObserver(handlePixelRatio);
+        observer.observe(canvas);
+      }
+      window.addEventListener('resize', handlePixelRatio);
+
+      let baseRotation = 0;
+      let scrollInfluence = 0;
+      let tiltInfluence = 0;
+      let lastScrollY = window.scrollY;
+
+      const clamp = THREE.MathUtils.clamp;
+
+      const updateFromScroll = () => {
+        const currentY = window.scrollY;
+        const delta = currentY - lastScrollY;
+        scrollInfluence = clamp(scrollInfluence + delta * 0.0025, -0.8, 0.8);
+        tiltInfluence = clamp(tiltInfluence - delta * 0.0006, -0.25, 0.25);
+        lastScrollY = currentY;
+
+        const maxScroll = document.body.scrollHeight - window.innerHeight;
+        const ratio = maxScroll > 0 ? currentY / maxScroll : 0;
+        canvas.style.opacity = (0.35 + (1 - ratio) * 0.35).toFixed(2);
+      };
+
+      window.addEventListener('scroll', updateFromScroll, { passive: true });
+      updateFromScroll();
+
+      let pointerTilt = 0;
+      window.addEventListener('pointermove', (event) => {
+        const normalizedX = event.clientX / window.innerWidth - 0.5;
+        pointerTilt = clamp(normalizedX * 0.25, -0.25, 0.25);
+      });
+
+      handlePixelRatio();
+
+      const animate = () => {
+        requestAnimationFrame(animate);
+        baseRotation += 0.0032;
+        scrollInfluence *= 0.92;
+        tiltInfluence *= 0.9;
+
+        helixGroup.rotation.y = baseRotation + scrollInfluence;
+        helixGroup.rotation.x = tiltInfluence + pointerTilt * 0.35;
+
+        renderer.render(scene, camera);
+      };
+
+      animate();
+    </script>
+  </body>
+</html>
