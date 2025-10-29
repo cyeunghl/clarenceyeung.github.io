@@ -1,66 +1,43 @@
-# Clarence Yeung · Portfolio Mise en Place
+# Monochrome Earth Globe (Three.js Example)
 
-A single-page portfolio presented like a minimalist recipe card. The layout frames a fixed visual
-column for the interactive globe while the right column houses About, Projects, and Contact
-sections. Three.js powers both the Strava-inspired globe and a holographic DNA helix, all compiled
-inside `index.html`.
+This repository hosts a minimal Three.js scene that renders a monochrome Earth using Natural Earth
+GeoJSON land polygons. Landmasses are rebuilt from vector data and placed slightly above an ocean
+sphere to create a clean two-tone silhouette with soft shading and orbit controls.
+
+## Features
+
+- Fetches Natural Earth 1:50m land polygons directly from GitHub.
+- Projects each longitude/latitude coordinate onto a 3D sphere without texture maps.
+- Uses `MeshLambertMaterial` for a matte ocean base and contrasting land layer.
+- Includes ambient and directional lighting for depth plus OrbitControls for rotation and zoom.
+- Auto-rotates slowly while remaining responsive to user interaction.
 
 ## Getting Started
 
-1. Clone the repository.
-2. Install any static file server (or use Python/Node's built-ins) and serve the site locally. Examples:
+1. Clone the repository:
    ```bash
-   npx serve .
+   git clone https://github.com/clarenceyeung/clarenceyeung.github.io.git
+   cd clarenceyeung.github.io
    ```
-   or open `index.html` directly in a modern browser.
-3. Replace placeholder assets inside `assets/` such as `profile-placeholder.svg`, `activities.json`,
-   and `cv.pdf` with personal files or data.
+2. Launch a static file server (any modern browser with module support works). For example:
+   ```bash
+   python -m http.server 8000
+   ```
+3. Navigate to `http://localhost:8000` and open `index.html` to view the globe.
 
-## Editing the Layout
+## Customisation Tips
 
-Core markup lives in `index.html`, with typography, layout, and tokens defined in `style.css`:
+- Adjust globe colours by editing the `oceanMaterial` and `landMaterial` definitions inside the
+  `<script type="module">` block of `index.html`.
+- Tune auto-rotation via `controls.autoRotateSpeed` or disable it entirely by setting
+  `controls.autoRotate = false`.
+- Change layout spacing, fonts, or background by editing `style.css`.
 
-- Update the hero content (name, portrait placeholder) within the `<header>` block.
-- Edit the About/Projects/Contact copy inside their respective `<section>` elements.
-- Adjust social links by editing the `about-links` and `contact-links` navigation lists.
-- Tweak colors and typography by editing the `:root` variables inside `style.css`.
+## Browser Support
 
-## Strava Activity Globe
-
-A custom Three.js globe renders inside the left column with OrbitControls enabled for rotation and
-zoom on a transparent stage. The ocean is a matte sphere while landmasses are rebuilt from Natural
-Earth GeoJSON polygons fetched at runtime, yielding a clean two-tone silhouette without relying on
-texture maps. Activity markers are sourced from `assets/activities.json`, which ships with mock
-global rides. Swap this file with Strava-derived JSON (or wire it into the proxy scaffold in
-[`cloud/`](cloud/)) to surface live data.
-
-- Hover markers to reveal their labels.
-- Click markers to open the corresponding Google Maps location in a new tab (and optionally handle
-  the `window.onGlobeMarkerClick` callback for custom interactions).
-
-Supporting documentation for a Strava OAuth proxy remains in [`cloud/`](cloud/) for future backend
-integration.
-
-## DNA Helix Animation
-
-The DNA helix renders inside a fixed, semi-transparent canvas anchored to the lower-right corner of
-the viewport. Scroll position gently rotates the helix on its axis for added depth without
-overpowering the content. Customize the geometry by editing the "DNA Helix" block near the bottom of
-the inline script.
-
-## Deployment
-
-1. Commit and push changes to the `main` branch.
-2. Ensure GitHub Pages is enabled for the repository (Settings → Pages → Deploy from branch).
-3. The site will be served from `https://clarenceyeung.github.io/`.
-
-## Accessibility & Performance Notes
-
-- Links feature subtle underlines and focus states for keyboard navigation.
-- Layout adapts responsively down to mobile widths.
-- WebGL features gracefully degrade by relying on static fallback copy if disabled (no explicit
-  fallback canvas is rendered, so consider adding one if needed).
+The example targets modern browsers that support ES modules and WebGL 2. If the globe does not
+appear, check the developer console for network or WebGL errors.
 
 ## License
 
-This project is published under the MIT License. Feel free to adapt and remix.
+Released under the MIT License. Feel free to adapt the code for personal or educational projects.
