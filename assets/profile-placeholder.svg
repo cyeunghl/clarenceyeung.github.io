@@ -1,0 +1,21 @@
+<svg width="600" height="800" viewBox="0 0 600 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="600" height="800" rx="36" fill="#394536" />
+  <defs>
+    <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5F7261" stop-opacity="0.85" />
+      <stop offset="100%" stop-color="#2F3729" stop-opacity="0.85" />
+    </linearGradient>
+    <clipPath id="clip">
+      <rect x="90" y="120" width="420" height="560" rx="120" />
+    </clipPath>
+  </defs>
+  <rect x="30" y="40" width="540" height="720" rx="28" fill="url(#grad)" opacity="0.85" />
+  <g clip-path="url(#clip)">
+    <circle cx="300" cy="320" r="140" fill="#465443" />
+    <rect x="180" y="420" width="240" height="260" rx="120" fill="#2F3729" />
+    <path d="M240 470C260 510 340 510 360 470" stroke="#A3A596" stroke-width="12" stroke-linecap="round" />
+  </g>
+  <text x="50%" y="690" text-anchor="middle" fill="#F2F0E9" font-family="'Inter', sans-serif" font-size="42" letter-spacing="0.18em">
+    ADD PORTRAIT
+  </text>
+</svg>
