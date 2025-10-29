@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Clarence Yeung · Portfolio</title>
     <link rel="stylesheet" href="style.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.158/build/three.module.js",
+          "three/examples/jsm/controls/OrbitControls.js": "https://cdn.jsdelivr.net/npm/three@0.158/examples/jsm/controls/OrbitControls.js"
+        }
+      }
+    </script>
   </head>
   <body>
     <!-- Layout Wrapper -->
@@ -97,8 +105,8 @@
     </main>
 
     <script type="module">
-      import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.158/build/three.module.js';
-      import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.158/examples/jsm/controls/OrbitControls.js';
+      import * as THREE from 'three';
+      import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
       /* ---------------------------------------- */
       /* Minimal Globe Setup                      */
