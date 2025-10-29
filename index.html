@@ -127,8 +127,8 @@
           size / 2,
           size * 0.5
         );
-        gradient.addColorStop(0, 'rgba(255,255,255,0.8)');
-        gradient.addColorStop(1, 'rgba(255,255,255,0)');
+        gradient.addColorStop(0, 'rgba(99,107,47,0.5)');
+        gradient.addColorStop(1, 'rgba(99,107,47,0)');
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, size, size);
         const texture = new THREE.CanvasTexture(texCanvas);
@@ -136,10 +136,10 @@
         return texture;
       })();
 
-      const segments = 720;
-      const turns = 1.8;
-      const helixHeight = 9.2;
-      const helixRadius = 2.8;
+      const segments = 900;
+      const turns = 1.5;
+      const helixHeight = 12.5;
+      const helixRadius = 3.2;
       const rungInterval = 6;
 
       const strandPositions = [];
@@ -184,25 +184,23 @@
           rungPositions.push(x1, y, z1, x2, y, z2);
         }
 
-        if (i % 9 === 0) {
-          const clusterSize = 8;
+        if (i % 7 === 0) {
+          const clusterSize = 16;
           for (let c = 0; c < clusterSize; c++) {
-            const offsetRadius = helixRadius * (0.4 + Math.random() * 0.45);
-            const offsetAngle = angle + (Math.random() - 0.5) * 0.9;
-            const cx = Math.cos(offsetAngle) * offsetRadius + (Math.random() - 0.5) * 0.9;
-            const cy = y + (Math.random() - 0.5) * 1.1;
-            const cz = Math.sin(offsetAngle) * offsetRadius + (Math.random() - 0.5) * 0.9;
+            const offsetRadius = helixRadius * (0.45 + Math.random() * 0.75);
+            const offsetAngle = angle + (Math.random() - 0.5) * 1.1;
+            const cx = Math.cos(offsetAngle) * offsetRadius + (Math.random() - 0.5) * 1.2;
+            const cy = y + (Math.random() - 0.5) * 1.4;
+            const cz = Math.sin(offsetAngle) * offsetRadius + (Math.random() - 0.5) * 1.2;
 
             clusterPositions.push(cx, cy, cz);
             clusterLinkPositions.push(cx, cy, cz, x1, y, z1);
-            if (c % 2 === 0) {
-              clusterLinkPositions.push(cx, cy, cz, x2, y, z2);
-            }
+            clusterLinkPositions.push(cx, cy, cz, x2, y, z2);
           }
         }
       }
 
-      const ambientCount = 1500;
+      const ambientCount = 2600;
       for (let i = 0; i < ambientCount; i++) {
         const spread = helixRadius * (0.9 + Math.random() * 1.1);
         const theta = Math.random() * Math.PI * 2 * turns;
@@ -255,7 +253,7 @@
         size: 0.32,
         transparent: true,
         opacity: baseOpacity,
-        blending: THREE.AdditiveBlending,
+        blending: THREE.NormalBlending,
         depthWrite: false,
         sizeAttenuation: true,
       });
@@ -264,7 +262,7 @@
         color: oliveColor,
         transparent: true,
         opacity: baseOpacity,
-        blending: THREE.AdditiveBlending,
+        blending: THREE.NormalBlending,
         depthWrite: false,
       });
 
@@ -277,7 +275,7 @@
         size: 0.22,
         transparent: true,
         opacity: baseOpacity,
-        blending: THREE.AdditiveBlending,
+        blending: THREE.NormalBlending,
         depthWrite: false,
         sizeAttenuation: true,
       });
@@ -289,7 +287,7 @@
         size: 0.28,
         transparent: true,
         opacity: baseOpacity,
-        blending: THREE.AdditiveBlending,
+        blending: THREE.NormalBlending,
         depthWrite: false,
         sizeAttenuation: true,
       });
@@ -298,7 +296,7 @@
         color: oliveColor,
         transparent: true,
         opacity: baseOpacity,
-        blending: THREE.AdditiveBlending,
+        blending: THREE.NormalBlending,
         depthWrite: false,
       });
 
@@ -309,7 +307,7 @@
       helixGroup.add(new THREE.Points(clusterGeometry, clusterMaterial));
       helixGroup.add(new THREE.LineSegments(clusterLinkGeometry, clusterLinkMaterial));
 
-      helixGroup.scale.set(3.2, 1.1, 1.35);
+      helixGroup.scale.set(4.4, 1.1, 1.35);
       const baseRotation = new THREE.Euler(Math.PI / 5, Math.PI / 4, -Math.PI / 4);
       helixGroup.rotation.copy(baseRotation);
 
