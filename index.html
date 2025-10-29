@@ -102,98 +102,164 @@
       const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.setClearColor(0x000000, 0);
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
 
       const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 50);
-      camera.position.set(0, 0, 6);
+      const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 60);
+      camera.position.set(0, 0, 10);
 
       const helixGroup = new THREE.Group();
       scene.add(helixGroup);
 
-      const segments = 220;
-      const height = 4;
-      const radius = 0.6;
-      const twist = Math.PI * 6;
+      const strandPoints = 480;
+      const turns = 6.5;
+      const helixHeight = 6.5;
+      const radius = 1.15;
 
-      const pointPositions = new Float32Array((segments + 1) * 2 * 3);
-      const pointColors = new Float32Array((segments + 1) * 2 * 3);
-      const colorStart = new THREE.Color('#4f9bff');
-      const colorEnd = new THREE.Color('#6fffdc');
-      const tempColor = new THREE.Color();
+      const colorStart = new THREE.Color('#a5b2d6');
+      const colorEnd = new THREE.Color('#dce1f0');
+
+      const pointPositions = new Float32Array(strandPoints * 2 * 3);
+      const pointColors = new Float32Array(strandPoints * 2 * 3);
+      const strandLinePositions = [];
+      const strandLineColors = [];
+      const rungPositions = [];
+      const rungColors = [];
 
       let positionIndex = 0;
       let colorIndex = 0;
+      let previousVertices = null;
+      let previousColor = null;
 
-      const rungPositions = [];
+      for (let i = 0; i < strandPoints; i++) {
+        const progress = i / (strandPoints - 1);
+        const angle = progress * Math.PI * 2 * turns;
+        const y = (progress - 0.5) * helixHeight;
 
-      for (let i = 0; i <= segments; i++) {
-        const t = (i / segments) * twist;
-        const y = (i / segments - 0.5) * height;
+        const x1 = Math.cos(angle) * radius;
+        const z1 = Math.sin(angle) * radius;
+        const x2 = -x1;
+        const z2 = -z1;
 
-        const x1 = Math.cos(t) * radius;
-        const z1 = Math.sin(t) * radius;
-        const x2 = Math.cos(t + Math.PI) * radius;
-        const z2 = Math.sin(t + Math.PI) * radius;
+        const mixColor = colorStart.clone().lerp(colorEnd, progress);
 
         pointPositions[positionIndex++] = x1;
         pointPositions[positionIndex++] = y;
         pointPositions[positionIndex++] = z1;
-
-        tempColor.copy(colorStart).lerp(colorEnd, (Math.sin(t) + 1) / 2);
-        pointColors[colorIndex++] = tempColor.r;
-        pointColors[colorIndex++] = tempColor.g;
-        pointColors[colorIndex++] = tempColor.b;
+        pointColors[colorIndex++] = mixColor.r;
+        pointColors[colorIndex++] = mixColor.g;
+        pointColors[colorIndex++] = mixColor.b;
 
         pointPositions[positionIndex++] = x2;
         pointPositions[positionIndex++] = y;
         pointPositions[positionIndex++] = z2;
+        pointColors[colorIndex++] = mixColor.r;
+        pointColors[colorIndex++] = mixColor.g;
+        pointColors[colorIndex++] = mixColor.b;
 
-        tempColor.copy(colorStart).lerp(colorEnd, (Math.cos(t) + 1) / 2);
-        pointColors[colorIndex++] = tempColor.r;
-        pointColors[colorIndex++] = tempColor.g;
-        pointColors[colorIndex++] = tempColor.b;
+        if (previousVertices) {
+          const prevColor = previousColor;
+          strandLinePositions.push(
+            previousVertices[0],
+            previousVertices[1],
+            previousVertices[2],
+            x1,
+            y,
+            z1,
+            previousVertices[3],
+            previousVertices[4],
+            previousVertices[5],
+            x2,
+            y,
+            z2
+          );
 
-        if (i % 8 === 0) {
-          rungPositions.push(x1, y, z1, x2, y, z2);
+          strandLineColors.push(
+            prevColor.r,
+            prevColor.g,
+            prevColor.b,
+            mixColor.r,
+            mixColor.g,
+            mixColor.b,
+            prevColor.r,
+            prevColor.g,
+            prevColor.b,
+            mixColor.r,
+            mixColor.g,
+            mixColor.b
+          );
         }
+
+        if (i % 9 === 0) {
+          rungPositions.push(x1, y, z1, x2, y, z2);
+          rungColors.push(
+            mixColor.r,
+            mixColor.g,
+            mixColor.b,
+            mixColor.r,
+            mixColor.g,
+            mixColor.b
+          );
+        }
+
+        previousVertices = [x1, y, z1, x2, y, z2];
+        previousColor = mixColor.clone();
       }
 
-      const helixGeometry = new THREE.BufferGeometry();
-      helixGeometry.setAttribute('position', new THREE.BufferAttribute(pointPositions, 3));
-      helixGeometry.setAttribute('color', new THREE.BufferAttribute(pointColors, 3));
+      const pointsGeometry = new THREE.BufferGeometry();
+      pointsGeometry.setAttribute('position', new THREE.BufferAttribute(pointPositions, 3));
+      pointsGeometry.setAttribute('color', new THREE.BufferAttribute(pointColors, 3));
 
       const helixMaterial = new THREE.PointsMaterial({
-        size: 0.055,
+        size: 0.045,
+        sizeAttenuation: true,
         transparent: true,
-        opacity: 0.9,
+        opacity: 0.85,
         vertexColors: true,
         depthWrite: false,
         blending: THREE.AdditiveBlending,
       });
 
-      const helixPoints = new THREE.Points(helixGeometry, helixMaterial);
+      const helixPoints = new THREE.Points(pointsGeometry, helixMaterial);
       helixGroup.add(helixPoints);
+
+      const strandGeometry = new THREE.BufferGeometry();
+      strandGeometry.setAttribute(
+        'position',
+        new THREE.Float32BufferAttribute(strandLinePositions, 3)
+      );
+      strandGeometry.setAttribute(
+        'color',
+        new THREE.Float32BufferAttribute(strandLineColors, 3)
+      );
 
       const rungGeometry = new THREE.BufferGeometry();
       rungGeometry.setAttribute(
         'position',
         new THREE.Float32BufferAttribute(rungPositions, 3)
       );
+      rungGeometry.setAttribute(
+        'color',
+        new THREE.Float32BufferAttribute(rungColors, 3)
+      );
 
-      const rungMaterial = new THREE.LineBasicMaterial({
-        color: 0x8feaff,
+      const lineMaterial = new THREE.LineBasicMaterial({
+        vertexColors: true,
         transparent: true,
-        opacity: 0.35,
+        opacity: 0.18,
         blending: THREE.AdditiveBlending,
+        depthWrite: false,
       });
 
-      const rungLines = new THREE.LineSegments(rungGeometry, rungMaterial);
-      helixGroup.add(rungLines);
+      const strandLines = new THREE.LineSegments(strandGeometry, lineMaterial);
+      const rungLines = new THREE.LineSegments(rungGeometry, lineMaterial.clone());
+      helixGroup.add(strandLines, rungLines);
 
-      const ambient = new THREE.AmbientLight(0xffffff, 0.6);
-      const fill = new THREE.PointLight(0xb7ffff, 0.4);
-      fill.position.set(3, 4, 6);
-      scene.add(ambient, fill);
+      helixGroup.scale.set(1.6, 1.6, 1.6);
+
+      const baseTiltX = 0;
+      const baseRotationY = Math.PI / 4;
+      const baseRotationZ = Math.PI / 4;
 
       const resizeRenderer = () => {
         const width = canvas.clientWidth;
@@ -215,9 +281,9 @@
       }
       window.addEventListener('resize', handlePixelRatio);
 
-      let baseRotation = 0;
-      let scrollInfluence = 0;
-      let tiltInfluence = 0;
+      let autoRotation = 0;
+      let scrollTarget = 0;
+      let scrollBlend = 0;
       let lastScrollY = window.scrollY;
 
       const clamp = THREE.MathUtils.clamp;
@@ -225,34 +291,31 @@
       const updateFromScroll = () => {
         const currentY = window.scrollY;
         const delta = currentY - lastScrollY;
-        scrollInfluence = clamp(scrollInfluence + delta * 0.0025, -0.8, 0.8);
-        tiltInfluence = clamp(tiltInfluence - delta * 0.0006, -0.25, 0.25);
+        scrollTarget = clamp(scrollTarget + delta * 0.0004, -0.3, 0.3);
         lastScrollY = currentY;
 
         const maxScroll = document.body.scrollHeight - window.innerHeight;
         const ratio = maxScroll > 0 ? currentY / maxScroll : 0;
-        canvas.style.opacity = (0.35 + (1 - ratio) * 0.35).toFixed(2);
+        const baseOpacity = 0.52;
+        const faded = clamp(baseOpacity - ratio * 0.22, 0.24, baseOpacity);
+        canvas.style.opacity = faded.toFixed(2);
       };
 
       window.addEventListener('scroll', updateFromScroll, { passive: true });
       updateFromScroll();
 
-      let pointerTilt = 0;
-      window.addEventListener('pointermove', (event) => {
-        const normalizedX = event.clientX / window.innerWidth - 0.5;
-        pointerTilt = clamp(normalizedX * 0.25, -0.25, 0.25);
-      });
-
       handlePixelRatio();
 
       const animate = () => {
         requestAnimationFrame(animate);
-        baseRotation += 0.0032;
-        scrollInfluence *= 0.92;
-        tiltInfluence *= 0.9;
+        autoRotation += 0.0009;
+        scrollBlend += (scrollTarget - scrollBlend) * 0.08;
 
-        helixGroup.rotation.y = baseRotation + scrollInfluence;
-        helixGroup.rotation.x = tiltInfluence + pointerTilt * 0.35;
+        helixGroup.rotation.set(
+          baseTiltX,
+          baseRotationY + autoRotation + scrollBlend,
+          baseRotationZ
+        );
 
         renderer.render(scene, camera);
       };
