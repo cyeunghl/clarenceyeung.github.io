@@ -118,8 +118,21 @@
       const globeCamera = new THREE.PerspectiveCamera(40, 1, 0.1, 1000);
       const globeRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
       globeRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      globeRenderer.outputColorSpace = THREE.SRGBColorSpace;
+      globeRenderer.toneMapping = THREE.ACESFilmicToneMapping;
+      globeRenderer.toneMappingExposure = 1.05;
       globeRenderer.setClearColor(0x000000, 0);
       stage.appendChild(globeRenderer.domElement);
+      globeRenderer.domElement.style.cursor = 'grab';
+      globeRenderer.domElement.style.outline = 'none';
+      globeRenderer.domElement.addEventListener('pointerdown', () => {
+        globeRenderer.domElement.style.cursor = 'grabbing';
+      });
+      ['pointerup', 'pointerleave'].forEach((evt) => {
+        globeRenderer.domElement.addEventListener(evt, () => {
+          globeRenderer.domElement.style.cursor = 'grab';
+        });
+      });
 
       const globeGroup = new THREE.Group();
       globeScene.add(globeGroup);
@@ -131,17 +144,10 @@
         const texCanvas = document.createElement('canvas');
         texCanvas.width = texCanvas.height = size;
         const ctx = texCanvas.getContext('2d');
-        const gradient = ctx.createRadialGradient(
-          size * 0.35,
-          size * 0.4,
-          size * 0.15,
-          size * 0.6,
-          size * 0.6,
-          size * 0.75
-        );
-        gradient.addColorStop(0, '#f8f6ed');
-        gradient.addColorStop(0.6, '#e7ead6');
-        gradient.addColorStop(1, '#cfd5b0');
+        const gradient = ctx.createRadialGradient(size * 0.32, size * 0.38, size * 0.1, size * 0.68, size * 0.68, size * 0.85);
+        gradient.addColorStop(0, '#f5f4ef');
+        gradient.addColorStop(0.55, '#e4e7d5');
+        gradient.addColorStop(1, '#d1d7bd');
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, size, size);
         const texture = new THREE.CanvasTexture(texCanvas);
@@ -151,20 +157,85 @@
 
       const globeMaterial = new THREE.MeshStandardMaterial({
         map: gradientTexture,
-        roughness: 0.5,
-        metalness: 0.15,
+        roughness: 0.35,
+        metalness: 0.25,
+        emissive: new THREE.Color('#d9ddca'),
+        emissiveIntensity: 0.16,
       });
-      const globeMesh = new THREE.Mesh(new THREE.SphereGeometry(globeRadius, 96, 96), globeMaterial);
+      const globeMesh = new THREE.Mesh(new THREE.SphereGeometry(globeRadius, 128, 128), globeMaterial);
       globeGroup.add(globeMesh);
+
+      const atmosphereMaterial = new THREE.MeshPhongMaterial({
+        color: new THREE.Color('#b4c0a0'),
+        transparent: true,
+        opacity: 0.18,
+        side: THREE.BackSide,
+        blending: THREE.AdditiveBlending,
+      });
+      const atmosphere = new THREE.Mesh(new THREE.SphereGeometry(globeRadius + 0.32, 64, 64), atmosphereMaterial);
+      globeGroup.add(atmosphere);
+
+      const horizonMaterial = new THREE.ShaderMaterial({
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        uniforms: {
+          glowColor: { value: new THREE.Color('#9aa776') },
+        },
+        vertexShader: `
+          varying vec3 vNormal;
+          void main() {
+            vNormal = normalize(normalMatrix * normal);
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }
+        `,
+        fragmentShader: `
+          varying vec3 vNormal;
+          uniform vec3 glowColor;
+          void main() {
+            float intensity = pow(0.7 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 3.5);
+            gl_FragColor = vec4(glowColor, intensity * 0.35);
+          }
+        `,
+      });
+      const horizon = new THREE.Mesh(new THREE.SphereGeometry(globeRadius + 0.18, 96, 96), horizonMaterial);
+      globeGroup.add(horizon);
 
       const markerGroup = new THREE.Group();
       globeGroup.add(markerGroup);
 
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.55);
+      const starGeometry = new THREE.BufferGeometry();
+      const starCount = 450;
+      const starPositions = new Float32Array(starCount * 3);
+      for (let i = 0; i < starCount; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const v = Math.random() * 2 - 1;
+        const radius = globeRadius * (3.5 + Math.random() * 1.2);
+        const sqrt = Math.sqrt(1 - v * v);
+        starPositions[i * 3] = radius * sqrt * Math.cos(angle);
+        starPositions[i * 3 + 1] = radius * v;
+        starPositions[i * 3 + 2] = radius * sqrt * Math.sin(angle);
+      }
+      starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+      const starMaterial = new THREE.PointsMaterial({
+        size: 0.015,
+        color: '#d3d8c3',
+        transparent: true,
+        opacity: 0.45,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+      });
+      const starField = new THREE.Points(starGeometry, starMaterial);
+      globeScene.add(starField);
+
+      const ambientLight = new THREE.AmbientLight(0xf2f1ea, 0.65);
       globeScene.add(ambientLight);
-      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.65);
-      directionalLight.position.set(-5, 6, 4);
-      globeScene.add(directionalLight);
+      const keyLight = new THREE.DirectionalLight(0xfaf8f0, 0.85);
+      keyLight.position.set(-6.5, 7.5, 6.5);
+      globeScene.add(keyLight);
+      const rimLight = new THREE.DirectionalLight(0xcad1b1, 0.35);
+      rimLight.position.set(5, -3, -4);
+      globeScene.add(rimLight);
 
       globeCamera.position.set(0, 0, globeRadius * 4.2);
 
@@ -174,9 +245,14 @@
       controls.dampingFactor = 0.08;
       controls.enableZoom = true;
       controls.autoRotate = true;
-      controls.autoRotateSpeed = 0.35;
+      controls.autoRotateSpeed = 0.28;
       controls.minDistance = globeRadius * 1.6;
       controls.maxDistance = globeRadius * 4.8;
+      controls.addEventListener('start', () => (controls.autoRotate = false));
+      controls.addEventListener('end', () => (controls.autoRotate = true));
+
+      globeGroup.rotation.x = THREE.MathUtils.degToRad(16);
+      globeGroup.rotation.y = THREE.MathUtils.degToRad(-28);
 
       const markerMeshes = [];
       let hoveredMarker = null;
@@ -198,16 +274,23 @@
         const material = new THREE.MeshStandardMaterial({
           color: new THREE.Color('#636B2F'),
           emissive: new THREE.Color('#636B2F'),
-          emissiveIntensity: 0.35,
+          emissiveIntensity: 0.22,
           transparent: true,
-          opacity: 0.75,
-          roughness: 0.4,
-          metalness: 0.2,
+          opacity: 0.7,
+          roughness: 0.35,
+          metalness: 0.25,
         });
-        const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.085, 20, 20), material);
+        const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.08, 28, 28), material);
         mesh.position.copy(position);
         mesh.lookAt(new THREE.Vector3(0, 0, 0));
-        mesh.userData = { id, name, baseEmissive: material.emissiveIntensity, baseOpacity: material.opacity };
+        mesh.userData = {
+          id,
+          name,
+          lat,
+          lon,
+          baseEmissive: material.emissiveIntensity,
+          baseOpacity: material.opacity,
+        };
         markerGroup.add(mesh);
         markerMeshes.push(mesh);
       };
@@ -227,17 +310,22 @@
           hoveredMarker = marker;
           marker.material.emissiveIntensity = 0.95;
           marker.material.opacity = 0.95;
-          marker.scale.set(1.6, 1.6, 1.6);
+          marker.scale.set(1.65, 1.65, 1.65);
           tooltip.textContent = marker.userData.name || 'Activity';
           tooltip.hidden = false;
         }
-        const rect = stage.getBoundingClientRect();
+        const rect = globeRenderer.domElement.getBoundingClientRect();
         tooltip.style.left = `${event.clientX - rect.left + 12}px`;
         tooltip.style.top = `${event.clientY - rect.top - 12}px`;
       };
 
-      const onMarkerClick = (id) => {
-        console.info('Marker clicked:', id);
+      const onMarkerClick = (marker) => {
+        const { id, lat, lon } = marker.userData;
+        const url = `https://www.google.com/maps/search/?api=1&query=${lat.toFixed(5)},${lon.toFixed(5)}`;
+        window.open(url, '_blank', 'noopener');
+        if (typeof window.onGlobeMarkerClick === 'function') {
+          window.onGlobeMarkerClick({ id, lat, lon });
+        }
       };
 
       const updatePointerFromEvent = (event) => {
@@ -267,13 +355,13 @@
         const intersects = raycaster.intersectObjects(markerMeshes);
         if (intersects.length > 0) {
           const marker = intersects[0].object;
-          onMarkerClick(marker.userData.id);
+          onMarkerClick(marker);
         }
       };
 
-      stage.addEventListener('pointermove', handlePointerMove);
-      stage.addEventListener('pointerleave', handlePointerLeave);
-      stage.addEventListener('click', handlePointerClick);
+      globeRenderer.domElement.addEventListener('pointermove', handlePointerMove);
+      globeRenderer.domElement.addEventListener('pointerleave', handlePointerLeave);
+      globeRenderer.domElement.addEventListener('click', handlePointerClick);
 
       const resizeGlobe = () => {
         const { clientWidth, clientHeight } = stage;
@@ -300,6 +388,7 @@
       const animateGlobe = () => {
         requestAnimationFrame(animateGlobe);
         controls.update();
+        starField.rotation.y += 0.0002;
         globeRenderer.render(globeScene, globeCamera);
       };
 
@@ -520,7 +609,7 @@
       helixGroup.add(new THREE.Points(clusterGeometry, clusterMaterial));
       helixGroup.add(new THREE.LineSegments(clusterLinkGeometry, clusterLinkMaterial));
 
-      helixGroup.scale.set(2.2, 0.55, 0.675);
+      helixGroup.scale.set(1.8, 0.45, 0.55);
       const baseRotation = new THREE.Euler(Math.PI / 5, Math.PI / 4, -Math.PI / 4);
       helixGroup.rotation.copy(baseRotation);
 
