@@ -10,11 +10,16 @@
     <!-- Layout Wrapper -->
     <main class="page">
       <!-- Visual Placeholder Column -->
-      <section class="visual-column" aria-labelledby="visual-title">
+      <section class="visual-column">
         <div class="visual-container" role="presentation">
-          <div class="visual-placeholder">
-            <span id="visual-title">Future Visual</span>
-          </div>
+          <div class="visual-stage" id="globe-stage" aria-hidden="true"></div>
+          <div
+            class="visual-tooltip"
+            id="globe-tooltip"
+            role="status"
+            aria-live="polite"
+            hidden
+          ></div>
         </div>
       </section>
 
@@ -93,6 +98,207 @@
 
     <script type="module">
       import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.158/build/three.module.js';
+      import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.158/examples/jsm/controls/OrbitControls.js';
+
+      /* ---------------------------------------- */
+      /* Minimal Globe Setup                      */
+      /* ---------------------------------------- */
+      const stage = document.getElementById('globe-stage');
+      const tooltip = document.getElementById('globe-tooltip');
+
+      const globeScene = new THREE.Scene();
+      const globeCamera = new THREE.PerspectiveCamera(40, 1, 0.1, 1000);
+      const globeRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      globeRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      globeRenderer.setClearColor(0x000000, 0);
+      stage.appendChild(globeRenderer.domElement);
+
+      const globeGroup = new THREE.Group();
+      globeScene.add(globeGroup);
+
+      const globeRadius = 3.2;
+
+      const gradientTexture = (() => {
+        const size = 1024;
+        const texCanvas = document.createElement('canvas');
+        texCanvas.width = texCanvas.height = size;
+        const ctx = texCanvas.getContext('2d');
+        const gradient = ctx.createRadialGradient(
+          size * 0.35,
+          size * 0.4,
+          size * 0.15,
+          size * 0.6,
+          size * 0.6,
+          size * 0.75
+        );
+        gradient.addColorStop(0, '#f8f6ed');
+        gradient.addColorStop(0.6, '#e7ead6');
+        gradient.addColorStop(1, '#cfd5b0');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, size, size);
+        const texture = new THREE.CanvasTexture(texCanvas);
+        texture.colorSpace = THREE.SRGBColorSpace;
+        return texture;
+      })();
+
+      const globeMaterial = new THREE.MeshStandardMaterial({
+        map: gradientTexture,
+        roughness: 0.5,
+        metalness: 0.15,
+      });
+      const globeMesh = new THREE.Mesh(new THREE.SphereGeometry(globeRadius, 96, 96), globeMaterial);
+      globeGroup.add(globeMesh);
+
+      const markerGroup = new THREE.Group();
+      globeGroup.add(markerGroup);
+
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.55);
+      globeScene.add(ambientLight);
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.65);
+      directionalLight.position.set(-5, 6, 4);
+      globeScene.add(directionalLight);
+
+      globeCamera.position.set(0, 0, globeRadius * 4.2);
+
+      const controls = new OrbitControls(globeCamera, globeRenderer.domElement);
+      controls.enablePan = false;
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.08;
+      controls.enableZoom = true;
+      controls.autoRotate = true;
+      controls.autoRotateSpeed = 0.35;
+      controls.minDistance = globeRadius * 1.6;
+      controls.maxDistance = globeRadius * 4.8;
+
+      const markerMeshes = [];
+      let hoveredMarker = null;
+      const raycaster = new THREE.Raycaster();
+      const pointer = new THREE.Vector2();
+
+      const convertLatLonToXYZ = (lat, lon, radius) => {
+        const phi = THREE.MathUtils.degToRad(90 - lat);
+        const theta = THREE.MathUtils.degToRad(lon + 180);
+        const x = -radius * Math.sin(phi) * Math.cos(theta);
+        const z = radius * Math.sin(phi) * Math.sin(theta);
+        const y = radius * Math.cos(phi);
+        return new THREE.Vector3(x, y, z);
+      };
+
+      const createMarker = (activity) => {
+        const { lat, lon, name, id } = activity;
+        const position = convertLatLonToXYZ(lat, lon, globeRadius + 0.02);
+        const material = new THREE.MeshStandardMaterial({
+          color: new THREE.Color('#636B2F'),
+          emissive: new THREE.Color('#636B2F'),
+          emissiveIntensity: 0.35,
+          transparent: true,
+          opacity: 0.75,
+          roughness: 0.4,
+          metalness: 0.2,
+        });
+        const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.085, 20, 20), material);
+        mesh.position.copy(position);
+        mesh.lookAt(new THREE.Vector3(0, 0, 0));
+        mesh.userData = { id, name, baseEmissive: material.emissiveIntensity, baseOpacity: material.opacity };
+        markerGroup.add(mesh);
+        markerMeshes.push(mesh);
+      };
+
+      const resetHover = () => {
+        if (!hoveredMarker) return;
+        hoveredMarker.material.emissiveIntensity = hoveredMarker.userData.baseEmissive;
+        hoveredMarker.material.opacity = hoveredMarker.userData.baseOpacity;
+        hoveredMarker.scale.set(1, 1, 1);
+        hoveredMarker = null;
+        tooltip.hidden = true;
+      };
+
+      const setHover = (marker, event) => {
+        if (hoveredMarker !== marker) {
+          resetHover();
+          hoveredMarker = marker;
+          marker.material.emissiveIntensity = 0.95;
+          marker.material.opacity = 0.95;
+          marker.scale.set(1.6, 1.6, 1.6);
+          tooltip.textContent = marker.userData.name || 'Activity';
+          tooltip.hidden = false;
+        }
+        const rect = stage.getBoundingClientRect();
+        tooltip.style.left = `${event.clientX - rect.left + 12}px`;
+        tooltip.style.top = `${event.clientY - rect.top - 12}px`;
+      };
+
+      const onMarkerClick = (id) => {
+        console.info('Marker clicked:', id);
+      };
+
+      const updatePointerFromEvent = (event) => {
+        const rect = globeRenderer.domElement.getBoundingClientRect();
+        pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      };
+
+      const handlePointerMove = (event) => {
+        updatePointerFromEvent(event);
+        raycaster.setFromCamera(pointer, globeCamera);
+        const intersects = raycaster.intersectObjects(markerMeshes);
+        if (intersects.length > 0) {
+          setHover(intersects[0].object, event);
+        } else {
+          resetHover();
+        }
+      };
+
+      const handlePointerLeave = () => {
+        resetHover();
+      };
+
+      const handlePointerClick = (event) => {
+        updatePointerFromEvent(event);
+        raycaster.setFromCamera(pointer, globeCamera);
+        const intersects = raycaster.intersectObjects(markerMeshes);
+        if (intersects.length > 0) {
+          const marker = intersects[0].object;
+          onMarkerClick(marker.userData.id);
+        }
+      };
+
+      stage.addEventListener('pointermove', handlePointerMove);
+      stage.addEventListener('pointerleave', handlePointerLeave);
+      stage.addEventListener('click', handlePointerClick);
+
+      const resizeGlobe = () => {
+        const { clientWidth, clientHeight } = stage;
+        if (!clientWidth || !clientHeight) return;
+        globeRenderer.setSize(clientWidth, clientHeight, false);
+        globeCamera.aspect = clientWidth / clientHeight;
+        globeCamera.updateProjectionMatrix();
+      };
+
+      const loadActivities = async () => {
+        try {
+          const response = await fetch('assets/activities.json');
+          if (!response.ok) throw new Error('Failed to load activities');
+          const data = await response.json();
+          resetHover();
+          markerGroup.clear();
+          markerMeshes.length = 0;
+          (data.activities || []).forEach(createMarker);
+        } catch (error) {
+          console.warn(error);
+        }
+      };
+
+      const animateGlobe = () => {
+        requestAnimationFrame(animateGlobe);
+        controls.update();
+        globeRenderer.render(globeScene, globeCamera);
+      };
+
+      resizeGlobe();
+      window.addEventListener('resize', resizeGlobe);
+      loadActivities();
+      animateGlobe();
 
       const canvas = document.createElement('canvas');
       canvas.id = 'dna-helix';
@@ -306,7 +512,7 @@
       helixGroup.add(new THREE.Points(clusterGeometry, clusterMaterial));
       helixGroup.add(new THREE.LineSegments(clusterLinkGeometry, clusterLinkMaterial));
 
-      helixGroup.scale.set(4.4, 1.1, 1.35);
+      helixGroup.scale.set(2.2, 0.55, 0.675);
       const baseRotation = new THREE.Euler(Math.PI / 5, Math.PI / 4, -Math.PI / 4);
       helixGroup.rotation.copy(baseRotation);
 

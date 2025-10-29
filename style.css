@@ -59,24 +59,44 @@ a:focus-visible {
   box-shadow: 0 18px 45px rgba(15, 15, 15, 0.08);
   min-height: min(80vh, 640px);
   padding: clamp(2rem, 6vw, 3rem);
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
   overflow: hidden;
 }
 
-.visual-placeholder {
+.visual-stage {
+  flex: 1;
   width: 100%;
-  aspect-ratio: 3 / 4;
-  border-radius: 24px;
-  border: 1px dashed rgba(99, 107, 47, 0.35);
-  background: rgba(99, 107, 47, 0.08);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--accent);
-  font-size: 0.85rem;
-  letter-spacing: 0.12em;
+  height: 100%;
+  position: relative;
+}
+
+.visual-stage canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+.visual-tooltip {
+  position: absolute;
+  top: clamp(1rem, 4vw, 1.5rem);
+  left: clamp(1rem, 4vw, 1.5rem);
+  padding: 0.4rem 0.8rem;
+  background: rgba(246, 243, 238, 0.92);
+  border-radius: 999px;
+  border: 1px solid rgba(30, 30, 30, 0.08);
+  color: var(--text-primary);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.visual-tooltip[hidden] {
+  opacity: 0;
+  display: none;
 }
 
 /* ---------- Content Column ---------- */
@@ -182,8 +202,8 @@ h1 {
   position: fixed;
   bottom: clamp(1.5rem, 5vw, 3rem);
   right: clamp(1.25rem, 5vw, 3rem);
-  width: min(48vw, 620px);
-  height: min(70vh, 640px);
+  width: min(24vw, 310px);
+  height: min(38vh, 320px);
   pointer-events: none;
   z-index: 10;
   opacity: 0.4;
@@ -201,6 +221,10 @@ h1 {
     min-height: 320px;
   }
 
+  .visual-tooltip {
+    inset: auto auto 1rem 1rem;
+  }
+
   .header-inner {
     flex-direction: column;
     align-items: flex-start;
@@ -212,8 +236,8 @@ h1 {
   }
 
   #dna-helix {
-    width: min(48vw, 360px);
-    height: min(50vh, 360px);
+    width: min(36vw, 260px);
+    height: min(36vh, 240px);
     bottom: 1.25rem;
     right: 1.25rem;
   }
@@ -230,13 +254,9 @@ h1 {
     letter-spacing: 0.06em;
   }
 
-  .visual-placeholder {
-    font-size: 0.75rem;
-  }
-
   #dna-helix {
-    width: 60vw;
-    height: 42vh;
+    width: 52vw;
+    height: 34vh;
     bottom: 1rem;
     right: 1rem;
   }

@@ -2,34 +2,37 @@
 
 A single-page portfolio presented like a minimalist recipe card. The layout highlights Clarence's
 links as "ingredients", a narrative blurb as the "instructions", an interactive Strava globe, and a
-scroll-driven DNA helix — all powered directly inside `index.html` with Three.js.
+scroll-driven DNA helix — all composed with semantic HTML/CSS and a compact Three.js module inside
+`index.html`.
 
 ## Getting Started
 
 1. Clone the repository.
-2. Serve the site locally with any static file server. Examples:
+2. Install any static file server (or use Python/Node's built-ins) and serve the site locally. Examples:
    ```bash
    npx serve .
    ```
    or open `index.html` directly in a modern browser.
-3. Replace placeholder assets inside `assets/` such as `profile-placeholder.svg` and
-   `cv.pdf` with personal files.
+3. Replace placeholder assets inside `assets/` such as `profile-placeholder.svg`, `activities.json`,
+   and `cv.pdf` with personal files or data.
 
 ## Editing the Recipe Layout
 
-The entire layout, styles, and scripts are contained inside `index.html` for easy tweaking:
+Core markup lives in `index.html`, with typography, layout, and tokens defined in `style.css`:
 
 - Update the hero content, tagline, and recipe-style notes at the top of the file.
 - Adjust the left-hand "About" block links or blurb to suit your current focus.
 - Refresh the "Ingredients" list to mirror current projects, interests, or skills.
 - Replace the instructions text with a personal biography or project summary.
-- Adjust colors and typography by editing the `:root` variables inside the inline `<style>` block.
+- Adjust colors and typography by editing the `:root` variables inside `style.css`.
 
 ## Strava Activity Globe
 
-A `three-globe` powered scene renders a dark, rotating Earth with glowing activity dots sourced from
-`assets/mock-strava.json` (now populated with multiple mock locales). Swap this file with real
-activity data or hook it into the provided proxy scaffold when ready to authenticate against Strava.
+A custom Three.js globe renders inside the left column with OrbitControls enabled for rotation and
+zoom. Activity markers are sourced from `assets/activities.json`, which ships with mock global rides.
+Swap this file with Strava-derived JSON (or wire it into the proxy scaffold in [`cloud/`](cloud/)) to
+surface live data. Hovering markers reveals their label; clicking triggers the `onMarkerClick` stub
+inside `index.html`.
 
 Supporting documentation for a Strava OAuth proxy remains in [`cloud/`](cloud/) for future backend
 integration.
@@ -37,9 +40,8 @@ integration.
 ## DNA Helix Animation
 
 The DNA helix renders inside a fixed, semi-transparent canvas anchored to the lower-right corner of
-the viewport. Scroll direction adjusts the helix rotation: downward scroll moves it clockwise,
-upward scroll reverses the spin. Customize the geometry by editing the "DNA Helix" block near the
-bottom of the inline script.
+the viewport. Scroll position gently rotates the helix for added depth. Customize the geometry by
+editing the "DNA Helix" block near the bottom of the inline script.
 
 ## Deployment
 
