@@ -28,10 +28,11 @@ Core markup lives in `index.html`, with typography, layout, and tokens defined i
 ## Strava Activity Globe
 
 A custom Three.js globe renders inside the left column with OrbitControls enabled for rotation and
-zoom on a transparent stage. The sphere uses a soft gradient material plus an additive halo to echo
-Stripe's artful globe aesthetic. Activity markers are sourced from `assets/activities.json`, which
-ships with mock global rides. Swap this file with Strava-derived JSON (or wire it into the proxy
-scaffold in [`cloud/`](cloud/)) to surface live data.
+zoom on a transparent stage. The ocean is a matte sphere while landmasses are rebuilt from Natural
+Earth GeoJSON polygons fetched at runtime, yielding a clean two-tone silhouette without relying on
+texture maps. Activity markers are sourced from `assets/activities.json`, which ships with mock
+global rides. Swap this file with Strava-derived JSON (or wire it into the proxy scaffold in
+[`cloud/`](cloud/)) to surface live data.
 
 - Hover markers to reveal their labels.
 - Click markers to open the corresponding Google Maps location in a new tab (and optionally handle
