@@ -9,7 +9,8 @@
       {
         "imports": {
           "three": "https://cdn.jsdelivr.net/npm/three@0.158/build/three.module.js",
-          "three/examples/jsm/controls/OrbitControls.js": "https://cdn.jsdelivr.net/npm/three@0.158/examples/jsm/controls/OrbitControls.js"
+          "three/examples/jsm/controls/OrbitControls.js": "https://cdn.jsdelivr.net/npm/three@0.158/examples/jsm/controls/OrbitControls.js",
+          "three/examples/jsm/utils/BufferGeometryUtils.js": "https://cdn.jsdelivr.net/npm/three@0.158/examples/jsm/utils/BufferGeometryUtils.js"
         }
       }
     </script>
@@ -107,6 +108,7 @@
     <script type="module">
       import * as THREE from 'three';
       import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+      import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 
       /* ---------------------------------------- */
       /* Minimal Globe Setup                      */
@@ -148,9 +150,16 @@
         transparent: true,
         opacity: 0.92,
         side: THREE.DoubleSide,
+        polygonOffset: true,
+        polygonOffsetFactor: -0.5,
+        polygonOffsetUnits: -0.5,
       });
       const landGroup = new THREE.Group();
       globeGroup.add(landGroup);
+
+      const landDebugGroup = new THREE.Group();
+      landDebugGroup.visible = false;
+      globeGroup.add(landDebugGroup);
 
       const markerGroup = new THREE.Group();
       globeGroup.add(markerGroup);
@@ -191,13 +200,14 @@
       };
 
       const ensureClosedRing = (ring) => {
-        if (ring.length < 3) return ring;
-        const first = ring[0];
-        const last = ring[ring.length - 1];
-        if (first[0] !== last[0] || first[1] !== last[1]) {
-          ring.push([...first]);
+        if (!Array.isArray(ring) || ring.length < 3) return [];
+        const closed = ring.map(([lon, lat]) => [lon, lat]);
+        const [firstLon, firstLat] = closed[0];
+        const [lastLon, lastLat] = closed[closed.length - 1];
+        if (firstLon !== lastLon || firstLat !== lastLat) {
+          closed.push([firstLon, firstLat]);
         }
-        return ring;
+        return closed;
       };
 
       const ringArea = (ring) => {
@@ -210,85 +220,191 @@
         return sum / 2;
       };
 
-      const normalizePolygonRings = (rings) => {
-        if (!Array.isArray(rings) || rings.length === 0) return null;
-        const cleaned = rings
-          .map((ring) =>
-            Array.isArray(ring)
-              ? ensureClosedRing(
-                  ring
-                    .filter((coord) => Array.isArray(coord) && coord.length >= 2)
-                    .map(([lon, lat]) => [
-                      ((lon + 540) % 360) - 180,
-                      Math.max(-90, Math.min(90, lat)),
-                    ])
-                )
-              : null
-          )
-          .filter((ring) => ring && ring.length >= 4);
-        if (cleaned.length === 0) return null;
-
-        const outer = cleaned[0];
-        if (ringArea(outer) < 0) {
-          outer.reverse();
+      const unwrapRing = (ring) => {
+        const unwrapped = [];
+        let offset = 0;
+        for (let i = 0; i < ring.length; i++) {
+          const [lon, lat] = ring[i];
+          if (i > 0) {
+            const prevLon = unwrapped[i - 1][0];
+            const delta = lon + offset - prevLon;
+            if (delta > 180) {
+              offset -= 360;
+            } else if (delta < -180) {
+              offset += 360;
+            }
+          }
+          unwrapped.push([lon + offset, lat]);
         }
-
-        const removeInteriorHoles = true; // collapse lakes for filled silhouette
-        const holes = removeInteriorHoles
-          ? []
-          : cleaned.slice(1).map((hole) => {
-              if (ringArea(hole) > 0) {
-                hole.reverse();
-              }
-              return hole;
-            });
-
-        return { outer, holes };
+        return unwrapped;
       };
 
-      const buildPolygon = (rings) => {
-        const normalized = normalizePolygonRings(rings);
-        if (!normalized) return;
-        const { outer, holes } = normalized;
-
-        const shape = new THREE.Shape();
-        outer.forEach(([lon, lat], index) => {
-          if (index === 0) {
-            shape.moveTo(lon, lat);
-          } else {
-            shape.lineTo(lon, lat);
-          }
+      const flagDatelineCrossing = (segment, featureId, ringIndex) => {
+        console.warn(
+          `Dateline crossing detected in feature ${featureId ?? 'unknown'} ring ${ringIndex}. Segment split for stability.`
+        );
+        const debugPositions = [];
+        const landRadius = globeRadius + 0.05;
+        segment.forEach(([lon, lat]) => {
+          const normalizedLon = ((lon % 360) + 540) % 360 - 180;
+          const vertex = convertLatLonToXYZ(lat, normalizedLon, landRadius);
+          debugPositions.push(vertex.x, vertex.y, vertex.z);
         });
-        shape.closePath();
+        if (debugPositions.length >= 9) {
+          const debugGeometry = new THREE.BufferGeometry();
+          debugGeometry.setAttribute(
+            'position',
+            new THREE.Float32BufferAttribute(debugPositions, 3)
+          );
+          const debugMaterial = new THREE.LineBasicMaterial({ color: 0xd04d4d, transparent: true, opacity: 0.7 });
+          const debugLoop = new THREE.LineLoop(debugGeometry, debugMaterial);
+          landDebugGroup.visible = true;
+          landDebugGroup.add(debugLoop);
+        }
+      };
 
-        const holePaths = holes.map((hole) => {
-          const path = new THREE.Path();
-          hole.forEach(([lon, lat], index) => {
+      const splitRingByDateline = (ring, featureId, ringIndex = 0) => {
+        if (!Array.isArray(ring) || ring.length < 4) return [];
+        const segments = [];
+        let currentSegment = [[...ring[0]]];
+        for (let i = 0; i < ring.length - 1; i++) {
+          const start = currentSegment[currentSegment.length - 1];
+          const end = [...ring[i + 1]];
+          const lonDiff = end[0] - start[0];
+          if (Math.abs(lonDiff) > 150) {
+            console.debug(
+              `Large longitudinal edge detected (${lonDiff.toFixed(2)}°) in feature ${featureId ?? 'unknown'} ring ${ringIndex}.`
+            );
+          }
+          if (Math.abs(lonDiff) > 180) {
+            const crossingLon = lonDiff > 0 ? 180 : -180;
+            const wrappedLon = lonDiff > 0 ? -180 : 180;
+            const t = (crossingLon - start[0]) / (end[0] - start[0]);
+            const crossingLat = THREE.MathUtils.lerp(start[1], end[1], t);
+            const crossingPointNear = [crossingLon, crossingLat];
+            const crossingPointFar = [wrappedLon, crossingLat];
+            currentSegment.push(crossingPointNear);
+            segments.push(ensureClosedRing(currentSegment));
+            flagDatelineCrossing(currentSegment, featureId, ringIndex);
+            currentSegment = [crossingPointFar, end];
+          } else {
+            currentSegment.push(end);
+          }
+        }
+        if (currentSegment.length > 2) {
+          segments.push(ensureClosedRing(currentSegment));
+        }
+        if (segments.length === 0) {
+          segments.push(ensureClosedRing(ring.map(([lon, lat]) => [lon, lat])));
+        }
+        return segments;
+      };
+
+      const preprocessRing = (ring, featureId, ringIndex = 0) => {
+        if (!Array.isArray(ring)) return [];
+        const filtered = ring
+          .filter((coord) => Array.isArray(coord) && coord.length >= 2)
+          .map(([lon, lat]) => [
+            ((lon + 540) % 360) - 180,
+            Math.max(-90, Math.min(90, lat)),
+          ]);
+        if (filtered.length < 3) return [];
+        const closed = ensureClosedRing(filtered);
+        const datelineSegments = splitRingByDateline(closed, featureId, ringIndex);
+        return datelineSegments
+          .map((segment) => unwrapRing(segment))
+          .map((segment) => {
+            const area = ringArea(segment);
+            if (Math.abs(area) < 1e-5) {
+              console.warn(
+                `Discarding near-zero area ring in feature ${featureId ?? 'unknown'} ring ${ringIndex}.`
+              );
+              return null;
+            }
+            if (area < 0) {
+              segment.reverse();
+            }
+            return segment;
+          })
+          .filter(Boolean);
+      };
+
+      const preparePolygonSegments = (rings, featureId) => {
+        if (!Array.isArray(rings) || rings.length === 0) return [];
+        const outerSegments = preprocessRing(rings[0], featureId, 0);
+        if (!outerSegments.length) return [];
+        const removeInteriorHoles = true;
+        if (removeInteriorHoles || rings.length === 1) {
+          return outerSegments.map((segment) => ({ outer: segment, holes: [] }));
+        }
+
+        const processedHoles = rings.slice(1).map((ring, index) => preprocessRing(ring, featureId, index + 1)).flat();
+        const orientedHoles = processedHoles
+          .map((segment) => {
+            const area = ringArea(segment);
+            if (Math.abs(area) < 1e-5) return null;
+            if (area > 0) {
+              segment.reverse();
+            }
+            return segment;
+          })
+          .filter(Boolean);
+
+        return outerSegments.map((segment) => ({ outer: segment, holes: removeInteriorHoles ? [] : orientedHoles }));
+      };
+
+      const landGeometries = [];
+
+      const buildPolygon = (rings, featureId) => {
+        const segments = preparePolygonSegments(rings, featureId);
+        if (!segments.length) return;
+        segments.forEach(({ outer, holes }) => {
+          const shape = new THREE.Shape();
+          outer.forEach(([lon, lat], index) => {
             if (index === 0) {
-              path.moveTo(lon, lat);
+              shape.moveTo(lon, lat);
             } else {
-              path.lineTo(lon, lat);
+              shape.lineTo(lon, lat);
             }
           });
-          path.closePath();
-          return path;
+          shape.closePath();
+
+          const holePaths = (holes || []).map((hole) => {
+            const path = new THREE.Path();
+            hole.forEach(([lon, lat], index) => {
+              if (index === 0) {
+                path.moveTo(lon, lat);
+              } else {
+                path.lineTo(lon, lat);
+              }
+            });
+            path.closePath();
+            return path;
+          });
+
+          const geometry = new THREE.ShapeGeometry(shape, holePaths);
+          const position = geometry.attributes.position;
+          const landRadius = globeRadius + 0.02;
+          for (let i = 0; i < position.count; i++) {
+            const lon = position.getX(i);
+            const lat = position.getY(i);
+            const normalizedLon = ((lon % 360) + 540) % 360 - 180;
+            const vertex = convertLatLonToXYZ(lat, normalizedLon, landRadius);
+            position.setXYZ(i, vertex.x, vertex.y, vertex.z);
+          }
+          position.needsUpdate = true;
+          geometry.computeVertexNormals();
+          geometry.computeBoundingSphere();
+          landGeometries.push(geometry);
         });
+      };
 
-        const geometry = new THREE.ShapeGeometry(shape, holePaths);
-        const position = geometry.attributes.position;
-        const landRadius = globeRadius + 0.018;
-        for (let i = 0; i < position.count; i++) {
-          const lon = position.getX(i);
-          const lat = position.getY(i);
-          const vertex = convertLatLonToXYZ(lat, lon, landRadius);
-          position.setXYZ(i, vertex.x, vertex.y, vertex.z);
-        }
-        position.needsUpdate = true;
-        geometry.computeVertexNormals();
-
-        const mesh = new THREE.Mesh(geometry, landMaterial);
-        mesh.frustumCulled = false;
-        landGroup.add(mesh);
+      const finalizeLandGeometry = () => {
+        if (!landGeometries.length) return;
+        const merged = BufferGeometryUtils.mergeGeometries(landGeometries, false);
+        const landMesh = new THREE.Mesh(merged, landMaterial);
+        landMesh.frustumCulled = false;
+        landGroup.add(landMesh);
       };
 
       const loadLandPolygons = async () => {
@@ -299,15 +415,22 @@
           if (!response.ok) throw new Error('Failed to load land GeoJSON');
           const data = await response.json();
           const features = Array.isArray(data.features) ? data.features : [];
+          landGroup.clear();
+          landDebugGroup.clear();
+          landDebugGroup.visible = false;
+          landGeometries.length = 0;
           features.forEach((feature) => {
             const geometry = feature && feature.geometry;
             if (!geometry) return;
             if (geometry.type === 'Polygon') {
-              buildPolygon(geometry.coordinates);
+              buildPolygon(geometry.coordinates, feature.id || feature.properties?.name);
             } else if (geometry.type === 'MultiPolygon') {
-              geometry.coordinates.forEach(buildPolygon);
+              geometry.coordinates.forEach((polygonRings) =>
+                buildPolygon(polygonRings, feature.id || feature.properties?.name)
+              );
             }
           });
+          finalizeLandGeometry();
         } catch (error) {
           console.error('Unable to build land polygons', error);
         }
