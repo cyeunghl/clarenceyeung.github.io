@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Clarence Yeung · Portfolio Mise en Place</title>
+    <script src="https://unpkg.com/three@0.158.0/build/three.min.js"></script>
+    <style>
+      :root {
+        color-scheme: light;
+        --olive: #5f6f52;
+        --sage: #899c72;
+        --cream: #faf9f5;
+        --ink: #1c1d21;
+        --muted: #6d6f76;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        background: var(--cream);
+        color: var(--ink);
+        line-height: 1.6;
+        min-height: 100vh;
+      }
+
+      img {
+        max-width: 100%;
+        display: block;
+      }
+
+      a {
+        color: var(--olive);
+        text-decoration: none;
+        font-weight: 500;
+        position: relative;
+      }
+
+      a::after {
+        content: "";
+        position: absolute;
+        inset: auto 0 -0.2em;
+        height: 1px;
+        background: currentColor;
+        opacity: 0.4;
+        transition: opacity 0.2s ease;
+      }
+
+      a:hover::after,
+      a:focus-visible::after {
+        opacity: 1;
+      }
+
+      header {
+        padding: clamp(2.5rem, 6vw, 4.5rem) clamp(1.5rem, 8vw, 7rem) 2.5rem;
+        position: relative;
+        z-index: 1;
+      }
+
+      .hero {
+        display: grid;
+        gap: clamp(2rem, 5vw, 4rem);
+        grid-template-columns: minmax(220px, 280px) minmax(260px, 1fr);
+        align-items: start;
+      }
+
+      .about-block {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+
+      .about-block h2 {
+        font-size: 0.75rem;
+        letter-spacing: 0.4em;
+        text-transform: uppercase;
+        margin: 0;
+      }
+
+      .about-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.55rem;
+        font-size: 0.9rem;
+      }
+
+      .about-blurb {
+        font-size: 0.95rem;
+        color: var(--muted);
+        max-width: 22ch;
+        background: white;
+        padding: 1rem 1.25rem;
+        border-radius: 18px;
+        box-shadow: 0 15px 30px rgba(23, 29, 33, 0.08);
+        border: 1px solid rgba(23, 29, 33, 0.08);
+      }
+
+      .hero-card {
+        background: var(--olive);
+        color: white;
+        border-radius: 28px;
+        padding: clamp(2.5rem, 6vw, 4rem);
+        padding-top: clamp(5rem, 9vw, 6.5rem);
+        position: relative;
+        overflow: hidden;
+        min-height: 320px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        box-shadow: 0 35px 80px rgba(38, 50, 56, 0.25);
+      }
+
+      .hero-card::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 10% 15%, rgba(255, 255, 255, 0.28), transparent 55%),
+          radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.12), transparent 65%);
+        pointer-events: none;
+      }
+
+      .portrait-frame {
+        position: absolute;
+        top: clamp(1.5rem, 4vw, 2.5rem);
+        left: clamp(1.5rem, 4vw, 2.5rem);
+        width: clamp(120px, 18vw, 160px);
+        aspect-ratio: 1;
+        border-radius: 999px;
+        overflow: hidden;
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.25);
+        border: 4px solid rgba(255, 255, 255, 0.6);
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0));
+      }
+
+      .hero-card h1 {
+        font-size: clamp(2.8rem, 6vw, 4.6rem);
+        margin: 0;
+        letter-spacing: -0.03em;
+        position: relative;
+        z-index: 1;
+      }
+
+      .hero-card p {
+        margin: 0.5rem 0 0;
+        text-transform: uppercase;
+        letter-spacing: 0.3em;
+        font-size: clamp(0.75rem, 2.2vw, 0.95rem);
+        color: rgba(255, 255, 255, 0.78);
+        position: relative;
+        z-index: 1;
+      }
+
+      main {
+        padding: 0 clamp(1.5rem, 8vw, 7rem) clamp(4rem, 10vw, 7rem);
+        display: grid;
+        gap: clamp(3rem, 8vw, 6rem);
+        position: relative;
+        z-index: 1;
+      }
+
+      .recipe-section {
+        background: white;
+        border-radius: 32px;
+        padding: clamp(2rem, 6vw, 3.5rem);
+        box-shadow: 0 28px 70px rgba(23, 29, 33, 0.12);
+        border: 1px solid rgba(23, 29, 33, 0.08);
+      }
+
+      .recipe-section header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+
+      .recipe-section header h2 {
+        margin: 0;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.32em;
+        color: var(--olive);
+      }
+
+      .recipe-section header span {
+        font-size: 0.85rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      .recipe-columns {
+        margin-top: clamp(2rem, 5vw, 3rem);
+        display: grid;
+        gap: clamp(1.5rem, 4vw, 3rem);
+        grid-template-columns: minmax(220px, 280px) minmax(280px, 1fr);
+      }
+
+      .ingredients ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        font-size: 0.95rem;
+      }
+
+      .ingredients li {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+      }
+
+      .ingredients li::before {
+        content: "•";
+        color: rgba(95, 111, 82, 0.5);
+      }
+
+      .instructions p {
+        margin: 0 0 1rem;
+        color: var(--muted);
+      }
+
+      .instructions p:last-child {
+        margin-bottom: 0;
+      }
+
+      .strava-section {
+        display: grid;
+        gap: 1.5rem;
+      }
+
+      .strava-section h3 {
+        margin: 0;
+        text-transform: uppercase;
+        font-size: 0.78rem;
+        letter-spacing: 0.3em;
+        color: var(--muted);
+      }
+
+      .strava-card {
+        display: grid;
+        grid-template-columns: minmax(240px, 1fr) minmax(260px, 1fr);
+        gap: clamp(1.5rem, 4vw, 3rem);
+        align-items: center;
+        background: white;
+        border-radius: 28px;
+        padding: clamp(1.8rem, 5vw, 2.6rem);
+        box-shadow: 0 25px 60px rgba(23, 29, 33, 0.1);
+        border: 1px solid rgba(23, 29, 33, 0.06);
+      }
+
+      #globe-canvas {
+        width: 100%;
+        aspect-ratio: 1;
+        border-radius: 20px;
+        background: radial-gradient(circle at 30% 30%, rgba(95, 111, 82, 0.12), rgba(23, 29, 33, 0.08));
+      }
+
+      .strava-copy h4 {
+        margin: 0 0 0.75rem;
+        font-size: 1.35rem;
+        letter-spacing: -0.01em;
+      }
+
+      .strava-copy p {
+        margin: 0 0 1rem;
+        color: var(--muted);
+      }
+
+      .strava-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.7rem;
+      }
+
+      .strava-actions a {
+        border-radius: 999px;
+        padding: 0.6rem 1.4rem;
+        border: 1px solid rgba(95, 111, 82, 0.4);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .strava-actions a:hover,
+      .strava-actions a:focus-visible {
+        transform: translateY(-1px);
+        box-shadow: 0 12px 30px rgba(95, 111, 82, 0.2);
+      }
+
+      footer {
+        padding: clamp(2.5rem, 6vw, 4rem) clamp(1.5rem, 8vw, 7rem);
+        background: white;
+        border-top: 1px solid rgba(0, 0, 0, 0.06);
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        font-size: 0.9rem;
+        color: var(--muted);
+        position: relative;
+        z-index: 1;
+      }
+
+      footer .links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.9rem;
+      }
+
+      #dna-canvas {
+        position: fixed;
+        bottom: clamp(1.5rem, 5vw, 3rem);
+        right: clamp(1.5rem, 5vw, 3rem);
+        width: clamp(220px, 24vw, 320px);
+        height: clamp(300px, 36vw, 420px);
+        pointer-events: none;
+        opacity: 0.7;
+        z-index: 0;
+      }
+
+      @media (max-width: 920px) {
+        .hero {
+          grid-template-columns: 1fr;
+        }
+
+        .about-blurb {
+          max-width: none;
+        }
+
+        .hero-card {
+          min-height: 260px;
+        }
+
+        .recipe-columns,
+        .strava-card {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 600px) {
+        header {
+          padding-bottom: 2rem;
+        }
+
+        .hero-card {
+          padding: clamp(2rem, 10vw, 2.5rem);
+        }
+
+        .hero-card figure {
+          position: static;
+          margin-top: 7rem;
+        }
+
+        .portrait-frame {
+          left: 50%;
+          transform: translateX(-50%);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="dna-canvas" aria-hidden="true"></canvas>
+    <header>
+      <div class="hero">
+        <aside class="about-block">
+          <h2>About Me</h2>
+          <nav class="about-links">
+            <a href="https://www.linkedin.com" target="_blank" rel="noopener">LinkedIn</a>
+            <a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
+            <a href="https://scholar.google.com" target="_blank" rel="noopener">Scholar</a>
+            <a href="https://substack.com" target="_blank" rel="noopener">Substack</a>
+            <a href="assets/cv.pdf" target="_blank" rel="noopener">CV</a>
+          </nav>
+          <p class="about-blurb">
+            Freeform blurb — swap in a quick origin story, current fascinations, or a friendly hello.
+          </p>
+        </aside>
+        <div class="hero-card">
+          <div class="portrait-frame">
+            <img src="assets/profile-placeholder.svg" alt="Portrait placeholder" />
+          </div>
+          <h1>Clarence Yeung</h1>
+          <p>Scientist | Biker | Baker</p>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="recipe-section">
+        <header>
+          <h2>Ingredients</h2>
+          <span>mise en place</span>
+        </header>
+        <div class="recipe-columns">
+          <div class="ingredients">
+            <ul>
+              <li>Curiosity-led research</li>
+              <li>Motion design experiments</li>
+              <li>Long-distance rides</li>
+              <li>Wild yeast starters</li>
+              <li>Collaborative energy</li>
+            </ul>
+          </div>
+          <div class="instructions">
+            <p>
+              Combine scientific rigor with tactile making. Layer in motion studies, data stories, and
+              community-centered prototyping. Fold gently until ideas stay buoyant.
+            </p>
+            <p>
+              Proof overnight through collaboration, then bake at scale with teams who love to learn.
+              Serve with curiosity and good humor.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="strava-section" aria-labelledby="strava-title">
+        <h3 id="strava-title">Strava mise en place</h3>
+        <div class="strava-card">
+          <canvas id="globe-canvas" aria-label="Strava activity globe visualization"></canvas>
+          <div class="strava-copy">
+            <h4>Activity globe prototype</h4>
+            <p>
+              A dark, glowing globe for plotting clustered Strava activities. Swap the mocked fetch
+              with the provided Cloud proxy notes when you are ready to authenticate.
+            </p>
+            <div class="strava-actions">
+              <a href="cloud/README.md" target="_blank" rel="noopener">View data pipeline</a>
+              <a href="assets/mock-strava.json" target="_blank" rel="noopener">Inspect mock data</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="links">
+        <a href="mailto:hello@example.com">hello@example.com</a>
+        <a href="https://www.linkedin.com" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
+        <a href="assets/cv.pdf" target="_blank" rel="noopener">CV</a>
+      </div>
+      <div>© <span id="year"></span> Clarence Yeung. Crafted with Three.js &amp; care.</div>
+    </footer>
+
+    <script type="module">
+      const yearEl = document.getElementById("year");
+      if (yearEl) {
+        yearEl.textContent = new Date().getFullYear();
+      }
+
+      // --- Strava Globe (simplified) ---
+      const globeCanvas = document.getElementById("globe-canvas");
+      const globeRenderer = new THREE.WebGLRenderer({
+        canvas: globeCanvas,
+        antialias: true,
+        alpha: true,
+      });
+      globeRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+      const globeScene = new THREE.Scene();
+      const globeCamera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
+      globeCamera.position.set(0, 0, 5);
+      globeScene.add(globeCamera);
+
+      const globeLight = new THREE.HemisphereLight(0xffffff, 0x222233, 1);
+      globeScene.add(globeLight);
+
+      const globeGroup = new THREE.Group();
+      globeScene.add(globeGroup);
+
+      const sphereGeom = new THREE.SphereGeometry(1.4, 48, 48);
+      const sphereMat = new THREE.MeshStandardMaterial({
+        color: 0x25303b,
+        roughness: 0.6,
+        metalness: 0.1,
+        transparent: true,
+        opacity: 0.92,
+      });
+      const sphere = new THREE.Mesh(sphereGeom, sphereMat);
+      globeGroup.add(sphere);
+
+      const glowGeom = new THREE.SphereGeometry(1.45, 48, 48);
+      const glowMat = new THREE.MeshBasicMaterial({
+        color: 0x5f6f52,
+        transparent: true,
+        opacity: 0.18,
+        wireframe: true,
+      });
+      globeGroup.add(new THREE.Mesh(glowGeom, glowMat));
+
+      const fetchActivities = async () => {
+        try {
+          const res = await fetch("assets/mock-strava.json");
+          if (!res.ok) throw new Error("Unable to fetch mock data");
+          return res.json();
+        } catch (error) {
+          console.warn(error);
+          return [];
+        }
+      };
+
+      const activityPoints = new THREE.Group();
+      globeGroup.add(activityPoints);
+
+      const toCartesian = (lat, lon, radius = 1.4) => {
+        const phi = (90 - lat) * (Math.PI / 180);
+        const theta = (lon + 180) * (Math.PI / 180);
+        return new THREE.Vector3(
+          -(radius * Math.sin(phi) * Math.cos(theta)),
+          radius * Math.cos(phi),
+          radius * Math.sin(phi) * Math.sin(theta)
+        );
+      };
+
+      const loadActivities = async () => {
+        const activities = await fetchActivities();
+        const pointGeom = new THREE.SphereGeometry(0.025, 12, 12);
+        activities.slice(0, 120).forEach((activity) => {
+          const { latitude, longitude } = activity.location;
+          const pointMat = new THREE.MeshBasicMaterial({
+            color: new THREE.Color().setHSL(0.3, 0.4, 0.6),
+          });
+          const point = new THREE.Mesh(pointGeom, pointMat);
+          point.position.copy(toCartesian(latitude, longitude, 1.45));
+          activityPoints.add(point);
+        });
+      };
+
+      loadActivities();
+
+      const resizeGlobe = () => {
+        const { clientWidth, clientHeight } = globeCanvas;
+        globeRenderer.setSize(clientWidth, clientHeight, false);
+        globeCamera.aspect = clientWidth / clientHeight;
+        globeCamera.updateProjectionMatrix();
+      };
+
+      const globeObserver = new ResizeObserver(resizeGlobe);
+      globeObserver.observe(globeCanvas);
+      resizeGlobe();
+
+      let globeRotation = 0;
+      const renderGlobe = () => {
+        globeRotation += 0.0015;
+        globeGroup.rotation.y = globeRotation;
+        globeRenderer.render(globeScene, globeCamera);
+        requestAnimationFrame(renderGlobe);
+      };
+      renderGlobe();
+
+      // --- DNA Helix ---
+      const dnaCanvas = document.getElementById("dna-canvas");
+      const dnaRenderer = new THREE.WebGLRenderer({
+        canvas: dnaCanvas,
+        alpha: true,
+        antialias: true,
+      });
+      dnaRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+      const dnaScene = new THREE.Scene();
+      const dnaCamera = new THREE.PerspectiveCamera(40, 1, 0.1, 50);
+      dnaCamera.position.set(0, 0, 8);
+      dnaScene.add(dnaCamera);
+
+      const ambient = new THREE.AmbientLight(0xffffff, 0.85);
+      const directional = new THREE.DirectionalLight(0xffffff, 0.5);
+      directional.position.set(5, 8, 6);
+      dnaScene.add(ambient, directional);
+
+      const dnaGroup = new THREE.Group();
+      dnaScene.add(dnaGroup);
+
+      const helixMaterialA = new THREE.MeshStandardMaterial({
+        color: 0x5f6f52,
+        roughness: 0.25,
+        metalness: 0.15,
+      });
+      const helixMaterialB = new THREE.MeshStandardMaterial({
+        color: 0x9fb38a,
+        roughness: 0.22,
+        metalness: 0.1,
+      });
+      const rungMaterial = new THREE.LineBasicMaterial({
+        color: 0x5f6f52,
+        transparent: true,
+        opacity: 0.5,
+      });
+
+      const dotGeometry = new THREE.SphereGeometry(0.1, 16, 16);
+      const rungGeometry = new THREE.BufferGeometry();
+      const rungPositions = [];
+
+      for (let i = 0; i <= 200; i++) {
+        const angle = i * 0.18;
+        const radius = 1.1;
+        const height = (i - 100) * 0.075;
+
+        const xA = Math.cos(angle) * radius;
+        const zA = Math.sin(angle) * radius;
+        const y = height;
+
+        const xB = Math.cos(angle + Math.PI) * radius;
+        const zB = Math.sin(angle + Math.PI) * radius;
+
+        const atomA = new THREE.Mesh(dotGeometry, helixMaterialA);
+        atomA.position.set(xA, y, zA);
+        dnaGroup.add(atomA);
+
+        const atomB = new THREE.Mesh(dotGeometry, helixMaterialB);
+        atomB.position.set(xB, y, zB);
+        dnaGroup.add(atomB);
+
+        if (i % 6 === 0) {
+          rungPositions.push(xA, y, zA, xB, y, zB);
+        }
+      }
+
+      rungGeometry.setAttribute("position", new THREE.Float32BufferAttribute(rungPositions, 3));
+      const rungs = new THREE.LineSegments(rungGeometry, rungMaterial);
+      dnaGroup.add(rungs);
+
+      const resizeDNA = () => {
+        const { clientWidth, clientHeight } = dnaCanvas;
+        dnaRenderer.setSize(clientWidth, clientHeight, false);
+        dnaCamera.aspect = clientWidth / clientHeight;
+        dnaCamera.updateProjectionMatrix();
+      };
+
+      const dnaObserver = new ResizeObserver(resizeDNA);
+      dnaObserver.observe(dnaCanvas);
+      resizeDNA();
+
+      let targetRotation = 0;
+      let currentRotation = 0;
+      let lastScrollY = window.scrollY;
+
+      const updateTargetRotation = () => {
+        const currentScroll = window.scrollY;
+        const delta = currentScroll - lastScrollY;
+        lastScrollY = currentScroll;
+        targetRotation += delta * 0.0025;
+      };
+
+      const animateDNA = () => {
+        currentRotation += (targetRotation - currentRotation) * 0.08;
+        dnaGroup.rotation.y = currentRotation;
+        dnaRenderer.render(dnaScene, dnaCamera);
+        requestAnimationFrame(animateDNA);
+      };
+
+      animateDNA();
+
+      window.addEventListener("scroll", updateTargetRotation, { passive: true });
+      window.addEventListener("resize", () => {
+        resizeGlobe();
+        resizeDNA();
+      });
+    </script>
+  </body>
+</html>
