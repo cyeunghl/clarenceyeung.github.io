@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Clarence Yeung | Portfolio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <noscript>
+      <div class="no-js-warning">
+        This site uses WebGL-powered animations. Enable JavaScript for the full
+        experience.
+      </div>
+    </noscript>
+    <header class="hero" id="hero">
+      <div class="hero__overlay"></div>
+      <div class="hero__content">
+        <figure class="hero__portrait">
+          <img
+            src="assets/profile-placeholder.svg"
+            alt="Portrait of Clarence Yeung"
+            class="hero__portrait-image"
+            loading="lazy"
+          />
+        </figure>
+        <h1 class="hero__title">Clarence Yeung</h1>
+        <p class="hero__subtitle">scientist | biker | baker</p>
+        <button class="scroll-indicator" data-scroll-target="#about" aria-label="Scroll to About section">
+          <span class="scroll-indicator__dot"></span>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <section class="section section--about" id="about">
+        <div class="section__inner section__inner--card">
+          <h2 class="section__title">About Me</h2>
+          <p class="section__description">
+            I am an interdisciplinary explorer blending science, design, and
+            storytelling. This is placeholder text that can be updated with
+            Clarence's biography, research interests, and ongoing projects.
+          </p>
+          <div class="link-grid">
+            <a href="https://www.linkedin.com" target="_blank" rel="noopener" class="link-grid__item">LinkedIn</a>
+            <a href="https://github.com" target="_blank" rel="noopener" class="link-grid__item">GitHub</a>
+            <a href="https://scholar.google.com" target="_blank" rel="noopener" class="link-grid__item">Google Scholar</a>
+            <a href="https://substack.com" target="_blank" rel="noopener" class="link-grid__item">Substack</a>
+            <a href="assets/cv.pdf" class="link-grid__item" download>Download CV</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section--globe" id="globe">
+        <div class="section__inner section__inner--wide">
+          <div class="section__header">
+            <h2 class="section__title">Strava Rides Around the Globe</h2>
+            <p class="section__description">
+              A real-time view of Clarence's adventures. Strava activities are
+              clustered and refreshed every 10 days. Hover a point to reveal the
+              latest ride in that area.
+            </p>
+            <div class="strava-actions">
+              <button type="button" class="strava-actions__cta" id="strava-connect">
+                Connect Strava Account
+              </button>
+              <p class="strava-actions__note">
+                Authenticate securely to refresh activities via the protected Strava proxy.
+              </p>
+            </div>
+          </div>
+          <div class="webgl-wrapper" data-lazy="globe">
+            <div class="webgl-placeholder">
+              <p>Loading interactive globe…</p>
+            </div>
+            <div class="webgl-fallback" hidden>
+              WebGL is unavailable. View the activity log on Strava instead.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section--dna" id="dna">
+        <div class="section__inner section__inner--wide">
+          <div class="section__header">
+            <h2 class="section__title">Designing Motion in Molecules</h2>
+            <p class="section__description">
+              The helix hovering in the corner is rendered in real time with Three.js.
+              It remains anchored as you scroll, reacting to motion cues to echo the
+              rhythm of Clarence's research practice.
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="footer__inner">
+        <p class="footer__title">Let&apos;s Collaborate</p>
+        <div class="footer__links">
+          <a href="mailto:hello@clarenceyeung.github.io">Email</a>
+          <a href="https://www.linkedin.com" target="_blank" rel="noopener">LinkedIn</a>
+          <a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
+          <a href="https://substack.com" target="_blank" rel="noopener">Substack</a>
+          <a href="assets/cv.pdf" download>CV</a>
+        </div>
+        <p class="footer__copyright">
+          &copy; <span id="year"></span> Clarence Yeung. All rights reserved.
+        </p>
+      </div>
+    </footer>
+
+    <div class="dna-overlay" id="dna-overlay" aria-hidden="true"></div>
+
+    <script type="module" src="main.js"></script>
+  </body>
+</html>
