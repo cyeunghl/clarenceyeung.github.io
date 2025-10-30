@@ -1,9 +1,7 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.module.js';
 
 export function initDNA(container, options = {}) {
-  if (!container) {
-    throw new Error('A valid container element is required for initDNA');
-  }
+  if (!container) throw new Error('A valid container element is required for initDNA');
 
   const {
     colorA = '#7da7ba',
@@ -15,10 +13,10 @@ export function initDNA(container, options = {}) {
     showParticles = true,
   } = options;
 
-  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setSize(container.clientWidth, container.clientHeight);
-  renderer.setClearColor(new THREE.Color(backgroundColor), 1);
+  renderer.setClearColor(new THREE.Color(backgroundColor), 0);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   container.appendChild(renderer.domElement);
 
@@ -83,7 +81,7 @@ export function initDNA(container, options = {}) {
   for (let i = 0; i < segments; i++) {
     const progress = i / (segments - 1);
     const angle = progress * Math.PI * 2 * turns;
-    const y = progress * strandHeight - strandHeight / 2;
+    const y = progress * strandHeight - strandHeight / 2; // center the helix vertically
 
     const xA = Math.cos(angle) * strandRadius;
     const zA = Math.sin(angle) * strandRadius;
@@ -111,9 +109,8 @@ export function initDNA(container, options = {}) {
     direction.normalize();
 
     dummy.position.copy(midpoint);
-    dummy.quaternion.set(0, 0, 0, 1);
-    dummy.scale.set(1, length, 1);
     dummy.quaternion.setFromUnitVectors(up, direction);
+    dummy.scale.set(1, length, 1);
     dummy.updateMatrix();
     rungs.setMatrixAt(i, dummy.matrix);
   }
@@ -123,11 +120,19 @@ export function initDNA(container, options = {}) {
   rungs.instanceMatrix.needsUpdate = true;
 
   helixGroup.add(strandA, strandB, rungs);
+  helixGroup.position.set(0, 0, 0); // ensure centered at origin
+
+  // Optional subtle randomness for organic feel
+  for (let j = 1; j < 3; j++) {
+    const clone = helixGroup.clone(true);
+    clone.rotation.y += Math.random() * 0.3;
+    clone.rotation.z += (Math.random() - 0.5) * 0.15;
+    clone.position.x += (Math.random() - 0.5) * 0.1;
+    clone.position.z += (Math.random() - 0.5) * 0.1;
+    dnaGroup.add(clone);
+  }
 
   let particles = null;
-  let particleGeometry = null;
-  let particleMaterial = null;
-
   if (showParticles) {
     const particleCount = 400;
     const positions = new Float32Array(particleCount * 3);
@@ -141,10 +146,10 @@ export function initDNA(container, options = {}) {
       positions[i * 3 + 2] = Math.sin(angle) * radius;
     }
 
-    particleGeometry = new THREE.BufferGeometry();
+    const particleGeometry = new THREE.BufferGeometry();
     particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
 
-    particleMaterial = new THREE.PointsMaterial({
+    const particleMaterial = new THREE.PointsMaterial({
       color: new THREE.Color(particleColor),
       size: 0.06,
       sizeAttenuation: true,
@@ -162,14 +167,10 @@ export function initDNA(container, options = {}) {
   let isDestroyed = false;
 
   function render() {
-    if (isDestroyed) {
-      return;
-    }
-
-    animationFrameId = window.requestAnimationFrame(render);
+    if (isDestroyed) return;
+    animationFrameId = requestAnimationFrame(render);
     baseRotation += rotationSpeed;
     dnaGroup.rotation.y = baseRotation;
-
     renderer.render(scene, camera);
   }
 
@@ -184,33 +185,11 @@ export function initDNA(container, options = {}) {
   render();
 
   function destroy() {
-    if (isDestroyed) {
-      return;
-    }
+    if (isDestroyed) return;
     isDestroyed = true;
-
     window.removeEventListener('resize', onResize);
-    if (animationFrameId !== null) {
-      window.cancelAnimationFrame(animationFrameId);
-    }
-
+    if (animationFrameId !== null) cancelAnimationFrame(animationFrameId);
     container.removeChild(renderer.domElement);
-
-    helixGroup.remove(strandA, strandB, rungs);
-    scene.remove(dnaGroup);
-
-    if (particles) {
-      scene.remove(particles);
-      particleGeometry.dispose();
-      particleMaterial.dispose();
-    }
-
-    sphereGeometry.dispose();
-    strandMaterialA.dispose();
-    strandMaterialB.dispose();
-    rungGeometry.dispose();
-    rungMaterial.dispose();
-
     renderer.dispose();
   }
 
