@@ -22,12 +22,7 @@ export function initDNA(container, options = {}) {
 
   const scene = new THREE.Scene();
 
-  const camera = new THREE.PerspectiveCamera(
-    32,
-    container.clientWidth / container.clientHeight,
-    0.1,
-    60
-  );
+  const camera = new THREE.PerspectiveCamera(32, container.clientWidth / container.clientHeight, 0.1, 60);
   camera.position.set(0, 0, 14);
 
   const ambientLight = new THREE.AmbientLight(0xf6f3ec, 0.8);
@@ -48,7 +43,7 @@ export function initDNA(container, options = {}) {
   const turns = 7.5;
   const segments = 260;
 
-  const sphereGeometry = new THREE.SphereGeometry(0.13, 18, 18);
+  const sphereGeometry = new THREE.SphereGeometry(0.13, 16, 16);
   const strandMaterialA = new THREE.MeshStandardMaterial({
     color: new THREE.Color(colorA),
     roughness: 0.35,
@@ -59,8 +54,7 @@ export function initDNA(container, options = {}) {
     roughness: 0.38,
     metalness: 0.1,
   });
-
-  const rungGeometry = new THREE.CylinderGeometry(0.05, 0.05, 1, 12, 1, true);
+  const rungGeometry = new THREE.CylinderGeometry(0.05, 0.05, 1, 8);
   const rungMaterial = new THREE.MeshStandardMaterial({
     color: new THREE.Color(rungColor),
     roughness: 0.45,
@@ -78,39 +72,33 @@ export function initDNA(container, options = {}) {
   const direction = new THREE.Vector3();
   const midpoint = new THREE.Vector3();
 
+  // Generate helix geometry
   for (let i = 0; i < segments; i++) {
     const progress = i / (segments - 1);
     const angle = progress * Math.PI * 2 * turns;
-    const y = progress * strandHeight - strandHeight / 2; // center the helix vertically
+    const y = progress * strandHeight - strandHeight / 2;
 
     const xA = Math.cos(angle) * strandRadius;
     const zA = Math.sin(angle) * strandRadius;
-
     const xB = Math.cos(angle + Math.PI) * strandRadius;
     const zB = Math.sin(angle + Math.PI) * strandRadius;
 
     dummy.position.set(xA, y, zA);
-    dummy.rotation.set(0, 0, 0);
-    dummy.scale.set(1, 1, 1);
     dummy.updateMatrix();
     strandA.setMatrixAt(i, dummy.matrix);
 
     dummy.position.set(xB, y, zB);
-    dummy.rotation.set(0, 0, 0);
-    dummy.scale.set(1, 1, 1);
     dummy.updateMatrix();
     strandB.setMatrixAt(i, dummy.matrix);
 
     from.set(xA, y, zA);
     to.set(xB, y, zB);
     midpoint.copy(from).add(to).multiplyScalar(0.5);
-    direction.copy(to).sub(from);
-    const length = direction.length();
-    direction.normalize();
+    direction.copy(to).sub(from).normalize();
 
     dummy.position.copy(midpoint);
     dummy.quaternion.setFromUnitVectors(up, direction);
-    dummy.scale.set(1, length, 1);
+    dummy.scale.set(1, from.distanceTo(to), 1);
     dummy.updateMatrix();
     rungs.setMatrixAt(i, dummy.matrix);
   }
@@ -120,9 +108,14 @@ export function initDNA(container, options = {}) {
   rungs.instanceMatrix.needsUpdate = true;
 
   helixGroup.add(strandA, strandB, rungs);
-  helixGroup.position.set(0, 0, 0); // ensure centered at origin
 
-  // Optional subtle randomness for organic feel
+  // ✅ Compute bounding box and re-center helixGroup at origin
+  const box = new THREE.Box3().setFromObject(helixGroup);
+  const center = new THREE.Vector3();
+  box.getCenter(center);
+  helixGroup.position.sub(center);
+
+  // Optional: clone slightly offset for "messier" look
   for (let j = 1; j < 3; j++) {
     const clone = helixGroup.clone(true);
     clone.rotation.y += Math.random() * 0.3;
@@ -132,12 +125,11 @@ export function initDNA(container, options = {}) {
     dnaGroup.add(clone);
   }
 
-  let particles = null;
+  // Background particles
   if (showParticles) {
-    const particleCount = 400;
-    const positions = new Float32Array(particleCount * 3);
-
-    for (let i = 0; i < particleCount; i++) {
+    const count = 400;
+    const positions = new Float32Array(count * 3);
+    for (let i = 0; i < count; i++) {
       const radius = 6 + Math.random() * 6;
       const angle = Math.random() * Math.PI * 2;
       const height = (Math.random() - 0.5) * 14;
@@ -145,52 +137,47 @@ export function initDNA(container, options = {}) {
       positions[i * 3 + 1] = height;
       positions[i * 3 + 2] = Math.sin(angle) * radius;
     }
-
-    const particleGeometry = new THREE.BufferGeometry();
-    particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-
-    const particleMaterial = new THREE.PointsMaterial({
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const mat = new THREE.PointsMaterial({
       color: new THREE.Color(particleColor),
       size: 0.06,
-      sizeAttenuation: true,
-      transparent: true,
       opacity: 0.35,
+      transparent: true,
     });
-
-    particles = new THREE.Points(particleGeometry, particleMaterial);
-    particles.renderOrder = -1;
-    scene.add(particles);
+    const points = new THREE.Points(geo, mat);
+    points.renderOrder = -1;
+    scene.add(points);
   }
 
+  // ✅ Animate
   let baseRotation = 0;
-  let animationFrameId = null;
-  let isDestroyed = false;
+  let animationFrameId;
+  let destroyed = false;
 
   function render() {
-    if (isDestroyed) return;
+    if (destroyed) return;
     animationFrameId = requestAnimationFrame(render);
     baseRotation += rotationSpeed;
     dnaGroup.rotation.y = baseRotation;
     renderer.render(scene, camera);
   }
 
-  function onResize() {
-    const { clientWidth, clientHeight } = container;
-    camera.aspect = clientWidth / clientHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(clientWidth, clientHeight);
-  }
-
-  window.addEventListener('resize', onResize);
   render();
 
+  function onResize() {
+    camera.aspect = container.clientWidth / container.clientHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(container.clientWidth, container.clientHeight);
+  }
+  window.addEventListener('resize', onResize);
+
   function destroy() {
-    if (isDestroyed) return;
-    isDestroyed = true;
+    destroyed = true;
+    cancelAnimationFrame(animationFrameId);
     window.removeEventListener('resize', onResize);
-    if (animationFrameId !== null) cancelAnimationFrame(animationFrameId);
-    container.removeChild(renderer.domElement);
     renderer.dispose();
+    container.removeChild(renderer.domElement);
   }
 
   return { destroy };
