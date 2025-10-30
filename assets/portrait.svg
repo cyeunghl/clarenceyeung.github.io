@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="240" height="240" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Portrait Placeholder</title>
+  <desc id="desc">Simplified illustrated portrait placeholder</desc>
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#cfd6c0" />
+      <stop offset="100%" stop-color="#aab391" />
+    </linearGradient>
+  </defs>
+  <circle cx="120" cy="120" r="120" fill="url(#bgGradient)" />
+  <g fill="#f5f1e8">
+    <circle cx="120" cy="95" r="46" />
+    <path d="M68 192c16-32 40-50 52-50h0c12 0 36 18 52 50-26 12-78 12-104 0z" />
+  </g>
+  <g fill="#3f3b37">
+    <circle cx="102" cy="92" r="6" />
+    <circle cx="138" cy="92" r="6" />
+    <path d="M100 118c8 10 32 10 40 0" stroke="#3f3b37" stroke-width="6" stroke-linecap="round" fill="none" />
+  </g>
+  <path d="M74 86c6-26 28-44 46-44s40 18 46 44c-12-10-28-16-46-16s-34 6-46 16z" fill="#5c554c" />
+</svg>
