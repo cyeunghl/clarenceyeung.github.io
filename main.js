@@ -2,9 +2,6 @@ import * as THREE from 'https://unpkg.com/three@0.158.0/build/three.module.js';
 import { OrbitControls } from 'https://unpkg.com/three@0.158.0/examples/jsm/controls/OrbitControls.js';
 import { BufferGeometryUtils } from 'https://unpkg.com/three@0.158.0/examples/jsm/utils/BufferGeometryUtils.js';
 
-const DATA_URL =
-  'https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_land.geojson';
-
 const container = document.getElementById('globe-container');
 const scene = new THREE.Scene();
 scene.background = null;
@@ -98,7 +95,9 @@ function animate() {
 animate();
 
 async function loadLandPolygons() {
-  const response = await fetch(DATA_URL);
+  const response = await fetch(
+    'https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_land.geojson'
+  );
   if (!response.ok) {
     throw new Error(`GeoJSON request failed with ${response.status}`);
   }
