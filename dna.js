@@ -53,10 +53,10 @@ export function initDNA(container, options = {}) {
     roughness: 0.4,
   });
 
-  const strandRadius = 0.18;
-  const totalHeight = 8;
-  const turns = 6;
-  const segments = 260;
+  const strandRadius = 0.24;
+  const totalHeight = 14;
+  const turns = 7.5;
+  const segments = 360;
 
   const sphereGeometry = new THREE.SphereGeometry(strandRadius, 16, 16);
   const rungGeometry = new THREE.CylinderGeometry(0.08, 0.08, 0.9, 12);
@@ -96,14 +96,23 @@ export function initDNA(container, options = {}) {
 
   dnaGroup.add(helixGroup);
 
+  const helixLayers = [helixGroup];
+
   const extraHelixCount = 2;
   for (let i = 0; i < extraHelixCount; i++) {
     const clone = helixGroup.clone(true);
-    clone.rotation.y += (Math.random() - 0.5) * 0.6;
-    clone.rotation.x += (Math.random() - 0.5) * 0.15;
-    clone.position.y += (Math.random() - 0.5) * 0.6;
+    clone.rotation.y += (Math.random() - 0.5) * 0.35;
+    clone.rotation.x += (Math.random() - 0.5) * 0.12;
+    clone.position.y += (Math.random() - 0.5) * 0.8;
     dnaGroup.add(clone);
+    helixLayers.push(clone);
   }
+
+  helixLayers.forEach((layer, index) => {
+    layer.position.z += (index - helixLayers.length / 2) * 0.15;
+  });
+
+  dnaGroup.scale.set(1.35, 1.35, 1.35);
 
   const particleGeometry = new THREE.BufferGeometry();
   const particleCount = 500;
@@ -155,14 +164,14 @@ export function initDNA(container, options = {}) {
   let animationFrameId;
   let isRunning = true;
   let reduced = reducedMotion;
-  let scrollTilt = 0;
-  let baseRotation = 0;
+  let scrollTiltTarget = 0;
+  let scrollTiltCurrent = 0;
 
   function updateScrollTilt() {
     const rect = container.getBoundingClientRect();
     const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
     const scrollProgress = THREE.MathUtils.clamp(1 - rect.top / viewportHeight, 0, 1);
-    scrollTilt = (scrollProgress - 0.5) * 0.4;
+    scrollTiltTarget = (scrollProgress - 0.5) * 0.25;
   }
 
   updateScrollTilt();
@@ -170,10 +179,9 @@ export function initDNA(container, options = {}) {
   function render() {
     if (!isRunning) return;
     animationFrameId = requestAnimationFrame(render);
-    if (!reduced) {
-      baseRotation += 0.004;
-    }
-    dnaGroup.rotation.set(scrollTilt, baseRotation, 0);
+    const target = reduced ? 0 : scrollTiltTarget;
+    scrollTiltCurrent = THREE.MathUtils.damp(scrollTiltCurrent, target, 6, 1 / 60);
+    dnaGroup.rotation.set(scrollTiltCurrent, 0, 0);
     renderer.render(scene, camera);
   }
 
@@ -204,6 +212,9 @@ export function initDNA(container, options = {}) {
     },
     setReducedMotion(value) {
       reduced = value;
+      if (reduced) {
+        scrollTiltTarget = 0;
+      }
     },
     destroy() {
       isRunning = false;
