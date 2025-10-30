@@ -29,7 +29,6 @@ export function initDNA(container, options = {}) {
   scene.add(dnaGroup);
 
   const helixGroup = new THREE.Group();
-  dnaGroup.add(helixGroup);
 
   const helixMaterialA = new THREE.MeshStandardMaterial({
     color: 0xb7f0d0,
@@ -95,6 +94,17 @@ export function initDNA(container, options = {}) {
     }
   }
 
+  dnaGroup.add(helixGroup);
+
+  const extraHelixCount = 2;
+  for (let i = 0; i < extraHelixCount; i++) {
+    const clone = helixGroup.clone(true);
+    clone.rotation.y += (Math.random() - 0.5) * 0.6;
+    clone.rotation.x += (Math.random() - 0.5) * 0.15;
+    clone.position.y += (Math.random() - 0.5) * 0.6;
+    dnaGroup.add(clone);
+  }
+
   const particleGeometry = new THREE.BufferGeometry();
   const particleCount = 500;
   const positions = new Float32Array(particleCount * 3);
@@ -145,26 +155,25 @@ export function initDNA(container, options = {}) {
   let animationFrameId;
   let isRunning = true;
   let reduced = reducedMotion;
-  let scrollRotation = 0;
+  let scrollTilt = 0;
+  let baseRotation = 0;
 
-  function updateScrollRotation() {
+  function updateScrollTilt() {
     const rect = container.getBoundingClientRect();
     const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
     const scrollProgress = THREE.MathUtils.clamp(1 - rect.top / viewportHeight, 0, 1);
-    scrollRotation = scrollProgress * Math.PI * 2;
+    scrollTilt = (scrollProgress - 0.5) * 0.4;
   }
 
-  updateScrollRotation();
+  updateScrollTilt();
 
   function render() {
     if (!isRunning) return;
     animationFrameId = requestAnimationFrame(render);
     if (!reduced) {
-      // Spin the helix smoothly in place around its local axis
-      helixGroup.rotateY(0.004);
-      particles.rotateY(-0.0015);
+      baseRotation += 0.004;
     }
-    dnaGroup.rotation.y += (scrollRotation - dnaGroup.rotation.y) * 0.1;
+    dnaGroup.rotation.set(scrollTilt, baseRotation, 0);
     renderer.render(scene, camera);
   }
 
@@ -177,7 +186,7 @@ export function initDNA(container, options = {}) {
   }
 
   function onScroll() {
-    updateScrollRotation();
+    updateScrollTilt();
   }
 
   window.addEventListener('resize', onResize);
