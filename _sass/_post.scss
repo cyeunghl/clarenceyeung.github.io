@@ -1,0 +1,66 @@
+.post {
+  width: min(100% - #{$space-3 * 2}, $max-width);
+  margin: $space-4 auto;
+  padding: $space-4;
+  border-radius: $radius-large;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 40px 80px rgba(15, 23, 42, 0.12);
+  display: grid;
+  gap: $space-3;
+}
+
+.post__header h1 {
+  font-size: clamp(2rem, 4vw, 3rem);
+}
+
+.post__meta {
+  font-size: 0.95rem;
+  color: $color-text-muted;
+}
+
+.post__intro {
+  font-size: 1.1rem;
+  color: $color-text;
+}
+
+.post__recipe {
+  display: grid;
+  gap: $space-2;
+  border-radius: $radius-medium;
+  padding: $space-3;
+  background: rgba(226, 230, 217, 0.4);
+}
+
+.post__recipe-section {
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: $radius-small;
+  padding: $space-2;
+  border: 1px solid rgba(99, 107, 47, 0.12);
+}
+
+.post__recipe-section h2 {
+  font-size: 1.1rem;
+  margin-bottom: $space-1;
+}
+
+.post__recipe-section ul,
+.post__recipe-section ol {
+  padding-left: $space-3;
+  margin: 0;
+}
+
+.post__placeholder {
+  margin: 0;
+  color: $color-text-muted;
+  font-style: italic;
+}
+
+.post__content {
+  color: $color-text;
+}
+
+@media (min-width: 720px) {
+  .post__recipe {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

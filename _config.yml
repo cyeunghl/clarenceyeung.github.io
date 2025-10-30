@@ -1,0 +1,23 @@
+title: Clarence Yeung
+email: hello@example.com
+description: >-
+  Personal website powered by a custom Jekyll theme inspired by sketch.com.
+baseurl: ""
+url: ""
+
+permalink: /:categories/:year/:month/:day/:title/
+
+markdown: kramdown
+theme: null
+plugins: []
+
+collections:
+  posts:
+    output: true
+
+include:
+  - assets
+
+sass:
+  sass_dir: _sass
+  style: compressed
