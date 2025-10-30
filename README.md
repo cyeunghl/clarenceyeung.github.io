@@ -18,9 +18,10 @@ The page will automatically fetch the GeoJSON land polygons from the Natural Ear
 - Projects longitude/latitude pairs to 3D coordinates on a sphere.
 - Renders an ocean sphere with Lambert shading and slightly offset land meshes to avoid z-fighting.
 - Adds OrbitControls for interactive rotation and zoom, plus a gentle automatic spin.
+- Loads mock Strava-style activities from `assets/activities.json` and plots them as yellow pins.
 
 ## Customization
 
-- Adjust `OCEAN_RADIUS` and `LAND_RADIUS` in `main.js` to tweak the relative heights.
+- Adjust `GLOBE_RADIUS` and `LAND_RADIUS` in `main.js` to tweak the relative heights.
 - Update colors in `style.css` or the Lambert materials in `main.js` to change the palette.
 - Replace the data source URL if you want to experiment with a different Natural Earth resolution.

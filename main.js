@@ -33,6 +33,10 @@ controls.addEventListener('end', () => {
 const globeGroup = new THREE.Group();
 scene.add(globeGroup);
 
+const markersGroup = new THREE.Group();
+markersGroup.name = 'markers';
+globeGroup.add(markersGroup);
+
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
 scene.add(ambientLight);
 
@@ -42,12 +46,13 @@ scene.add(directionalLight);
 
 directionalLight.castShadow = false;
 
-const OCEAN_RADIUS = 1;
-const LAND_RADIUS = OCEAN_RADIUS * 1.0015;
+const GLOBE_RADIUS = 1;
+const LAND_RADIUS = GLOBE_RADIUS + 0.02;
+const MARKER_RADIUS = GLOBE_RADIUS + 0.04;
 
-const oceanGeometry = new THREE.SphereGeometry(OCEAN_RADIUS, 128, 128);
+const oceanGeometry = new THREE.SphereGeometry(GLOBE_RADIUS, 128, 128);
 const oceanMaterial = new THREE.MeshLambertMaterial({
-  color: 0xcad4e0,
+  color: 0x1d4ed8,
   emissive: 0x000000,
   side: THREE.FrontSide,
 });
@@ -57,6 +62,10 @@ globeGroup.add(oceanMesh);
 
 loadLandPolygons().catch((error) => {
   console.error('Failed to load land polygons:', error);
+});
+
+loadActivities().catch((error) => {
+  console.error('Failed to load activity markers:', error);
 });
 
 function onResize() {
@@ -132,6 +141,43 @@ async function loadLandPolygons() {
   globeGroup.add(landMesh);
 }
 
+async function loadActivities() {
+  const response = await fetch('assets/activities.json');
+  if (!response.ok) {
+    throw new Error(`Activities request failed with ${response.status}`);
+  }
+
+  const payload = await response.json();
+  const activities = Array.isArray(payload.activities)
+    ? payload.activities
+    : [];
+
+  markersGroup.clear();
+
+  const markerGeometry = new THREE.SphereGeometry(0.015, 16, 16);
+  const markerMaterial = new THREE.MeshBasicMaterial({
+    color: 0xffd447,
+  });
+  const target = new THREE.Vector3();
+
+  for (const activity of activities) {
+    const { latitude, longitude } = activity;
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) continue;
+
+    const position = convertLatLonToXYZ(
+      latitude,
+      longitude,
+      MARKER_RADIUS,
+      target
+    );
+
+    const marker = new THREE.Mesh(markerGeometry, markerMaterial);
+    marker.position.copy(position);
+    marker.name = activity.name || 'activity-marker';
+    markersGroup.add(marker);
+  }
+}
+
 function polygonToGeometry(rings) {
   if (!rings || !rings.length) {
     return null;
@@ -142,28 +188,34 @@ function polygonToGeometry(rings) {
     return null;
   }
 
+  const holes = [];
+  for (let i = 1; i < rings.length; i += 1) {
+    const holeRing = sanitizeRing(rings[i]);
+    if (holeRing.length >= 3) {
+      holes.push(holeRing);
+    }
+  }
+
   const shape = new THREE.Shape();
-  outerRing.forEach((point, index) => {
+  outerRing.forEach(([lon, lat], index) => {
     if (index === 0) {
-      shape.moveTo(point.x, point.y);
+      shape.moveTo(lon, lat);
     } else {
-      shape.lineTo(point.x, point.y);
+      shape.lineTo(lon, lat);
     }
   });
 
-  for (let i = 1; i < rings.length; i += 1) {
-    const holeRing = sanitizeRing(rings[i]);
-    if (holeRing.length < 3) continue;
+  holes.forEach((hole) => {
     const path = new THREE.Path();
-    holeRing.forEach((point, index) => {
+    hole.forEach(([lon, lat], index) => {
       if (index === 0) {
-        path.moveTo(point.x, point.y);
+        path.moveTo(lon, lat);
       } else {
-        path.lineTo(point.x, point.y);
+        path.lineTo(lon, lat);
       }
     });
     shape.holes.push(path);
-  }
+  });
 
   const geometry = new THREE.ShapeGeometry(shape);
   projectShapeGeometry(geometry);
@@ -175,13 +227,13 @@ function sanitizeRing(ring) {
   for (let i = 0; i < ring.length; i += 1) {
     const [lon, lat] = ring[i];
     if (!Number.isFinite(lon) || !Number.isFinite(lat)) continue;
-    cleaned.push(new THREE.Vector2(lon, lat));
+    cleaned.push([lon, lat]);
   }
 
   if (cleaned.length > 1) {
-    const first = cleaned[0];
-    const last = cleaned[cleaned.length - 1];
-    if (first.distanceToSquared(last) < 1e-10) {
+    const [firstLon, firstLat] = cleaned[0];
+    const [lastLon, lastLat] = cleaned[cleaned.length - 1];
+    if (Math.hypot(firstLon - lastLon, firstLat - lastLat) < 1e-10) {
       cleaned.pop();
     }
   }
