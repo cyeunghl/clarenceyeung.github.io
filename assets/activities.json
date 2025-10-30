@@ -48,6 +48,32 @@
       "name": "Costanera Sur Breeze",
       "lat": -34.6131,
       "lon": -58.3618
+    },
+    {
+      "id": 16287921866,
+      "name": "la bella vita",
+      "type": "Ride",
+      "start_date": "2025-10-28T23:48:33Z",
+      "distance": 36132.7,
+      "coordinates": [
+        37.484661,
+        -122.248954
+      ],
+      "city": null,
+      "country": null
+    },
+    {
+      "id": 16266921071,
+      "name": "dejablue",
+      "type": "Ride",
+      "start_date": "2025-10-26T19:29:19Z",
+      "distance": 71068.8,
+      "coordinates": [
+        37.483408,
+        -122.248553
+      ],
+      "city": null,
+      "country": null
     }
   ]
 }
