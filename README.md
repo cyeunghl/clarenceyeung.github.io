@@ -1,71 +1,66 @@
-# Clarence Yeung · Portfolio
+# Clarence Yeung · Portfolio Mise en Place
 
-A minimalist, motion-forward personal website for Clarence Yeung. Built for GitHub Pages with HTML, CSS, and modular JavaScript powered by Three.js visualizations.
+A single-page portfolio presented like a minimalist recipe card. The layout frames a fixed visual
+column for the interactive globe while the right column houses About, Projects, and Contact
+sections. Three.js powers both the Strava-inspired globe and a holographic DNA helix, all compiled
+inside `index.html`.
 
-## 📁 Project Structure
+## Getting Started
 
-```
-├── index.html          # Single-page layout for all sections
-├── style.css           # Global styling and responsive layout
-├── main.js             # Entry script, lazy loading, scroll interactions
-├── globe.js            # Three.js Strava globe component
-├── dna.js              # Three.js DNA helix animation
-├── assets/
-│   ├── cv.pdf          # CV placeholder (replace with live document)
-│   ├── mock-strava.json# Mock response for Strava data
-│   └── papers/         # Placeholder directory for publications/PDFs
-└── README.md           # This file
-```
-
-## 🚀 Getting Started
-
-1. **Install a local static server** (any option works):
-   - Python: `python3 -m http.server 8000`
-   - Node: `npx serve`
-   - Ruby: `ruby -run -e httpd . -p 8000`
-
-2. **Run the site locally**:
+1. Clone the repository.
+2. Install any static file server (or use Python/Node's built-ins) and serve the site locally. Examples:
    ```bash
-   python3 -m http.server 8000
+   npx serve .
    ```
-   Then open [http://localhost:8000](http://localhost:8000) in your browser.
+   or open `index.html` directly in a modern browser.
+3. Replace placeholder assets inside `assets/` such as `profile-placeholder.svg`, `activities.json`,
+   and `cv.pdf` with personal files or data.
 
-3. **Edit content**:
-   - Update copy in `index.html` (About, hero text, footer).
-   - Replace `assets/cv.pdf` with the live document.
-   - Add additional PDFs inside `assets/papers/` and link them from the page.
+## Editing the Layout
 
-## 🌐 GitHub Pages Deployment
+Core markup lives in `index.html`, with typography, layout, and tokens defined in `style.css`:
 
-This repository is ready for GitHub Pages. Push to the `main` branch and enable Pages in your repository settings (Source: `main` branch, `/ (root)` folder). Changes will publish automatically.
+- Update the hero content (name, portrait placeholder) within the `<header>` block.
+- Edit the About/Projects/Contact copy inside their respective `<section>` elements.
+- Adjust social links by editing the `about-links` and `contact-links` navigation lists.
+- Tweak colors and typography by editing the `:root` variables inside `style.css`.
 
-## 🧭 Strava Globe Integration
+## Strava Activity Globe
 
-- The globe component fetches activity data from `assets/mock-strava.json` by default.
-- To connect to the Strava API:
-  1. Host a lightweight endpoint (serverless function or proxy) that returns aggregated ride data in the same shape as `mock-strava.json`.
-  2. Update the `mockDataUrl` passed in `main.js` to point to that endpoint.
-  3. If you need authenticated requests, expose a read-only token as `window.STRAVA_ACCESS_TOKEN` or bundle-time environment variable and update `globe.js` accordingly.
-- Data is cached in `localStorage` for 10 days (configurable via `refreshIntervalDays`).
-- Activities closer than ~500 meters are clustered and surfaced as a single glowing point with the most recent ride highlighted in the tooltip.
+A custom Three.js globe renders inside the left column with OrbitControls enabled for rotation and
+zoom on a transparent stage. The ocean is a matte sphere while landmasses are rebuilt from Natural
+Earth GeoJSON polygons fetched at runtime, yielding a clean two-tone silhouette without relying on
+texture maps. Activity markers are sourced from `assets/activities.json`, which ships with mock
+global rides. Swap this file with Strava-derived JSON (or wire it into the proxy scaffold in
+[`cloud/`](cloud/)) to surface live data.
 
-## 🧬 DNA Helix Interaction
+- Hover markers to reveal their labels.
+- Click markers to open the corresponding Google Maps location in a new tab (and optionally handle
+  the `window.onGlobeMarkerClick` callback for custom interactions).
 
-- The DNA section loads lazily and reacts to page scroll.
-- Motion respects the user’s `prefers-reduced-motion` settings.
-- Particle counts and geometry are optimized for performance on both desktop and mobile.
+Supporting documentation for a Strava OAuth proxy remains in [`cloud/`](cloud/) for future backend
+integration.
 
-## ♿ Accessibility & Fallbacks
+## DNA Helix Animation
 
-- Smooth scrolling and animations degrade gracefully for browsers without WebGL (fallback messages are displayed instead of canvases).
-- Animations pause when the tab is inactive.
+The DNA helix renders inside a fixed, semi-transparent canvas anchored to the lower-right corner of
+the viewport. Scroll position gently rotates the helix on its axis for added depth without
+overpowering the content. Customize the geometry by editing the "DNA Helix" block near the bottom of
+the inline script.
 
-## 🔧 Customization Tips
+## Deployment
 
-- Colors and typography live in `style.css` under the `:root` variables.
-- Update outbound links in both the About section and footer.
-- Replace placeholder copy with the final narrative.
+1. Commit and push changes to the `main` branch.
+2. Ensure GitHub Pages is enabled for the repository (Settings → Pages → Deploy from branch).
+3. The site will be served from `https://clarenceyeung.github.io/`.
 
-## 📝 License
+## Accessibility & Performance Notes
 
-Content © Clarence Yeung. Code is provided under the MIT License unless otherwise specified.
+- Links feature subtle underlines and focus states for keyboard navigation.
+- Layout adapts responsively down to mobile widths.
+- WebGL features gracefully degrade by relying on static fallback copy if disabled (no explicit
+  fallback canvas is rendered, so consider adding one if needed).
+
+## License
+
+This project is published under the MIT License. Feel free to adapt and remix.
