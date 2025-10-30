@@ -19,10 +19,16 @@ container.appendChild(renderer.domElement);
 
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
-controls.autoRotate = true;
-controls.autoRotateSpeed = 0.5;
 controls.minDistance = 1.5;
 controls.maxDistance = 4;
+
+let isUserInteracting = false;
+controls.addEventListener('start', () => {
+  isUserInteracting = true;
+});
+controls.addEventListener('end', () => {
+  isUserInteracting = false;
+});
 
 const globeGroup = new THREE.Group();
 scene.add(globeGroup);
@@ -72,6 +78,11 @@ requestAnimationFrame(() => {
 function animate() {
   requestAnimationFrame(animate);
   controls.update();
+
+  if (!isUserInteracting) {
+    globeGroup.rotation.y += 0.0005;
+  }
+
   renderer.render(scene, camera);
 }
 
