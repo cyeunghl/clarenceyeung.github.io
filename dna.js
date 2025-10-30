@@ -11,8 +11,10 @@ export function initDNA(container, options = {}) {
     particleColor = '#e7e2d6',
     rotationSpeed = 0.004,
     showParticles = true,
+    scale = 1.8, // make the helix bigger overall
   } = options;
 
+  // --- Renderer setup ---
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setSize(container.clientWidth, container.clientHeight);
@@ -20,11 +22,12 @@ export function initDNA(container, options = {}) {
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   container.appendChild(renderer.domElement);
 
+  // --- Scene + Camera ---
   const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(28, container.clientWidth / container.clientHeight, 0.1, 80);
+  camera.position.set(0, 0, 20); // pulled back to see more of the helix
 
-  const camera = new THREE.PerspectiveCamera(32, container.clientWidth / container.clientHeight, 0.1, 60);
-  camera.position.set(0, 0, 14);
-
+  // --- Lighting ---
   const ambientLight = new THREE.AmbientLight(0xf6f3ec, 0.8);
   const keyLight = new THREE.DirectionalLight(0xffffff, 0.7);
   keyLight.position.set(6, 8, 10);
@@ -32,18 +35,19 @@ export function initDNA(container, options = {}) {
   rimLight.position.set(-4, -6, -8);
   scene.add(ambientLight, keyLight, rimLight);
 
+  // --- DNA structure ---
   const dnaGroup = new THREE.Group();
   scene.add(dnaGroup);
 
   const helixGroup = new THREE.Group();
   dnaGroup.add(helixGroup);
 
-  const strandRadius = 1.15;
-  const strandHeight = 16;
-  const turns = 7.5;
-  const segments = 260;
+  const strandRadius = 1.4 * scale;
+  const strandHeight = 18 * scale;
+  const turns = 8;
+  const segments = 300;
 
-  const sphereGeometry = new THREE.SphereGeometry(0.13, 16, 16);
+  const sphereGeometry = new THREE.SphereGeometry(0.14 * scale, 16, 16);
   const strandMaterialA = new THREE.MeshStandardMaterial({
     color: new THREE.Color(colorA),
     roughness: 0.35,
@@ -54,7 +58,7 @@ export function initDNA(container, options = {}) {
     roughness: 0.38,
     metalness: 0.1,
   });
-  const rungGeometry = new THREE.CylinderGeometry(0.05, 0.05, 1, 8);
+  const rungGeometry = new THREE.CylinderGeometry(0.06 * scale, 0.06 * scale, 1, 8);
   const rungMaterial = new THREE.MeshStandardMaterial({
     color: new THREE.Color(rungColor),
     roughness: 0.45,
@@ -72,7 +76,6 @@ export function initDNA(container, options = {}) {
   const direction = new THREE.Vector3();
   const midpoint = new THREE.Vector3();
 
-  // Generate helix geometry
   for (let i = 0; i < segments; i++) {
     const progress = i / (segments - 1);
     const angle = progress * Math.PI * 2 * turns;
@@ -80,6 +83,7 @@ export function initDNA(container, options = {}) {
 
     const xA = Math.cos(angle) * strandRadius;
     const zA = Math.sin(angle) * strandRadius;
+
     const xB = Math.cos(angle + Math.PI) * strandRadius;
     const zB = Math.sin(angle + Math.PI) * strandRadius;
 
@@ -109,13 +113,13 @@ export function initDNA(container, options = {}) {
 
   helixGroup.add(strandA, strandB, rungs);
 
-  // ✅ Compute bounding box and re-center helixGroup at origin
+  // --- Center the helix precisely ---
   const box = new THREE.Box3().setFromObject(helixGroup);
   const center = new THREE.Vector3();
   box.getCenter(center);
   helixGroup.position.sub(center);
 
-  // Optional: clone slightly offset for "messier" look
+  // --- Optional messy look ---
   for (let j = 1; j < 3; j++) {
     const clone = helixGroup.clone(true);
     clone.rotation.y += Math.random() * 0.3;
@@ -125,14 +129,14 @@ export function initDNA(container, options = {}) {
     dnaGroup.add(clone);
   }
 
-  // Background particles
+  // --- Background particles ---
   if (showParticles) {
     const count = 400;
     const positions = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
-      const radius = 6 + Math.random() * 6;
+      const radius = 6 + Math.random() * 8;
       const angle = Math.random() * Math.PI * 2;
-      const height = (Math.random() - 0.5) * 14;
+      const height = (Math.random() - 0.5) * 24;
       positions[i * 3] = Math.cos(angle) * radius;
       positions[i * 3 + 1] = height;
       positions[i * 3 + 2] = Math.sin(angle) * radius;
@@ -150,7 +154,7 @@ export function initDNA(container, options = {}) {
     scene.add(points);
   }
 
-  // ✅ Animate
+  // --- Animation ---
   let baseRotation = 0;
   let animationFrameId;
   let destroyed = false;
@@ -165,6 +169,7 @@ export function initDNA(container, options = {}) {
 
   render();
 
+  // --- Resize handling ---
   function onResize() {
     camera.aspect = container.clientWidth / container.clientHeight;
     camera.updateProjectionMatrix();
@@ -172,6 +177,7 @@ export function initDNA(container, options = {}) {
   }
   window.addEventListener('resize', onResize);
 
+  // --- Cleanup ---
   function destroy() {
     destroyed = true;
     cancelAnimationFrame(animationFrameId);
