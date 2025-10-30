@@ -25,8 +25,11 @@ export function initDNA(container, options = {}) {
   directional.position.set(5, 6, 8);
   scene.add(ambient, directional);
 
+  const dnaGroup = new THREE.Group();
+  scene.add(dnaGroup);
+
   const helixGroup = new THREE.Group();
-  scene.add(helixGroup);
+  dnaGroup.add(helixGroup);
 
   const helixMaterialA = new THREE.MeshStandardMaterial({
     color: 0xb7f0d0,
@@ -137,7 +140,7 @@ export function initDNA(container, options = {}) {
   });
 
   const particles = new THREE.Points(particleGeometry, particleMaterial);
-  scene.add(particles);
+  dnaGroup.add(particles);
 
   let animationFrameId;
   let isRunning = true;
@@ -157,10 +160,11 @@ export function initDNA(container, options = {}) {
     if (!isRunning) return;
     animationFrameId = requestAnimationFrame(render);
     if (!reduced) {
-      helixGroup.rotation.y += 0.004;
-      particles.rotation.y -= 0.0015;
+      // Spin the helix smoothly in place around its local axis
+      helixGroup.rotateY(0.004);
+      particles.rotateY(-0.0015);
     }
-    helixGroup.rotation.y = helixGroup.rotation.y * 0.9 + scrollRotation * 0.1;
+    dnaGroup.rotation.y += (scrollRotation - dnaGroup.rotation.y) * 0.1;
     renderer.render(scene, camera);
   }
 
