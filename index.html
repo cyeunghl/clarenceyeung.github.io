@@ -7,28 +7,22 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <main class="layout">
-      <section class="info">
-        <h1>Monochrome Natural Earth Globe</h1>
+    <main class="page">
+      <section class="intro">
+        <h1>Natural Earth Globe Demo</h1>
         <p>
-          This demo renders a minimalist Earth using Natural Earth 1:50m land
-          polygons projected onto a sphere with Three.js. Landmasses are built
-          from GeoJSON data rather than texture maps, resulting in crisp,
-          stylized silhouettes.
+          This Three.js example renders a minimalist monochrome Earth using land
+          polygons from the Natural Earth 1:50m dataset. Rotate or zoom the
+          globe to explore the silhouettes.
         </p>
-        <ul class="feature-list">
-          <li>Natural Earth GeoJSON projected onto a 3D sphere</li>
-          <li>Ambient and directional lighting for soft shading</li>
-          <li>Interactive OrbitControls with gentle auto-rotation</li>
-          <li>Lightweight, texture-free rendering</li>
-        </ul>
-        <p class="note">
-          View the code in <code>main.js</code> to see how the GeoJSON polygons
-          are triangulated and mapped into spherical meshes.
+        <p class="details">
+          Data source:
+          <a href="https://www.naturalearthdata.com/">Natural Earth</a> · Built
+          with <a href="https://threejs.org/">Three.js</a>
         </p>
       </section>
       <section class="visual">
-        <div id="globe-container" aria-label="Three.js globe"></div>
+        <div id="globe-container" aria-label="Monochrome globe visualization"></div>
       </section>
     </main>
     <script type="module" src="main.js"></script>

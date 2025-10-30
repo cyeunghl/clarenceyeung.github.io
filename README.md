@@ -1,34 +1,26 @@
 # Monochrome Natural Earth Globe
 
-This repository contains a standalone Three.js example that renders a minimalist
-Earth. Landmasses are generated from the Natural Earth 1:50m GeoJSON dataset and
-projected onto a sphere, producing clean silhouettes without texture maps.
+This repository hosts a minimalist Three.js scene that renders a monochrome Earth using land polygons from the Natural Earth 1:50m dataset. The demo projects geographic coordinates onto a sphere, creating a matte ocean layer with contrasting land silhouettes.
 
-## Features
-- Fetches Natural Earth GeoJSON land polygons on load
-- Projects longitude/latitude coordinates into 3D space using spherical math
-- Builds land meshes with `THREE.ShapeUtils.triangulateShape`
-- Renders a matte ocean sphere with contrasting land color
-- Includes ambient + directional lighting and OrbitControls interactivity
-- Gentle idle rotation that pauses while the user drags the globe
+## Getting started
 
-## Getting Started
-1. Install a simple static server (or use Python's built-in option).
-2. From the project directory, start a server:
+1. Start a static file server from the repository root. For example:
    ```bash
    python -m http.server 8000
    ```
-3. Open `http://localhost:8000` in your browser to interact with the globe.
+2. Open [http://localhost:8000](http://localhost:8000) in a WebGL-capable browser.
 
-The demo fetches GeoJSON directly from GitHub. Ensure you have an internet
-connection when running locally or host your own copy of the data.
+The page will automatically fetch the GeoJSON land polygons from the Natural Earth project and render them above the base ocean sphere. Use your mouse or trackpad to orbit and zoom the camera.
+
+## Key features
+
+- Fetches Natural Earth 1:50m land polygons directly from GitHub.
+- Projects longitude/latitude pairs to 3D coordinates on a sphere.
+- Renders an ocean sphere with Lambert shading and slightly offset land meshes to avoid z-fighting.
+- Adds OrbitControls for interactive rotation and zoom, plus a gentle automatic spin.
 
 ## Customization
-- Update `LAND_URL` in `main.js` to point to a different GeoJSON source.
-- Adjust `OCEAN_RADIUS` and `LAND_RADIUS` to control the land offset above the
-  ocean surface.
-- Swap colors in `style.css` or the Three.js materials to change the palette.
 
-## License
-The Natural Earth data is in the public domain. Three.js is under the MIT
-License. Consult their respective documentation for full details.
+- Adjust `OCEAN_RADIUS` and `LAND_RADIUS` in `main.js` to tweak the relative heights.
+- Update colors in `style.css` or the Lambert materials in `main.js` to change the palette.
+- Replace the data source URL if you want to experiment with a different Natural Earth resolution.
