@@ -1,0 +1,8 @@
+{
+  "activities": [
+    { "id": "ride-berkeley", "name": "Berkeley Hills Ride", "latitude": 37.879, "longitude": -122.268 },
+    { "id": "ride-tokyo", "name": "Tokyo Riverside Spin", "latitude": 35.6895, "longitude": 139.6917 },
+    { "id": "ride-rome", "name": "Rome City Loop", "latitude": 41.9028, "longitude": 12.4964 },
+    { "id": "ride-santiago", "name": "Santiago Sunset Roll", "latitude": -33.4489, "longitude": -70.6693 }
+  ]
+}

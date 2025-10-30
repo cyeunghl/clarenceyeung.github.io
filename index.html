@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Monochrome Natural Earth Globe</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="page">
+      <section class="intro">
+        <h1>Natural Earth Globe Demo</h1>
+        <p>
+          This Three.js example renders a minimalist monochrome Earth using
+          country polygons from Natural Earth's <code>ne_110m_land</code>
+          dataset. Rotate or zoom the globe to explore the silhouettes.
+        </p>
+        <p class="details">
+          Data source:
+          <a
+            href="https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_land.geojson"
+            >Natural Earth ne_110m_land</a
+          >
+          · Built with <a href="https://threejs.org/">Three.js</a>
+        </p>
+      </section>
+      <section class="visual">
+        <div id="globe-container" aria-label="Monochrome globe visualization"></div>
+      </section>
+    </main>
+    <script type="module" src="main.js"></script>
+  </body>
+</html>
