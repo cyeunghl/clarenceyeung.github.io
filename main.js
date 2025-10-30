@@ -3,7 +3,7 @@ import { OrbitControls } from 'https://unpkg.com/three@0.158.0/examples/jsm/cont
 import { BufferGeometryUtils } from 'https://unpkg.com/three@0.158.0/examples/jsm/utils/BufferGeometryUtils.js';
 
 const DATA_URL =
-  'https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_50m_land.geojson';
+  'https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json';
 
 const container = document.getElementById('globe-container');
 const scene = new THREE.Scene();
