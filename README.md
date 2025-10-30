@@ -1,6 +1,6 @@
 # Monochrome Natural Earth Globe
 
-This repository hosts a minimalist Three.js scene that renders a monochrome Earth using country polygons from the world.geo.json dataset. The demo projects geographic coordinates onto a sphere, creating a matte ocean layer with contrasting land silhouettes.
+This repository hosts a minimalist Three.js scene that renders a monochrome Earth using Natural Earth's 1:110m land polygons. The demo projects geographic coordinates onto a sphere, creating a matte ocean layer with contrasting land silhouettes.
 
 ## Getting started
 
@@ -14,7 +14,7 @@ The page will automatically fetch the GeoJSON land polygons from the Natural Ear
 
 ## Key features
 
-- Fetches world.geo.json country polygons directly from GitHub.
+- Fetches Natural Earth 1:110m land polygons directly from GitHub.
 - Projects longitude/latitude pairs to 3D coordinates on a sphere.
 - Renders an ocean sphere with Lambert shading and slightly offset land meshes to avoid z-fighting.
 - Adds OrbitControls for interactive rotation and zoom, plus a gentle automatic spin.

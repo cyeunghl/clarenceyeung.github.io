@@ -3,7 +3,7 @@ import { OrbitControls } from 'https://unpkg.com/three@0.158.0/examples/jsm/cont
 import { BufferGeometryUtils } from 'https://unpkg.com/three@0.158.0/examples/jsm/utils/BufferGeometryUtils.js';
 
 const DATA_URL =
-  'https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json';
+  'https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_land.geojson';
 
 const container = document.getElementById('globe-container');
 const scene = new THREE.Scene();
@@ -52,7 +52,7 @@ const MARKER_RADIUS = GLOBE_RADIUS + 0.04;
 
 const oceanGeometry = new THREE.SphereGeometry(GLOBE_RADIUS, 128, 128);
 const oceanMaterial = new THREE.MeshLambertMaterial({
-  color: 0x1d4ed8,
+  color: 0x6faedb,
   emissive: 0x000000,
   side: THREE.FrontSide,
 });
