@@ -3,13 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Clarence Yeung · Lab & Larder</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap"
-      rel="stylesheet"
-    />
+    <title>Clarence Yeung · Lab &amp; Larder</title>
     <link rel="stylesheet" href="style.css" />
     <script type="importmap">
       {
@@ -21,144 +15,97 @@
     </script>
   </head>
   <body>
-    <!-- Layout Wrapper -->
-    <main class="page">
-      <!-- Visual Placeholder Column -->
-      <section class="visual-column">
-        <div class="visual-container" role="presentation" aria-hidden="true">
-          <div class="recipe-label">Chef's Atlas</div>
-          <div class="visual-stage" id="globe-stage"></div>
-          <div
-            class="visual-tooltip"
-            id="globe-tooltip"
-            role="status"
-            aria-live="polite"
-            hidden
-          ></div>
-          <div class="visual-footer">Routes simmered from Strava JSON</div>
+    <main class="recipe-layout">
+      <section class="image-column" aria-label="Cookbook inspired portrait and globe visualization">
+        <div class="image-panel">
+          <div class="image-panel__overlay">
+            <div class="portrait-frame" aria-hidden="true">
+              <span>Portrait Placeholder</span>
+            </div>
+            <p class="image-note">Clarence Yeung · Lab &amp; Larder</p>
+          </div>
+          <div class="globe-wrapper">
+            <div class="globe-stage" id="globe-stage" role="presentation" aria-hidden="true"></div>
+            <div
+              class="globe-tooltip"
+              id="globe-tooltip"
+              role="status"
+              aria-live="polite"
+              hidden
+            ></div>
+            <p class="globe-caption">Strava JSON routes plated as mustard markers.</p>
+          </div>
         </div>
       </section>
 
-      <!-- Content Column -->
-      <section class="content-column">
-        <header class="page-header">
-          <div class="header-inner">
-            <div class="hero-portrait" aria-hidden="true">
-              <span>Portrait</span>
-            </div>
-            <div class="hero-copy">
-              <p class="eyebrow">Clarence Yeung</p>
-              <h1>Scientist, cyclist, and experimental cook</h1>
-              <p class="hero-blurb">
-                I study genetic networks at Hexagon Bio while testing recipes that blend lab precision with
-                kitchen warmth. This site pairs research adventures with slow-crafted meals and miles logged
-                on two wheels.
-              </p>
-              <nav aria-label="Personal links" class="hero-links">
-                <a href="https://www.linkedin.com/in/clarence-yeung-8454237a/" target="_blank" rel="noopener"
-                  >LinkedIn</a
-                >
-                <a href="https://github.com/cyeunghl" target="_blank" rel="noopener">GitHub</a>
-                <a href="https://scholar.google.com/citations?user=sMj4W4EAAAAJ&hl=en&oi=ao" target="_blank" rel="noopener"
-                  >Google Scholar</a
-                >
-                <a href="https://clarenceyeung.substack.com" target="_blank" rel="noopener">Substack</a>
-              </nav>
-            </div>
-          </div>
+      <section class="text-column">
+        <header class="title-block">
+          <p class="title-block__label">Lab &amp; Larder Recipe Card</p>
+          <h1 class="recipe-title">Clarence Yeung</h1>
+          <p class="servings-info">Serves curious collaborators &amp; hungry cyclists</p>
+          <p class="intro-paragraph">
+            Scientist by training, cook by curiosity. I stir together oncology research, fermentation
+            experiments, and long rides across Bay Area ridgelines—always in pursuit of approachable precision.
+          </p>
+          <p class="attribution">Currently crafting at Hexagon Bio · Toronto roots, California kitchen.</p>
         </header>
 
-        <!-- About Section -->
-        <section class="content-section" id="about">
-          <h2>Mise en Place</h2>
-          <div class="section-grid">
-            <div>
-              <h3>Pantry Staples</h3>
-              <ul class="lined-list">
-                <li>Genomics &amp; systems biology research</li>
-                <li>Computational pipelines for variant interpretation</li>
-                <li>Collaborative lab leadership &amp; mentorship</li>
-                <li>Recipe development &amp; fermentation experiments</li>
-              </ul>
-            </div>
-            <div>
-              <h3>Current Kitchen</h3>
-              <p>
-                Senior Scientist at Hexagon Bio guiding oncology discovery programs. Formerly at the University
-                of Toronto studying how mutations reshape phenotype landscapes.
-              </p>
-              <p>
-                Outside the lab you will find me coaxing laminated doughs, brewing broths, and mapping Bay Area
-                climbs.
-              </p>
-            </div>
+        <nav class="links-list" aria-label="Personal links">
+          <a href="https://www.linkedin.com/in/clarence-yeung-8454237a/" target="_blank" rel="noopener">LinkedIn</a>
+          <a href="https://github.com/cyeunghl" target="_blank" rel="noopener">GitHub</a>
+          <a href="https://scholar.google.com/citations?user=sMj4W4EAAAAJ&hl=en&oi=ao" target="_blank" rel="noopener">Google Scholar</a>
+          <a href="https://clarenceyeung.substack.com" target="_blank" rel="noopener">Substack</a>
+        </nav>
+
+        <div class="divider" role="presentation"></div>
+
+        <section class="content-columns" aria-labelledby="ingredients-heading">
+          <div class="column column--ingredients">
+            <h2 id="ingredients-heading">Ingredients</h2>
+            <ul class="ingredients-list">
+              <li><span class="quantity">1</span><span class="item">Genomics &amp; systems biology toolkit</span></li>
+              <li><span class="quantity">2</span><span class="item">Scoops of computational modeling &amp; data viz</span></li>
+              <li><span class="quantity">3</span><span class="item">Pinches of mentorship &amp; collaborative lab culture</span></li>
+              <li><span class="quantity">A dash</span><span class="item">Fermentation, lamination &amp; broth experiments</span></li>
+            </ul>
+            <p class="footnote">Pictured portrait to be plated soon.</p>
+          </div>
+          <div class="column column--instructions">
+            <h2>Instructions</h2>
+            <p><strong>Lead</strong> oncology discovery at Hexagon Bio, translating genomic whispers into candidate medicines.</p>
+            <p><strong>Weave</strong> research notes into essays that read like tasting menus—precision framed with warmth.</p>
+            <p><strong>Season</strong> community gatherings with pop-up dinners and science salons that invite conversation.</p>
+            <p><strong>Ride</strong> coastal switchbacks, capture the data, and fold each climb into visual stories below.</p>
           </div>
         </section>
 
-        <!-- Projects Section -->
-        <section class="content-section" id="projects">
-          <h2>Tasting Menu</h2>
-          <ul class="project-list">
-            <li>
-              <h3>Genome Fermentation</h3>
-              <p>
-                Investigating microbial pathways that unlock novel therapeutics. My notebook reads like a
-                kitchen logbook—each experiment annotated with temperature, timing, and texture.
-              </p>
-            </li>
-            <li>
-              <h3>Community Suppers</h3>
-              <p>
-                Hosting pop-up dinners that pair seasonal menus with short talks on precision medicine.
-                Designed to make complex science as approachable as a family recipe card.
-              </p>
-            </li>
-            <li>
-              <h3>Field Notes</h3>
-              <p>
-                Essays weaving together lab breakthroughs, travel rides, and the comfort foods that fueled
-                them—all curated on my Substack.
-              </p>
-            </li>
-          </ul>
-        </section>
-
-        <!-- Strava Section -->
-        <section class="content-section" id="strava">
-          <h2>Ride Pantry</h2>
-          <div class="strava-grid">
-            <div class="strava-summary" id="ride-summary" aria-live="polite">
-              Loading seasonal stats…
-            </div>
+        <section class="strava-card" aria-labelledby="strava-heading">
+          <div class="strava-card__header">
+            <h2 id="strava-heading">Ride Pantry</h2>
+            <p class="strava-card__subtitle">Heat, routes, and seasonal stats direct from Strava JSON.</p>
+          </div>
+          <div class="strava-card__body">
+            <div class="strava-summary" id="ride-summary" aria-live="polite">Loading seasonal stats…</div>
             <figure class="strava-heatmap">
               <canvas id="ride-heatmap" width="360" height="220" aria-label="Heatmap of logged rides"></canvas>
-              <figcaption>Heatmap generated directly from Strava JSON activity coordinates.</figcaption>
+              <figcaption>Global activity heatmap rendered in neutral stock.</figcaption>
             </figure>
             <div class="strava-list">
               <h3>Featured Rides</h3>
-              <ol id="ride-feature-list" class="lined-list" aria-live="polite">
+              <ol id="ride-feature-list" class="feature-list" aria-live="polite">
                 <li>Awaiting route cards…</li>
               </ol>
             </div>
           </div>
         </section>
 
-        <!-- Contact Section -->
-        <section class="content-section" id="contact">
-          <h2>Say Hello</h2>
+        <section class="contact-card" aria-labelledby="contact-heading">
+          <h2 id="contact-heading">Say Hello</h2>
           <p>
-            Write to <a href="mailto:clarencehlyeung@gmail.com">clarencehlyeung@gmail.com</a> for
-            collaborations, ride suggestions, or a favourite family recipe.
+            Write to <a href="mailto:clarencehlyeung@gmail.com">clarencehlyeung@gmail.com</a> for collaborations,
+            ride suggestions, or a favourite family recipe.
           </p>
-          <p class="contact-links">
-            <a href="https://www.linkedin.com/in/clarence-yeung-8454237a/" target="_blank" rel="noopener">LinkedIn</a>
-            <span aria-hidden="true">·</span>
-            <a href="https://github.com/cyeunghl" target="_blank" rel="noopener">GitHub</a>
-            <span aria-hidden="true">·</span>
-            <a href="https://scholar.google.com/citations?user=sMj4W4EAAAAJ&hl=en&oi=ao" target="_blank" rel="noopener">Google Scholar</a>
-            <span aria-hidden="true">·</span>
-            <a href="https://clarenceyeung.substack.com" target="_blank" rel="noopener">Substack</a>
-          </p>
+          <p class="contact-note">Always open to co-authoring papers, menus, or mountain switchbacks.</p>
         </section>
       </section>
     </main>
@@ -198,14 +145,14 @@
 
       const globeRadius = 3.2;
 
-      const oceanMaterial = new THREE.MeshLambertMaterial({ color: '#d5d9c7' });
+      const oceanMaterial = new THREE.MeshLambertMaterial({ color: '#f1ede5' });
       const oceanMesh = new THREE.Mesh(new THREE.SphereGeometry(globeRadius, 128, 128), oceanMaterial);
       globeGroup.add(oceanMesh);
 
       const landMaterial = new THREE.MeshLambertMaterial({
-        color: '#9aa07a',
+        color: '#cbb79f',
         transparent: true,
-        opacity: 0.92,
+        opacity: 0.94,
         side: THREE.DoubleSide,
       });
       const landGroup = new THREE.Group();
@@ -214,9 +161,9 @@
       const markerGroup = new THREE.Group();
       globeGroup.add(markerGroup);
 
-      const ambientLight = new THREE.AmbientLight(0xf5f4ed, 0.6);
+      const ambientLight = new THREE.AmbientLight(0xfefbf6, 0.62);
       globeScene.add(ambientLight);
-      const sunLight = new THREE.DirectionalLight(0xffffff, 0.85);
+      const sunLight = new THREE.DirectionalLight(0xffffff, 0.8);
       sunLight.position.set(-6.5, 7.5, 6.5);
       globeScene.add(sunLight);
 
@@ -326,9 +273,9 @@
         const { lat, lon, name, id } = activity;
         const position = convertLatLonToXYZ(lat, lon, globeRadius + 0.02);
         const material = new THREE.MeshStandardMaterial({
-          color: new THREE.Color('#636B2F'),
-          emissive: new THREE.Color('#636B2F'),
-          emissiveIntensity: 0.08,
+          color: new THREE.Color('#C18E57'),
+          emissive: new THREE.Color('#C18E57'),
+          emissiveIntensity: 0.12,
           transparent: true,
           opacity: 0.7,
           roughness: 0.45,
@@ -362,8 +309,8 @@
         if (hoveredMarker !== marker) {
           resetHover();
           hoveredMarker = marker;
-          marker.material.emissiveIntensity = 0.35;
-          marker.material.opacity = 0.95;
+          marker.material.emissiveIntensity = 0.42;
+          marker.material.opacity = 0.98;
           marker.scale.set(1.45, 1.45, 1.45);
           tooltip.textContent = marker.userData.name || 'Activity';
           tooltip.hidden = false;
@@ -558,7 +505,7 @@
         context.scale(dpr, dpr);
 
         context.clearRect(0, 0, width, height);
-        context.fillStyle = '#f7f4eb';
+        context.fillStyle = '#fbf8f4';
         context.fillRect(0, 0, width, height);
 
         const points = activities
@@ -572,15 +519,15 @@
         points.forEach((point) => {
           const radius = 18 * point.weight;
           const gradient = context.createRadialGradient(point.x, point.y, 0, point.x, point.y, radius);
-          gradient.addColorStop(0, 'rgba(99, 107, 47, 0.42)');
-          gradient.addColorStop(1, 'rgba(99, 107, 47, 0)');
+          gradient.addColorStop(0, 'rgba(193, 142, 87, 0.45)');
+          gradient.addColorStop(1, 'rgba(193, 142, 87, 0)');
           context.fillStyle = gradient;
           context.beginPath();
           context.arc(point.x, point.y, radius, 0, Math.PI * 2);
           context.fill();
         });
 
-        context.strokeStyle = 'rgba(99, 107, 47, 0.18)';
+        context.strokeStyle = 'rgba(193, 142, 87, 0.24)';
         context.lineWidth = 1;
         context.strokeRect(0.5, 0.5, width - 1, height - 1);
       };
