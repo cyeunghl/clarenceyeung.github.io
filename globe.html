@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cool Places · Clarence Yeung</title>
+    <link rel="stylesheet" href="style.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.158/build/three.module.js",
+          "three/examples/jsm/controls/OrbitControls.js": "https://cdn.jsdelivr.net/npm/three@0.158/examples/jsm/controls/OrbitControls.js"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <nav class="globe-nav">
+      <a href="index.html">← Back to home</a>
+    </nav>
+
+    <!-- Layout Wrapper -->
+    <main class="page globe-page">
+      <div class="globe-intro">
+        <p>I've been fortunate enough to have had the ability to bike and ride in some of the most beautiful places in the world. Hover over each pin to see some Strava activities.</p>
+      </div>
+      <!-- Visual Placeholder Column -->
+      <section class="visual-column">
+        <div class="visual-container" role="presentation">
+          <div class="visual-stage" id="globe-stage" aria-hidden="true"></div>
+          <div
+            class="visual-tooltip"
+            id="globe-tooltip"
+            role="status"
+            aria-live="polite"
+            hidden
+          ></div>
+          <div id="globe-legend" aria-label="Legend" hidden></div>
+        </div>
+      </section>
+    </main>
+
+    <script type="module">
+      import * as THREE from 'three';
+      import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+
+      /* ---------------------------------------- */
+      /* Minimal Globe Setup                      */
+      /* ---------------------------------------- */
+      const stage = document.getElementById('globe-stage');
+      const tooltip = document.getElementById('globe-tooltip');
+
+      const globeScene = new THREE.Scene();
+      const globeCamera = new THREE.PerspectiveCamera(40, 1, 0.1, 1000);
+      const globeRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      globeRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      globeRenderer.outputColorSpace = THREE.SRGBColorSpace;
+      globeRenderer.toneMapping = THREE.ACESFilmicToneMapping;
+      globeRenderer.toneMappingExposure = 1.05;
+      globeRenderer.setClearColor(0x000000, 0);
+      stage.appendChild(globeRenderer.domElement);
+      globeRenderer.domElement.style.cursor = 'grab';
+      globeRenderer.domElement.style.outline = 'none';
+      globeRenderer.domElement.addEventListener('pointerdown', () => {
+        globeRenderer.domElement.style.cursor = 'grabbing';
+      });
+      ['pointerup', 'pointerleave'].forEach((evt) => {
+        globeRenderer.domElement.addEventListener(evt, () => {
+          globeRenderer.domElement.style.cursor = 'grab';
+        });
+      });
+
+      const globeGroup = new THREE.Group();
+      globeScene.add(globeGroup);
+
+      const globeRadius = 3.2;
+
+      const oceanMaterial = new THREE.MeshLambertMaterial({ color: '#C7E6F4' });
+      const oceanMesh = new THREE.Mesh(new THREE.SphereGeometry(globeRadius, 128, 128), oceanMaterial);
+      globeGroup.add(oceanMesh);
+
+      const landMaterial = new THREE.MeshLambertMaterial({
+        color: '#C9D6C1',
+        transparent: true,
+        opacity: 0.85,
+        side: THREE.DoubleSide,
+      });
+      const landGroup = new THREE.Group();
+      globeGroup.add(landGroup);
+
+      const markerGroup = new THREE.Group();
+      globeGroup.add(markerGroup);
+
+      const ambientLight = new THREE.AmbientLight(0xf5f4ed, 0.6);
+      globeScene.add(ambientLight);
+      const sunLight = new THREE.DirectionalLight(0xffffff, 0.85);
+      sunLight.position.set(-6.5, 7.5, 6.5);
+      globeScene.add(sunLight);
+
+      globeCamera.position.set(0, 0, globeRadius * 4.2);
+
+      const controls = new OrbitControls(globeCamera, globeRenderer.domElement);
+      controls.enablePan = false;
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.08;
+      controls.enableZoom = true;
+      controls.minDistance = globeRadius * 1.6;
+      controls.maxDistance = globeRadius * 4.8;
+
+      let userIsInteracting = false;
+      controls.addEventListener('start', () => {
+        userIsInteracting = true;
+      });
+      controls.addEventListener('end', () => {
+        userIsInteracting = false;
+      });
+
+      globeGroup.rotation.x = THREE.MathUtils.degToRad(18);
+
+      const convertLatLonToXYZ = (lat, lon, radius) => {
+        const phi = THREE.MathUtils.degToRad(90 - lat);
+        const theta = THREE.MathUtils.degToRad(lon + 180);
+        const x = -radius * Math.sin(phi) * Math.cos(theta);
+        const z = radius * Math.sin(phi) * Math.sin(theta);
+        const y = radius * Math.cos(phi);
+        return new THREE.Vector3(x, y, z);
+      };
+
+      const buildPolygon = (rings) => {
+        if (!Array.isArray(rings) || rings.length === 0) return;
+        const [outer, ...holes] = rings;
+        if (!outer || outer.length < 3) return;
+
+        const shape = new THREE.Shape();
+        outer.forEach(([lon, lat], index) => {
+          if (index === 0) {
+            shape.moveTo(lon, lat);
+          } else {
+            shape.lineTo(lon, lat);
+          }
+        });
+
+        const holePaths = holes
+          .filter((hole) => Array.isArray(hole) && hole.length >= 3)
+          .map((hole) => {
+            const path = new THREE.Path();
+            hole.forEach(([lon, lat], index) => {
+              if (index === 0) {
+                path.moveTo(lon, lat);
+              } else {
+                path.lineTo(lon, lat);
+              }
+            });
+            return path;
+          });
+
+        const geometry = new THREE.ShapeGeometry(shape, holePaths);
+        const position = geometry.attributes.position;
+        const landRadius = globeRadius + 0.01;
+        for (let i = 0; i < position.count; i++) {
+          const lon = position.getX(i);
+          const lat = position.getY(i);
+          const vertex = convertLatLonToXYZ(lat, lon, landRadius);
+          position.setXYZ(i, vertex.x, vertex.y, vertex.z);
+        }
+        position.needsUpdate = true;
+        geometry.computeVertexNormals();
+
+        const mesh = new THREE.Mesh(geometry, landMaterial);
+        landGroup.add(mesh);
+      };
+
+      const loadLandPolygons = async () => {
+        try {
+          const response = await fetch(
+            'https://raw.githubusercontent.com/datasets/geo-boundaries-world-110m/master/countries.geojson'
+          );
+          if (!response.ok) throw new Error('Failed to load land GeoJSON');
+          const data = await response.json();
+          const features = Array.isArray(data.features) ? data.features : [];
+          features.forEach((feature) => {
+            const geometry = feature && feature.geometry;
+            if (!geometry) return;
+            if (geometry.type === 'Polygon') {
+              buildPolygon(geometry.coordinates);
+            } else if (geometry.type === 'MultiPolygon') {
+              geometry.coordinates.forEach(buildPolygon);
+            }
+          });
+        } catch (error) {
+          console.error('Unable to build land polygons', error);
+        }
+      };
+
+      loadLandPolygons();
+
+      const markerMeshes = [];
+      let hoveredMarker = null;
+      const raycaster = new THREE.Raycaster();
+      const pointer = new THREE.Vector2();
+      const geocodeCache = new Map();
+
+      const reverseGeocode = async (lat, lon) => {
+        const key = `${lat.toFixed(3)},${lon.toFixed(3)}`;
+        if (geocodeCache.has(key)) return geocodeCache.get(key);
+        try {
+          const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`;
+          const res = await fetch(url, { headers: { 'Accept-Language': 'en' } });
+          if (!res.ok) throw new Error('geocode failed');
+          const data = await res.json();
+          const addr = data && data.address ? data.address : {};
+          const city = addr.city || addr.town || addr.village || addr.hamlet || addr.state_district || addr.state;
+          const country = addr.country || '';
+          const label = [city, country].filter(Boolean).join(', ') || 'Unknown location';
+          geocodeCache.set(key, label);
+          return label;
+        } catch (e) {
+          const fallback = 'Unknown location';
+          geocodeCache.set(key, fallback);
+          return fallback;
+        }
+      };
+
+      const typeColors = {
+        Ride: '#B08D28',          // mustard
+        Run: '#8A5A44',           // warm rust
+        Walk: '#6C7A3F',          // olive green
+        Hike: '#4E6E5D',          // deep sage
+        Swim: '#3B6C7A',          // teal
+      };
+
+      const createMarker = (activity) => {
+        const { name, id, coordinates } = activity;
+        if (!Array.isArray(coordinates) || coordinates.length < 2 || coordinates[0] == null || coordinates[1] == null) {
+          return;
+        }
+        const colorHex = typeColors[activity.type] || '#B08D28';
+        const lat = Number(coordinates[0]);
+        const lon = Number(coordinates[1]);
+        const position = convertLatLonToXYZ(lat, lon, globeRadius + 0.02);
+        const material = new THREE.MeshStandardMaterial({
+          color: new THREE.Color(colorHex),
+          emissive: new THREE.Color(colorHex),
+          emissiveIntensity: 0.25,
+          transparent: true,
+          opacity: 0.9,
+          roughness: 0.45,
+          metalness: 0.08,
+        });
+        const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.06, 28, 28), material);
+        mesh.position.copy(position);
+        mesh.lookAt(new THREE.Vector3(0, 0, 0));
+        mesh.userData = {
+          id,
+          name,
+          type: activity.type,
+          lat,
+          lon,
+          baseEmissive: material.emissiveIntensity,
+          baseOpacity: material.opacity,
+        };
+        markerGroup.add(mesh);
+        markerMeshes.push(mesh);
+      };
+
+      const resetHover = () => {
+        if (!hoveredMarker) return;
+        hoveredMarker.material.emissiveIntensity = hoveredMarker.userData.baseEmissive;
+        hoveredMarker.material.opacity = hoveredMarker.userData.baseOpacity;
+        hoveredMarker.scale.set(1, 1, 1);
+        hoveredMarker = null;
+        tooltip.hidden = true;
+        // resume gentle spin when no marker is hovered
+        userIsInteracting = false;
+      };
+
+      const setHover = async (marker, event) => {
+        if (hoveredMarker !== marker) {
+          resetHover();
+          hoveredMarker = marker;
+          marker.material.emissiveIntensity = 0.35;
+          marker.material.opacity = 0.95;
+          marker.scale.set(1.45, 1.45, 1.45);
+          tooltip.textContent = 'Loading…';
+          tooltip.hidden = false;
+          const label = await reverseGeocode(marker.userData.lat, marker.userData.lon);
+          if (hoveredMarker === marker) {
+            tooltip.textContent = label;
+          }
+        }
+        // pause globe rotation while hovering a marker
+        userIsInteracting = true;
+        const rect = globeRenderer.domElement.getBoundingClientRect();
+        tooltip.style.left = `${event.clientX - rect.left + 12}px`;
+        tooltip.style.top = `${event.clientY - rect.top - 12}px`;
+      };
+
+      const onMarkerClick = (marker) => {
+        const { id, lat, lon } = marker.userData;
+        const url = `https://www.google.com/maps/search/?api=1&query=${lat.toFixed(5)},${lon.toFixed(5)}`;
+        window.open(url, '_blank', 'noopener');
+        if (typeof window.onGlobeMarkerClick === 'function') {
+          window.onGlobeMarkerClick({ id, lat, lon });
+        }
+      };
+
+      const updatePointerFromEvent = (event) => {
+        const rect = globeRenderer.domElement.getBoundingClientRect();
+        pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      };
+
+      const handlePointerMove = (event) => {
+        updatePointerFromEvent(event);
+        raycaster.setFromCamera(pointer, globeCamera);
+        const intersects = raycaster.intersectObjects(markerMeshes);
+        if (intersects.length > 0) {
+          setHover(intersects[0].object, event);
+        } else {
+          resetHover();
+        }
+      };
+
+      const handlePointerLeave = () => {
+        resetHover();
+      };
+
+      const handlePointerClick = (event) => {
+        updatePointerFromEvent(event);
+        raycaster.setFromCamera(pointer, globeCamera);
+        const intersects = raycaster.intersectObjects(markerMeshes);
+        if (intersects.length > 0) {
+          const marker = intersects[0].object;
+          onMarkerClick(marker);
+        }
+      };
+
+      globeRenderer.domElement.addEventListener('pointermove', handlePointerMove);
+      globeRenderer.domElement.addEventListener('pointerleave', handlePointerLeave);
+      globeRenderer.domElement.addEventListener('click', handlePointerClick);
+
+      const resizeGlobe = () => {
+        const { clientWidth, clientHeight } = stage;
+        if (!clientWidth || !clientHeight) return;
+        globeRenderer.setSize(clientWidth, clientHeight, false);
+        globeCamera.aspect = clientWidth / clientHeight;
+        globeCamera.updateProjectionMatrix();
+      };
+
+      const loadActivities = async () => {
+        try {
+          const response = await fetch('assets/activities_visualization.json');
+          if (!response.ok) throw new Error('Failed to load activities');
+          const data = await response.json();
+          resetHover();
+          markerGroup.clear();
+          markerMeshes.length = 0;
+          const activities = (data.activities || []).filter((a) => a && a.type !== 'VirtualRide');
+          activities.forEach(createMarker);
+          // Build legend from present activity types
+          const legendEl = document.getElementById('globe-legend');
+          const presentTypes = Array.from(new Set(activities.map((a) => a.type).filter(Boolean)));
+          legendEl.innerHTML = presentTypes
+            .map((t) => {
+              const c = typeColors[t] || '#B08D28';
+              return `<div class="legend-item"><span class="legend-swatch" style="background:${c}"></span>${t}</div>`;
+            })
+            .join('');
+          legendEl.hidden = presentTypes.length === 0;
+        } catch (error) {
+          console.warn(error);
+        }
+      };
+
+      const animateGlobe = () => {
+        requestAnimationFrame(animateGlobe);
+        if (!userIsInteracting) {
+          globeGroup.rotation.y += 0.00035;
+        }
+        controls.update();
+        globeRenderer.render(globeScene, globeCamera);
+      };
+
+      resizeGlobe();
+      window.addEventListener('resize', resizeGlobe);
+      loadActivities();
+      animateGlobe();
+    </script>
+  </body>
+</html>

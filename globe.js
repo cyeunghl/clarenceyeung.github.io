@@ -273,7 +273,8 @@ export async function initGlobe(container, options = {}) {
   async function hydratePoints() {
     try {
       const payload = await fetchActivities({ mockDataUrl, refreshIntervalDays });
-      const clusters = clusterActivities(payload.activities || []);
+      const filtered = (payload.activities || []).filter((a) => a && a.type !== 'VirtualRide');
+      const clusters = clusterActivities(filtered);
       if (points) {
         scene.remove(points);
         points.geometry.dispose();
