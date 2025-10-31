@@ -1,9 +1,6 @@
-# Clarence Yeung · Portfolio Mise en Place
+# Clarence Yeung · personal webpage
 
-A single-page portfolio presented like a minimalist recipe card. The layout frames a fixed visual
-column for the interactive globe while the right column houses About, Projects, and Contact
-sections. Three.js powers both the Strava-inspired globe and a holographic DNA helix, all compiled
-inside `index.html`.
+
 
 ## Getting Started
 
