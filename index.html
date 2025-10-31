@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Clarence Yeung · Portfolio</title>
+    <title>Clarence Yeung · Lab &amp; Larder Folio</title>
     <link rel="stylesheet" href="style.css" />
     <script type="importmap">
       {
@@ -15,77 +15,87 @@
     </script>
   </head>
   <body>
-    <!-- Layout Wrapper -->
-    <main class="page">
-      <!-- Visual Placeholder Column -->
-      <section class="visual-column">
-        <div class="visual-container" role="presentation">
-          <div class="visual-stage" id="globe-stage" aria-hidden="true"></div>
-          <div
-            class="visual-tooltip"
-            id="globe-tooltip"
-            role="status"
-            aria-live="polite"
-            hidden
-          ></div>
+    <main class="recipe-layout">
+      <section class="image-panel">
+        <div class="image-surface" aria-hidden="true">
+          <div class="image-photo">
+            <div class="photo-overlay">Portrait placeholder</div>
+          </div>
+          <p class="image-caption">Moodboard: toasted cornmeal oatmeal cookies</p>
+        </div>
+        <div class="globe-shell">
+          <div class="globe-header">
+            <span class="globe-label">Ride atlas</span>
+            <p class="globe-sub">Strava JSON rendered in Three.js</p>
+          </div>
+          <div class="globe-stage" id="globe-stage"></div>
+          <div class="globe-tooltip" id="globe-tooltip" role="status" aria-live="polite" hidden></div>
+          <p class="globe-note">Pins glow in mustard yellow to flag recent routes.</p>
         </div>
       </section>
 
-      <!-- Content Column -->
-      <section class="content-column">
-        <header class="page-header">
-          <div class="header-inner">
-            <div class="hero-portrait" aria-hidden="true">
-            </div>
-            <h1>Clarence Yeung</h1>
-          </div>
+      <section class="text-panel">
+        <header class="title-block">
+          <p class="title-issue">Lab &amp; Larder · Issue 01</p>
+          <h1 class="recipe-title">Clarence Yeung</h1>
+          <p class="servings-info">Serves: oncology discovery teams, supper club guests, long-distance climbs</p>
+          <p class="intro">Scientist, cyclist, and experimental cook blending lab precision with kitchen warmth.</p>
+          <p class="attribution">Recipe by Clarence Yeung · Hexagon Bio · San Francisco Bay Area</p>
+          <nav aria-label="Personal links" class="profile-links">
+            <a href="https://www.linkedin.com/in/clarence-yeung-8454237a/" target="_blank" rel="noopener">LinkedIn</a>
+            <a href="https://github.com/cyeunghl" target="_blank" rel="noopener">GitHub</a>
+            <a href="https://scholar.google.com/citations?user=sMj4W4EAAAAJ&amp;hl=en&amp;oi=ao" target="_blank" rel="noopener">Google Scholar</a>
+            <a href="https://clarenceyeung.substack.com" target="_blank" rel="noopener">Substack</a>
+          </nav>
         </header>
 
-        <!-- About Section -->
-        <section class="content-section" id="about">
-          <h2>About Me</h2>
-          <nav aria-label="Primary links" class="about-links">
-            <a href="https://www.linkedin.com/in/clarence-yeung-8454237a/" target="_blank" rel="noopener">LinkedIn</a>
-            <span aria-hidden="true">·</span>
-            <a href="https://scholar.google.com/citations?user=sMj4W4EAAAAJ&hl=en&oi=ao" target="_blank" rel="noopener"
-              >Google Scholar</a
-            >
-            <span aria-hidden="true">·</span>
-            <a href="https://github.com/cyeunghl" target="_blank" rel="noopener">GitHub</a>
-          </nav>
-        </section>
+        <div class="divider" role="presentation"></div>
 
-        <!-- INTRO SECTION -->
-        <section class="content-section" id="projects">
-          <h2>INTRO</h2>
-          <ul class="project-list">
-            <li>
-              <p>
-                I am a scientist, biker and baker. I got my PhD at the University of Toronto studying genetic
-                networks and the impact of mutations on phenotypes. I currently am in the Bay Area working as a 
-                cancer geneticist at Hexagon Bio.
-              </p>
-            </li>
-          </ul>
-        </section>
+        <div class="content-columns">
+          <section class="ingredients-column" aria-labelledby="ingredients-heading">
+            <h2 id="ingredients-heading">Ingredients</h2>
+            <ul class="ingredient-list">
+              <li><span class="measure">250 g</span><span class="item">Genomics &amp; systems biology research</span></li>
+              <li><span class="measure">180 g</span><span class="item">Computational variant interpretation pipelines</span></li>
+              <li><span class="measure">120 g</span><span class="item">Collaborative lab leadership &amp; mentorship</span></li>
+              <li><span class="measure">90 g</span><span class="item">Fermentation experiments &amp; recipe development</span></li>
+              <li><span class="measure">Pinch</span><span class="item">Pop-up dinners with precision medicine storytelling</span></li>
+            </ul>
+            <p class="ingredients-note">All measures adaptable; season with curiosity and mustard-yellow data points.</p>
+          </section>
 
-        <!-- Contact Section -->
-        <section class="content-section" id="contact">
-          <h2>Contact</h2>
-          <p>
-            Reach out for collaborations, research inquiries, or to swap ride routes:
-            <a href="mailto:clarencehlyeung at gmail dot com">clarencehlyeung at gmail dot com</a>
-          </p>
-          <p class="contact-links">
-            <a href="https://www.linkedin.com/in/clarence-yeung-8454237a/" target="_blank" rel="noopener">LinkedIn</a>
-            <span aria-hidden="true">·</span>
-            <a href="https://github.com/cyeunghl" target="_blank" rel="noopener">GitHub</a>
-            <span aria-hidden="true">·</span>
-            <a href="https://scholar.google.com/citations?user=sMj4W4EAAAAJ&hl=en&oi=ao" target="_blank" rel="noopener">Google Scholar</a>
-            <span aria-hidden="true">·</span>
-            <a href="https://clarenceyeung.substack.com" target="_blank" rel="noopener">Substack</a>
-          </p>
-        </section>
+          <section class="instructions-column" aria-labelledby="instructions-heading">
+            <h2 id="instructions-heading">Instructions</h2>
+            <p><strong>Preheat.</strong> Start in the lab, mapping genetic networks at Hexagon Bio to uncover novel oncology therapeutics.</p>
+            <p><strong>Layer.</strong> Fold in computational rigor, translating raw sequencing data into actionable insights for cross-functional teams.</p>
+            <p><strong>Plate.</strong> Serve findings alongside community suppers, weaving stories of precision medicine with seasonal menus and long rides.</p>
+
+            <div class="strava-module" aria-labelledby="strava-heading">
+              <div class="strava-header">
+                <h3 id="strava-heading">Ride Pantry</h3>
+                <p class="strava-sub">Heatmap and highlights sourced directly from Strava activity JSON.</p>
+              </div>
+              <div class="strava-summary" id="ride-summary" aria-live="polite">Loading seasonal stats…</div>
+              <div class="strava-visuals">
+                <figure class="heatmap-frame">
+                  <canvas id="ride-heatmap" width="360" height="220" aria-label="Heatmap of logged rides"></canvas>
+                  <figcaption>Global heatmap—warm tones indicate frequent routes.</figcaption>
+                </figure>
+                <div class="strava-list">
+                  <h4>Featured Routes</h4>
+                  <ol id="ride-feature-list" class="feature-list" aria-live="polite">
+                    <li>Awaiting data from the latest rides.</li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <footer class="recipe-footnote">
+          <p>Contact <a href="mailto:clarencehlyeung@gmail.com">clarencehlyeung@gmail.com</a> for collaborations, ride suggestions, or a favorite family recipe.</p>
+          <p class="footnote">Adapted for web from the Lab &amp; Larder series · © <span id="year">2024</span></p>
+        </footer>
       </section>
     </main>
 
@@ -98,6 +108,10 @@
       /* ---------------------------------------- */
       const stage = document.getElementById('globe-stage');
       const tooltip = document.getElementById('globe-tooltip');
+      const yearStamp = document.getElementById('year');
+      if (yearStamp) {
+        yearStamp.textContent = new Date().getFullYear();
+      }
 
       const globeScene = new THREE.Scene();
       const globeCamera = new THREE.PerspectiveCamera(40, 1, 0.1, 1000);
@@ -252,13 +266,13 @@
         const { lat, lon, name, id } = activity;
         const position = convertLatLonToXYZ(lat, lon, globeRadius + 0.02);
         const material = new THREE.MeshStandardMaterial({
-          color: new THREE.Color('#636B2F'),
-          emissive: new THREE.Color('#636B2F'),
-          emissiveIntensity: 0.08,
+          color: new THREE.Color('#c18e57'),
+          emissive: new THREE.Color('#c18e57'),
+          emissiveIntensity: 0.12,
           transparent: true,
-          opacity: 0.7,
-          roughness: 0.45,
-          metalness: 0.08,
+          opacity: 0.78,
+          roughness: 0.35,
+          metalness: 0.1,
         });
         const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.08, 28, 28), material);
         mesh.position.copy(position);
@@ -288,8 +302,8 @@
         if (hoveredMarker !== marker) {
           resetHover();
           hoveredMarker = marker;
-          marker.material.emissiveIntensity = 0.35;
-          marker.material.opacity = 0.95;
+          marker.material.emissiveIntensity = 0.4;
+          marker.material.opacity = 0.98;
           marker.scale.set(1.45, 1.45, 1.45);
           tooltip.textContent = marker.userData.name || 'Activity';
           tooltip.hidden = false;
@@ -351,17 +365,186 @@
         globeCamera.updateProjectionMatrix();
       };
 
+      const generateActivityId = () => {
+        if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+          return crypto.randomUUID();
+        }
+        return `ride-${Math.random().toString(36).slice(2, 10)}`;
+      };
+
+      const normalizeActivity = (activity) => {
+        if (!activity || typeof activity !== 'object') return null;
+        const getValue = (keys, fallback = null) => {
+          for (const key of keys) {
+            const value = activity[key];
+            if (value !== undefined && value !== null && value !== '') {
+              return value;
+            }
+          }
+          return fallback;
+        };
+
+        const coordinates = getValue([
+          'coordinates',
+          'location',
+          'latlng',
+          'latLng',
+          'start_latlng',
+          'startLatLng',
+        ]);
+        const lat = Array.isArray(coordinates) ? Number(coordinates[0]) : Number(getValue(['lat', 'latitude']));
+        const lon = Array.isArray(coordinates) ? Number(coordinates[1]) : Number(getValue(['lon', 'lng', 'longitude']));
+        if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+
+        return {
+          id: getValue(['id', 'activity_id'], generateActivityId()),
+          name: getValue(['name', 'title'], 'Untitled Ride'),
+          type: getValue(['type', 'sport_type'], 'Ride'),
+          distance: Number(getValue(['distance'], 0)),
+          duration: Number(getValue(['moving_time', 'elapsed_time'], 0)),
+          startDate: getValue(['start_date', 'startDate', 'date'], new Date().toISOString()),
+          lat,
+          lon,
+          city: getValue(['location_city', 'city'], ''),
+          country: getValue(['location_country', 'country'], ''),
+        };
+      };
+
+      const rideSummary = document.getElementById('ride-summary');
+      const rideFeatureList = document.getElementById('ride-feature-list');
+      const heatmapCanvas = document.getElementById('ride-heatmap');
+
+      const formatDistance = (meters) => {
+        const km = meters / 1000;
+        return km >= 100 ? `${km.toFixed(0)} km` : `${km.toFixed(1)} km`;
+      };
+
+      const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+      };
+
+      const formatDuration = (seconds) => {
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.round((seconds % 3600) / 60);
+        if (hours > 0) {
+          return `${hours} h ${minutes.toString().padStart(2, '0')} m`;
+        }
+        return `${minutes} m`;
+      };
+
+      const renderSummary = (activities) => {
+        if (!rideSummary) return;
+        if (!activities.length) {
+          rideSummary.innerHTML = '<p>No recorded rides yet—time to clip in.</p>';
+          return;
+        }
+
+        const totalDistance = activities.reduce((sum, item) => sum + (item.distance || 0), 0);
+        const totalDuration = activities.reduce((sum, item) => sum + (item.duration || 0), 0);
+        const rides = activities.filter((item) => item.type && item.type.toLowerCase().includes('ride'));
+        const runs = activities.filter((item) => item.type && item.type.toLowerCase().includes('run'));
+
+        rideSummary.innerHTML = `
+          <div class="summary-pair">
+            <span class="summary-label">Total distance</span>
+            <span class="summary-value">${formatDistance(totalDistance)}</span>
+          </div>
+          <div class="summary-pair">
+            <span class="summary-label">Time outside</span>
+            <span class="summary-value">${formatDuration(totalDuration)}</span>
+          </div>
+          <div class="summary-pair">
+            <span class="summary-label">Rides logged</span>
+            <span class="summary-value">${rides.length}</span>
+          </div>
+          <div class="summary-pair">
+            <span class="summary-label">Runs logged</span>
+            <span class="summary-value">${runs.length}</span>
+          </div>
+        `;
+
+        const featured = [...rides]
+          .sort((a, b) => b.distance - a.distance)
+          .slice(0, 5);
+
+        if (featured.length) {
+          rideFeatureList.innerHTML = featured
+            .map(
+              (item) => `
+                <li>
+                  <span class="feature-title">${item.name}</span>
+                  <span class="feature-meta">${formatDistance(item.distance)} · ${formatDate(item.startDate)}</span>
+                </li>
+              `
+            )
+            .join('');
+        } else {
+          rideFeatureList.innerHTML = '<li>No ride data yet—time to clip in.</li>';
+        }
+      };
+
+      const drawHeatmap = (activities) => {
+        if (!heatmapCanvas) return;
+        const context = heatmapCanvas.getContext('2d');
+        if (!context) return;
+
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const width = heatmapCanvas.clientWidth || heatmapCanvas.width || 360;
+        const height = heatmapCanvas.clientHeight || heatmapCanvas.height || 220;
+        heatmapCanvas.width = width * dpr;
+        heatmapCanvas.height = height * dpr;
+        context.scale(dpr, dpr);
+
+        context.clearRect(0, 0, width, height);
+        context.fillStyle = '#f8f5ef';
+        context.fillRect(0, 0, width, height);
+
+        const points = activities
+          .filter((item) => typeof item.lat === 'number' && typeof item.lon === 'number')
+          .map((item) => ({
+            x: ((item.lon + 180) / 360) * width,
+            y: ((90 - item.lat) / 180) * height,
+            weight: Math.min(Math.max(item.distance / 100000, 0.4), 2.2),
+          }));
+
+        points.forEach((point) => {
+          const radius = 18 * point.weight;
+          const gradient = context.createRadialGradient(point.x, point.y, 0, point.x, point.y, radius);
+          gradient.addColorStop(0, 'rgba(193, 142, 87, 0.38)');
+          gradient.addColorStop(1, 'rgba(193, 142, 87, 0)');
+          context.fillStyle = gradient;
+          context.beginPath();
+          context.arc(point.x, point.y, radius, 0, Math.PI * 2);
+          context.fill();
+        });
+
+        context.strokeStyle = 'rgba(193, 142, 87, 0.25)';
+        context.lineWidth = 1;
+        context.strokeRect(0.5, 0.5, width - 1, height - 1);
+      };
+
       const loadActivities = async () => {
         try {
           const response = await fetch('assets/activities.json');
           if (!response.ok) throw new Error('Failed to load activities');
           const data = await response.json();
+
+          const normalized = (data.activities || [])
+            .map(normalizeActivity)
+            .filter(Boolean);
+
           resetHover();
           markerGroup.clear();
           markerMeshes.length = 0;
-          (data.activities || []).forEach(createMarker);
+          normalized.forEach(createMarker);
+
+          renderSummary(normalized);
+          drawHeatmap(normalized);
         } catch (error) {
           console.warn(error);
+          rideSummary.textContent = 'Unable to reduce rides into view right now. Please refresh the page.';
+          rideFeatureList.innerHTML = '<li>Heatmap paused—check your network connection.</li>';
         }
       };
 
@@ -396,238 +579,69 @@
       const helixGroup = new THREE.Group();
       scene.add(helixGroup);
 
-      const oliveColor = new THREE.Color('#636B2F');
-      const baseOpacity = 0.5;
+      const strandColorA = new THREE.Color('#111111');
+      const strandColorB = new THREE.Color('#c18e57');
 
-      const dotTexture = (() => {
-        const size = 128;
-        const texCanvas = document.createElement('canvas');
-        texCanvas.width = texCanvas.height = size;
-        const ctx = texCanvas.getContext('2d');
-        const gradient = ctx.createRadialGradient(
-          size / 2,
-          size / 2,
-          size * 0.1,
-          size / 2,
-          size / 2,
-          size * 0.5
-        );
-        gradient.addColorStop(0, 'rgba(99,107,47,0.5)');
-        gradient.addColorStop(1, 'rgba(99,107,47,0)');
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, size, size);
-        const texture = new THREE.CanvasTexture(texCanvas);
-        texture.wrapS = texture.wrapT = THREE.ClampToEdgeWrapping;
-        return texture;
-      })();
+      const helixMaterialA = new THREE.MeshPhongMaterial({ color: strandColorA, shininess: 28 });
+      const helixMaterialB = new THREE.MeshPhongMaterial({ color: strandColorB, shininess: 28 });
 
-      const segments = 900;
-      const turns = 1.5;
-      const helixHeight = 12.5;
-      const helixRadius = 2.6;
-      const rungInterval = 12;
+      const radius = 1.6;
+      const tubeRadius = 0.08;
+      const turns = 9;
+      const segments = 420;
+      const height = 8;
 
-      const strandPositions = [];
-      const rungPositions = [];
-      const pointPositions = [];
-      const ambientPositions = [];
-      const clusterPositions = [];
-      const clusterLinkPositions = [];
-
-      for (let i = 0; i <= segments; i++) {
-        const progress = i / segments;
-        const angle = progress * Math.PI * 2 * turns;
-        const y = (progress - 0.5) * helixHeight;
-
-        const baseX = Math.cos(angle) * helixRadius;
-        const baseZ = Math.sin(angle) * helixRadius;
-        const jitter = (Math.random() - 0.5) * 0.22;
-        const x1 = baseX + jitter;
-        const z1 = baseZ + jitter * 0.4;
-        const x2 = -baseX + (Math.random() - 0.5) * 0.22;
-        const z2 = -baseZ + (Math.random() - 0.5) * 0.22;
-
-        pointPositions.push(x1, y, z1, x2, y, z2);
-
-        if (i < segments) {
-          const nextProgress = (i + 1) / segments;
-          const nextAngle = nextProgress * Math.PI * 2 * turns;
-          const nextY = (nextProgress - 0.5) * helixHeight;
-          const nextBaseX = Math.cos(nextAngle) * helixRadius;
-          const nextBaseZ = Math.sin(nextAngle) * helixRadius;
-          const nextJitter = (Math.random() - 0.5) * 0.22;
-          const nx1 = nextBaseX + nextJitter;
-          const nz1 = nextBaseZ + nextJitter * 0.4;
-          const nx2 = -nextBaseX + (Math.random() - 0.5) * 0.22;
-          const nz2 = -nextBaseZ + (Math.random() - 0.5) * 0.22;
-
-          strandPositions.push(x1, y, z1, nx1, nextY, nz1);
-          strandPositions.push(x2, y, z2, nx2, nextY, nz2);
+      const createHelixStrand = (phase, material) => {
+        const points = [];
+        for (let i = 0; i <= segments; i++) {
+          const t = (i / segments) * Math.PI * 2 * turns;
+          const x = Math.cos(t + phase) * radius;
+          const y = ((i / segments) - 0.5) * height;
+          const z = Math.sin(t + phase) * radius;
+          points.push(new THREE.Vector3(x, y, z));
         }
-
-        if (i % rungInterval === 0) {
-          rungPositions.push(x1, y, z1, x2, y, z2);
-        }
-
-        if (i % 7 === 0) {
-          const clusterSize = 16;
-          for (let c = 0; c < clusterSize; c++) {
-            const offsetRadius = helixRadius * (0.45 + Math.random() * 0.75);
-            const offsetAngle = angle + (Math.random() - 0.5) * 1.1;
-            const cx = Math.cos(offsetAngle) * offsetRadius + (Math.random() - 0.5) * 1.2;
-            const cy = y + (Math.random() - 0.5) * 1.4;
-            const cz = Math.sin(offsetAngle) * offsetRadius + (Math.random() - 0.5) * 1.2;
-
-            clusterPositions.push(cx, cy, cz);
-            clusterLinkPositions.push(cx, cy, cz, x1, y, z1);
-          }
-        }
-      }
-
-      const ambientCount = 2600;
-      for (let i = 0; i < ambientCount; i++) {
-        const spread = helixRadius * (0.9 + Math.random() * 1.1);
-        const theta = Math.random() * Math.PI * 2 * turns;
-        const y = (Math.random() - 0.5) * helixHeight * 1.1;
-        const x = Math.cos(theta) * spread + (Math.random() - 0.5) * 0.7;
-        const z = Math.sin(theta) * spread + (Math.random() - 0.5) * 0.7;
-        ambientPositions.push(x, y, z);
-      }
-
-      const pointGeometry = new THREE.BufferGeometry();
-      pointGeometry.setAttribute(
-        'position',
-        new THREE.Float32BufferAttribute(pointPositions, 3)
-      );
-
-      const strandGeometry = new THREE.BufferGeometry();
-      strandGeometry.setAttribute(
-        'position',
-        new THREE.Float32BufferAttribute(strandPositions, 3)
-      );
-
-      const rungGeometry = new THREE.BufferGeometry();
-      rungGeometry.setAttribute(
-        'position',
-        new THREE.Float32BufferAttribute(rungPositions, 3)
-      );
-
-      const ambientGeometry = new THREE.BufferGeometry();
-      ambientGeometry.setAttribute(
-        'position',
-        new THREE.Float32BufferAttribute(ambientPositions, 3)
-      );
-
-      const clusterGeometry = new THREE.BufferGeometry();
-      clusterGeometry.setAttribute(
-        'position',
-        new THREE.Float32BufferAttribute(clusterPositions, 3)
-      );
-
-      const clusterLinkGeometry = new THREE.BufferGeometry();
-      clusterLinkGeometry.setAttribute(
-        'position',
-        new THREE.Float32BufferAttribute(clusterLinkPositions, 3)
-      );
-
-      const pointsMaterial = new THREE.PointsMaterial({
-        map: dotTexture,
-        alphaMap: dotTexture,
-        color: oliveColor,
-        size: 0.32,
-        transparent: true,
-        opacity: baseOpacity,
-        blending: THREE.NormalBlending,
-        depthWrite: false,
-        sizeAttenuation: true,
-      });
-
-      const strandMaterial = new THREE.LineBasicMaterial({
-        color: oliveColor,
-        transparent: true,
-        opacity: baseOpacity,
-        blending: THREE.NormalBlending,
-        depthWrite: false,
-      });
-
-      const rungMaterial = strandMaterial.clone();
-
-      const ambientMaterial = new THREE.PointsMaterial({
-        map: dotTexture,
-        alphaMap: dotTexture,
-        color: oliveColor,
-        size: 0.22,
-        transparent: true,
-        opacity: baseOpacity,
-        blending: THREE.NormalBlending,
-        depthWrite: false,
-        sizeAttenuation: true,
-      });
-
-      const clusterMaterial = new THREE.PointsMaterial({
-        map: dotTexture,
-        alphaMap: dotTexture,
-        color: oliveColor,
-        size: 0.28,
-        transparent: true,
-        opacity: baseOpacity,
-        blending: THREE.NormalBlending,
-        depthWrite: false,
-        sizeAttenuation: true,
-      });
-
-      const clusterLinkMaterial = new THREE.LineBasicMaterial({
-        color: oliveColor,
-        transparent: true,
-        opacity: baseOpacity,
-        blending: THREE.NormalBlending,
-        depthWrite: false,
-      });
-
-      helixGroup.add(new THREE.Points(pointGeometry, pointsMaterial));
-      helixGroup.add(new THREE.LineSegments(strandGeometry, strandMaterial));
-      helixGroup.add(new THREE.LineSegments(rungGeometry, rungMaterial));
-      helixGroup.add(new THREE.Points(ambientGeometry, ambientMaterial));
-      helixGroup.add(new THREE.Points(clusterGeometry, clusterMaterial));
-      helixGroup.add(new THREE.LineSegments(clusterLinkGeometry, clusterLinkMaterial));
-
-      helixGroup.scale.set(1.8, 0.45, 0.55);
-      const baseRotation = new THREE.Euler(Math.PI / 5, Math.PI / 4, -Math.PI / 4);
-      helixGroup.rotation.copy(baseRotation);
-
-      const resizeRenderer = () => {
-        const width = canvas.clientWidth;
-        const height = canvas.clientHeight;
-        if (!width || !height) return;
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        renderer.setSize(width, height, false);
-        camera.aspect = width / height;
-        camera.updateProjectionMatrix();
+        const curve = new THREE.CatmullRomCurve3(points);
+        return new THREE.Mesh(new THREE.TubeGeometry(curve, segments, tubeRadius, 12, false), material);
       };
 
-      window.addEventListener('resize', resizeRenderer);
-      resizeRenderer();
+      const strandA = createHelixStrand(0, helixMaterialA);
+      const strandB = createHelixStrand(Math.PI, helixMaterialB);
+      helixGroup.add(strandA);
+      helixGroup.add(strandB);
 
-      const maxScroll = () => document.body.scrollHeight - window.innerHeight;
-      const baseRotationY = helixGroup.rotation.y;
+      const rungMaterial = new THREE.MeshStandardMaterial({ color: '#8d5524', metalness: 0.2, roughness: 0.7 });
+      for (let i = 0; i < turns * 12; i++) {
+        const t = (i / (turns * 12)) * Math.PI * 2 * turns;
+        const x = Math.cos(t) * radius;
+        const y = ((i / (turns * 12)) - 0.5) * height;
+        const z = Math.sin(t) * radius;
+        const rung = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, radius * 1.9, 6), rungMaterial);
+        rung.position.set(0, y, 0);
+        rung.rotation.z = Math.PI / 2;
+        rung.rotation.y = t;
+        helixGroup.add(rung);
+      }
 
-      const updateScrollEffects = () => {
-        const ratio = maxScroll() > 0 ? window.scrollY / maxScroll() : 0;
-        const rotationRange = 0.45;
-        helixGroup.rotation.y = baseRotationY + THREE.MathUtils.lerp(-rotationRange, rotationRange, ratio);
-        const cameraTilt = THREE.MathUtils.lerp(-0.05, 0.04, ratio);
-        camera.rotation.x = cameraTilt;
-        canvas.style.opacity = (0.3 + (1 - ratio) * 0.15).toFixed(2);
-      };
-
-      window.addEventListener('scroll', updateScrollEffects, { passive: true });
-      updateScrollEffects();
+      const helixLight = new THREE.DirectionalLight('#ffffff', 1.1);
+      helixLight.position.set(4, 6, 8);
+      scene.add(helixLight);
+      scene.add(new THREE.AmbientLight('#d9d2c4', 0.55));
 
       const animate = () => {
         requestAnimationFrame(animate);
+        helixGroup.rotation.y += 0.003;
         renderer.render(scene, camera);
       };
 
+      const resizeHelix = () => {
+        const size = Math.min(window.innerWidth * 0.18, 260);
+        renderer.setSize(size, size, false);
+        camera.aspect = 1;
+        camera.updateProjectionMatrix();
+      };
+
+      window.addEventListener('resize', resizeHelix);
+      resizeHelix();
       animate();
     </script>
   </body>
