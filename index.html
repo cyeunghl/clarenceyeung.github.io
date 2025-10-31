@@ -150,9 +150,9 @@
       globeGroup.add(oceanMesh);
 
       const landMaterial = new THREE.MeshLambertMaterial({
-        color: '#cbb79f',
+        color: '#b38b59',
         transparent: true,
-        opacity: 0.94,
+        opacity: 0.92,
         side: THREE.DoubleSide,
       });
       const landGroup = new THREE.Group();
@@ -198,35 +198,36 @@
 
       const buildPolygon = (rings) => {
         if (!Array.isArray(rings) || rings.length === 0) return;
-        const [outer, ...holes] = rings;
-        if (!outer || outer.length < 3) return;
+        const [outerRing, ...holeRings] = rings;
+        if (!outerRing || outerRing.length < 3) return;
 
-        const shape = new THREE.Shape();
-        outer.forEach(([lon, lat], index) => {
-          if (index === 0) {
-            shape.moveTo(lon, lat);
-          } else {
-            shape.lineTo(lon, lat);
-          }
-        });
+        const buildPath = (ring, PathClass) => {
+          const path = new PathClass();
+          ring.forEach(([lon, lat], index) => {
+            if (index === 0) {
+              path.moveTo(lon, lat);
+            } else {
+              path.lineTo(lon, lat);
+            }
+          });
+          path.closePath();
+          return path;
+        };
 
-        const holePaths = holes
-          .filter((hole) => Array.isArray(hole) && hole.length >= 3)
-          .map((hole) => {
-            const path = new THREE.Path();
-            hole.forEach(([lon, lat], index) => {
-              if (index === 0) {
-                path.moveTo(lon, lat);
-              } else {
-                path.lineTo(lon, lat);
-              }
-            });
-            return path;
+        const shape = buildPath(outerRing, THREE.Shape);
+
+        // Each additional ring in the polygon represents a hole (lakes, inland seas, etc.).
+        holeRings
+          .filter((ring) => Array.isArray(ring) && ring.length >= 3)
+          .forEach((ring) => {
+            const holePath = buildPath(ring, THREE.Path);
+            shape.holes.push(holePath);
           });
 
-        const geometry = new THREE.ShapeGeometry(shape, holePaths);
+        // Triangulate the 2D shape and then project each vertex onto the sphere.
+        const geometry = new THREE.ShapeGeometry(shape, 16);
         const position = geometry.attributes.position;
-        const landRadius = globeRadius + 0.01;
+        const landRadius = globeRadius * 1.001;
         for (let i = 0; i < position.count; i++) {
           const lon = position.getX(i);
           const lat = position.getY(i);
