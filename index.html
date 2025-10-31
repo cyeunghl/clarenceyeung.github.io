@@ -9,12 +9,11 @@
   <body>
     <!-- Layout Wrapper -->
     <main class="page">
-      <!-- Visual Placeholder Column -->
+      <!-- Visual Column with Three.js Globe -->
       <section class="visual-column" aria-labelledby="visual-title">
         <div class="visual-container" role="presentation">
-          <div class="visual-placeholder">
-            <span id="visual-title">Future Visual</span>
-          </div>
+          <span class="sr-only" id="visual-title">Interactive globe with activity highlights</span>
+          <div class="visual-globe" aria-hidden="true"></div>
         </div>
       </section>
 
@@ -93,234 +92,160 @@
 
     <script type="module">
       import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.158/build/three.module.js';
+      import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.158/examples/jsm/controls/OrbitControls.js';
+      import { feature } from 'https://cdn.jsdelivr.net/npm/topojson-client@3/+esm';
+      import { geoGraticule10 } from 'https://cdn.jsdelivr.net/npm/d3-geo@3/+esm';
 
-      const canvas = document.createElement('canvas');
-      canvas.id = 'dna-helix';
-      canvas.setAttribute('aria-hidden', 'true');
-      document.body.appendChild(canvas);
-
-      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      renderer.setClearColor(0x000000, 0);
+      const container = document.querySelector('.visual-globe');
+      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
       renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.setClearColor(0x000000, 0);
+      container.appendChild(renderer.domElement);
 
       const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 60);
-      camera.position.set(0, 0, 10);
+      const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
+      camera.position.set(0, 0, 6);
 
-      const helixGroup = new THREE.Group();
-      scene.add(helixGroup);
+      const controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.enablePan = false;
+      controls.minDistance = 3.5;
+      controls.maxDistance = 8;
+      controls.autoRotate = false;
+      controls.enableZoom = true;
+      controls.target.set(0, 0, 0);
+      controls.update();
 
-      const strandPoints = 480;
-      const turns = 6.5;
-      const helixHeight = 6.5;
-      const radius = 1.15;
+      const ambientLight = new THREE.AmbientLight(0x667799, 0.4);
+      const directionalLight = new THREE.DirectionalLight(0xbfd1ff, 0.75);
+      directionalLight.position.set(5, 4, 3);
+      scene.add(ambientLight, directionalLight);
 
-      const colorStart = new THREE.Color('#a5b2d6');
-      const colorEnd = new THREE.Color('#dce1f0');
+      const globeGroup = new THREE.Group();
+      scene.add(globeGroup);
 
-      const pointPositions = new Float32Array(strandPoints * 2 * 3);
-      const pointColors = new Float32Array(strandPoints * 2 * 3);
-      const strandLinePositions = [];
-      const strandLineColors = [];
-      const rungPositions = [];
-      const rungColors = [];
-
-      let positionIndex = 0;
-      let colorIndex = 0;
-      let previousVertices = null;
-      let previousColor = null;
-
-      for (let i = 0; i < strandPoints; i++) {
-        const progress = i / (strandPoints - 1);
-        const angle = progress * Math.PI * 2 * turns;
-        const y = (progress - 0.5) * helixHeight;
-
-        const x1 = Math.cos(angle) * radius;
-        const z1 = Math.sin(angle) * radius;
-        const x2 = -x1;
-        const z2 = -z1;
-
-        const mixColor = colorStart.clone().lerp(colorEnd, progress);
-
-        pointPositions[positionIndex++] = x1;
-        pointPositions[positionIndex++] = y;
-        pointPositions[positionIndex++] = z1;
-        pointColors[colorIndex++] = mixColor.r;
-        pointColors[colorIndex++] = mixColor.g;
-        pointColors[colorIndex++] = mixColor.b;
-
-        pointPositions[positionIndex++] = x2;
-        pointPositions[positionIndex++] = y;
-        pointPositions[positionIndex++] = z2;
-        pointColors[colorIndex++] = mixColor.r;
-        pointColors[colorIndex++] = mixColor.g;
-        pointColors[colorIndex++] = mixColor.b;
-
-        if (previousVertices) {
-          const prevColor = previousColor;
-          strandLinePositions.push(
-            previousVertices[0],
-            previousVertices[1],
-            previousVertices[2],
-            x1,
-            y,
-            z1,
-            previousVertices[3],
-            previousVertices[4],
-            previousVertices[5],
-            x2,
-            y,
-            z2
-          );
-
-          strandLineColors.push(
-            prevColor.r,
-            prevColor.g,
-            prevColor.b,
-            mixColor.r,
-            mixColor.g,
-            mixColor.b,
-            prevColor.r,
-            prevColor.g,
-            prevColor.b,
-            mixColor.r,
-            mixColor.g,
-            mixColor.b
-          );
-        }
-
-        if (i % 9 === 0) {
-          rungPositions.push(x1, y, z1, x2, y, z2);
-          rungColors.push(
-            mixColor.r,
-            mixColor.g,
-            mixColor.b,
-            mixColor.r,
-            mixColor.g,
-            mixColor.b
-          );
-        }
-
-        previousVertices = [x1, y, z1, x2, y, z2];
-        previousColor = mixColor.clone();
-      }
-
-      const pointsGeometry = new THREE.BufferGeometry();
-      pointsGeometry.setAttribute('position', new THREE.BufferAttribute(pointPositions, 3));
-      pointsGeometry.setAttribute('color', new THREE.BufferAttribute(pointColors, 3));
-
-      const helixMaterial = new THREE.PointsMaterial({
-        size: 0.045,
-        sizeAttenuation: true,
+      const RADIUS = 2.2;
+      const globeMaterial = new THREE.MeshPhongMaterial({
+        color: 0x0a1325,
+        emissive: 0x05070f,
+        shininess: 18,
         transparent: true,
-        opacity: 0.85,
-        vertexColors: true,
-        depthWrite: false,
-        blending: THREE.AdditiveBlending,
+        opacity: 0.92,
       });
+      const globeMesh = new THREE.Mesh(new THREE.SphereGeometry(RADIUS, 96, 96), globeMaterial);
+      globeGroup.add(globeMesh);
 
-      const helixPoints = new THREE.Points(pointsGeometry, helixMaterial);
-      helixGroup.add(helixPoints);
+      const outlineGroup = new THREE.Group();
+      globeGroup.add(outlineGroup);
 
-      const strandGeometry = new THREE.BufferGeometry();
-      strandGeometry.setAttribute(
-        'position',
-        new THREE.Float32BufferAttribute(strandLinePositions, 3)
-      );
-      strandGeometry.setAttribute(
-        'color',
-        new THREE.Float32BufferAttribute(strandLineColors, 3)
-      );
+      const graticuleGroup = new THREE.Group();
+      globeGroup.add(graticuleGroup);
 
-      const rungGeometry = new THREE.BufferGeometry();
-      rungGeometry.setAttribute(
-        'position',
-        new THREE.Float32BufferAttribute(rungPositions, 3)
-      );
-      rungGeometry.setAttribute(
-        'color',
-        new THREE.Float32BufferAttribute(rungColors, 3)
-      );
+      const lineMaterial = new THREE.LineBasicMaterial({ color: 0xf2f5ff, transparent: true, opacity: 0.55 });
+      const graticuleMaterial = new THREE.LineBasicMaterial({ color: 0x223a5c, transparent: true, opacity: 0.4 });
 
-      const lineMaterial = new THREE.LineBasicMaterial({
-        vertexColors: true,
-        transparent: true,
-        opacity: 0.18,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false,
-      });
+      const latLonToVector3 = (lat, lon, radius = RADIUS + 0.002) => {
+        // Latitude/longitude (in degrees) mapped onto the sphere surface using spherical coordinates.
+        const phi = THREE.MathUtils.degToRad(90 - lat);
+        const theta = THREE.MathUtils.degToRad(lon + 180);
+        const x = -radius * Math.sin(phi) * Math.cos(theta);
+        const z = radius * Math.sin(phi) * Math.sin(theta);
+        const y = radius * Math.cos(phi);
+        return new THREE.Vector3(x, y, z);
+      };
 
-      const strandLines = new THREE.LineSegments(strandGeometry, lineMaterial);
-      const rungLines = new THREE.LineSegments(rungGeometry, lineMaterial.clone());
-      helixGroup.add(strandLines, rungLines);
+      const addLineFromCoords = (coords) => {
+        const points = coords.map(([lon, lat]) => latLonToVector3(lat, lon));
+        if (points.length < 2) return;
+        const first = points[0];
+        const last = points[points.length - 1];
+        if (!first.equals(last)) {
+          points.push(first.clone());
+        }
+        const geometry = new THREE.BufferGeometry().setFromPoints(points);
+        const line = new THREE.LineLoop(geometry, lineMaterial);
+        outlineGroup.add(line);
+      };
 
-      helixGroup.scale.set(1.6, 1.6, 1.6);
+      const addGlowingPoint = (lat, lon) => {
+        const position = latLonToVector3(lat, lon, RADIUS + 0.04);
+        const geometry = new THREE.SphereGeometry(0.045, 16, 16);
+        const material = new THREE.MeshBasicMaterial({ color: 0x7fd3ff });
+        const point = new THREE.Mesh(geometry, material);
+        point.position.copy(position);
+        const glow = new THREE.Mesh(
+          new THREE.SphereGeometry(0.09, 16, 16),
+          new THREE.MeshBasicMaterial({ color: 0x7fd3ff, transparent: true, opacity: 0.28 })
+        );
+        glow.position.copy(position);
+        globeGroup.add(glow);
+        globeGroup.add(point);
+      };
 
-      const baseTiltX = 0;
-      const baseRotationY = Math.PI / 4;
-      const baseRotationZ = Math.PI / 4;
+      const addGraticule = () => {
+        const grid = geoGraticule10();
+        const convertLine = (lineCoords) => {
+          const points = lineCoords.map(([lon, lat]) => latLonToVector3(lat, lon, RADIUS + 0.001));
+          if (points.length < 2) return;
+          const geometry = new THREE.BufferGeometry().setFromPoints(points);
+          graticuleGroup.add(new THREE.Line(geometry, graticuleMaterial));
+        };
+        grid.coordinates.forEach(convertLine);
+      };
 
-      const resizeRenderer = () => {
-        const width = canvas.clientWidth;
-        const height = canvas.clientHeight;
+      const resize = () => {
+        const { clientWidth, clientHeight } = container;
+        const width = clientWidth;
+        const height = clientHeight;
         if (width === 0 || height === 0) return;
         renderer.setSize(width, height, false);
         camera.aspect = width / height;
         camera.updateProjectionMatrix();
       };
 
-      const handlePixelRatio = () => {
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        resizeRenderer();
-      };
-
-      if ('ResizeObserver' in window) {
-        const observer = new ResizeObserver(handlePixelRatio);
-        observer.observe(canvas);
-      }
-      window.addEventListener('resize', handlePixelRatio);
-
-      let autoRotation = 0;
-      let scrollTarget = 0;
-      let scrollBlend = 0;
-      let lastScrollY = window.scrollY;
-
-      const clamp = THREE.MathUtils.clamp;
-
-      const updateFromScroll = () => {
-        const currentY = window.scrollY;
-        const delta = currentY - lastScrollY;
-        scrollTarget = clamp(scrollTarget + delta * 0.0004, -0.3, 0.3);
-        lastScrollY = currentY;
-
-        const maxScroll = document.body.scrollHeight - window.innerHeight;
-        const ratio = maxScroll > 0 ? currentY / maxScroll : 0;
-        const baseOpacity = 0.52;
-        const faded = clamp(baseOpacity - ratio * 0.22, 0.24, baseOpacity);
-        canvas.style.opacity = faded.toFixed(2);
-      };
-
-      window.addEventListener('scroll', updateFromScroll, { passive: true });
-      updateFromScroll();
-
-      handlePixelRatio();
-
       const animate = () => {
         requestAnimationFrame(animate);
-        autoRotation += 0.0009;
-        scrollBlend += (scrollTarget - scrollBlend) * 0.08;
-
-        helixGroup.rotation.set(
-          baseTiltX,
-          baseRotationY + autoRotation + scrollBlend,
-          baseRotationZ
-        );
-
+        globeGroup.rotation.y += 0.0009;
+        controls.update();
         renderer.render(scene, camera);
       };
 
-      animate();
+      const loadWorldData = async () => {
+        const response = await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json');
+        const topoJson = await response.json();
+        // Convert TopoJSON from World Atlas into GeoJSON features for each country, then
+        // turn each polygon into a closed Three.js line so outlines hug the sphere.
+        const worldGeo = feature(topoJson, topoJson.objects.countries);
+        worldGeo.features.forEach((country) => {
+          if (country.geometry.type === 'Polygon') {
+            country.geometry.coordinates.forEach(addLineFromCoords);
+          } else if (country.geometry.type === 'MultiPolygon') {
+            country.geometry.coordinates.forEach((polygon) => polygon.forEach(addLineFromCoords));
+          }
+        });
+      };
+
+      const loadActivityPoints = async () => {
+        const response = await fetch('assets/mock-strava.json');
+        const data = await response.json();
+        // Replace the JSON file or adjust each activity's coordinates to spotlight your own data
+        // (for example, favourite recipes, travel spots, or studio locations).
+        data.activities.forEach((activity) => {
+          const [lat, lon] = activity.coordinates;
+          addGlowingPoint(lat, lon);
+        });
+      };
+
+      const init = async () => {
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        resize();
+        window.addEventListener('resize', resize);
+        addGraticule();
+        await Promise.all([loadWorldData(), loadActivityPoints()]);
+        animate();
+      };
+
+      init().catch((error) => console.error('Globe initialisation failed:', error));
     </script>
   </body>
 </html>

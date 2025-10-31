@@ -1,12 +1,12 @@
 /* ---------- Root & Base Styles ---------- */
 :root {
-  color-scheme: light;
-  --background: #f6f3ee;
-  --card: #ffffff;
-  --text-primary: #1f1f1f;
-  --text-muted: #5a5a5a;
-  --accent: #636b2f;
-  --border: rgba(30, 30, 30, 0.1);
+  color-scheme: dark;
+  --background: #0d1117;
+  --card: #111a25;
+  --text-primary: #f5f7fb;
+  --text-muted: #9baec6;
+  --accent: #7fd3ff;
+  --border: rgba(125, 175, 255, 0.14);
 }
 
 *,
@@ -17,8 +17,10 @@
 
 body {
   margin: 0;
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  background: var(--background);
+  font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  background: radial-gradient(circle at 20% 20%, rgba(47, 75, 117, 0.18), transparent 55%),
+    radial-gradient(circle at 80% 10%, rgba(25, 48, 85, 0.16), transparent 60%),
+    var(--background);
   color: var(--text-primary);
   line-height: 1.6;
 }
@@ -49,34 +51,48 @@ a:focus-visible {
   flex-direction: column;
 }
 
-/* ---------- Visual Placeholder ---------- */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- Visual Globe ---------- */
 .visual-container {
   position: sticky;
   top: clamp(2rem, 6vw, 3rem);
-  background: var(--card);
+  background: linear-gradient(145deg, rgba(18, 28, 44, 0.95), rgba(10, 16, 26, 0.9));
   border-radius: 32px;
   border: 1px solid var(--border);
-  box-shadow: 0 18px 45px rgba(15, 15, 15, 0.08);
+  box-shadow: 0 30px 80px rgba(3, 13, 28, 0.35);
   min-height: min(80vh, 640px);
-  padding: clamp(2rem, 6vw, 3rem);
+  padding: clamp(1.5rem, 4vw, 2.5rem);
   display: grid;
   place-items: center;
   overflow: hidden;
 }
 
-.visual-placeholder {
+.visual-globe {
   width: 100%;
-  aspect-ratio: 3 / 4;
-  border-radius: 24px;
-  border: 1px dashed rgba(99, 107, 47, 0.35);
-  background: rgba(99, 107, 47, 0.08);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--accent);
-  font-size: 0.85rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  aspect-ratio: 1;
+  border-radius: 28px;
+  background: radial-gradient(circle at 30% 20%, rgba(74, 112, 163, 0.15), transparent 55%),
+    rgba(5, 12, 25, 0.6);
+  border: 1px solid rgba(127, 211, 255, 0.18);
+  box-shadow: inset 0 0 40px rgba(15, 50, 90, 0.35);
+  position: relative;
+}
+
+.visual-globe canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 /* ---------- Content Column ---------- */
@@ -95,8 +111,8 @@ a:focus-visible {
   flex: 0 0 clamp(4.5rem, 12vw, 6.5rem);
   aspect-ratio: 1 / 1;
   border-radius: 999px;
-  border: 3px solid rgba(99, 107, 47, 0.35);
-  background: rgba(255, 255, 255, 0.85);
+  border: 2px solid rgba(127, 211, 255, 0.35);
+  background: rgba(12, 20, 34, 0.85);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -104,6 +120,7 @@ a:focus-visible {
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--text-muted);
+  box-shadow: 0 20px 45px rgba(12, 29, 55, 0.45);
 }
 
 h1 {
@@ -178,18 +195,6 @@ h1 {
   color: var(--text-muted);
 }
 
-/* ---------- DNA Helix Overlay ---------- */
-#dna-helix {
-  position: fixed;
-  bottom: clamp(1.25rem, 4vw, 2.5rem);
-  right: clamp(1.25rem, 4vw, 2.75rem);
-  width: clamp(260px, 38vw, 520px);
-  height: clamp(340px, 55vh, 620px);
-  pointer-events: none;
-  z-index: 1;
-  opacity: 0.52;
-}
-
 /* ---------- Responsive ---------- */
 @media (max-width: 900px) {
   .page {
@@ -212,12 +217,6 @@ h1 {
     width: clamp(4.5rem, 18vw, 6rem);
   }
 
-  #dna-helix {
-    width: clamp(220px, 48vw, 360px);
-    height: clamp(260px, 48vh, 420px);
-    bottom: 1.25rem;
-    right: 1.25rem;
-  }
 }
 
 @media (max-width: 600px) {
@@ -231,14 +230,7 @@ h1 {
     letter-spacing: 0.06em;
   }
 
-  .visual-placeholder {
-    font-size: 0.75rem;
-  }
-
-  #dna-helix {
-    width: clamp(200px, 60vw, 320px);
-    height: clamp(220px, 52vh, 360px);
-    bottom: 1rem;
-    right: 1rem;
+  .visual-globe {
+    border-radius: 20px;
   }
 }
