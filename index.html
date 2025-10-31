@@ -12,9 +12,10 @@
       <!-- Visual Placeholder Column -->
       <section class="visual-column" aria-labelledby="visual-title">
         <div class="visual-container" role="presentation">
-          <div class="visual-placeholder">
-            <span id="visual-title">Future Visual</span>
+          <div class="visual-placeholder" aria-hidden="true">
+            <canvas id="globe-canvas"></canvas>
           </div>
+          <p id="visual-title" class="visual-caption">Globe of journeys</p>
         </div>
       </section>
 
@@ -35,9 +36,7 @@
           <nav aria-label="Primary links" class="about-links">
             <a href="https://www.linkedin.com" target="_blank" rel="noopener">LinkedIn</a>
             <span aria-hidden="true">·</span>
-            <a href="https://scholar.google.com" target="_blank" rel="noopener"
-              >Google Scholar</a
-            >
+            <a href="https://scholar.google.com" target="_blank" rel="noopener">Google Scholar</a>
             <span aria-hidden="true">·</span>
             <a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
           </nav>
@@ -93,233 +92,157 @@
 
     <script type="module">
       import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.158/build/three.module.js';
+      import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.158/examples/jsm/controls/OrbitControls.js';
+      import { feature } from 'https://cdn.jsdelivr.net/npm/topojson-client@3/+esm';
 
-      const canvas = document.createElement('canvas');
-      canvas.id = 'dna-helix';
-      canvas.setAttribute('aria-hidden', 'true');
-      document.body.appendChild(canvas);
-
+      const canvas = document.getElementById('globe-canvas');
       const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.setClearColor(0x000000, 0);
       renderer.outputColorSpace = THREE.SRGBColorSpace;
 
       const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 60);
-      camera.position.set(0, 0, 10);
+      const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
+      camera.position.set(0, 0, 7);
 
-      const helixGroup = new THREE.Group();
-      scene.add(helixGroup);
+      const ambientLight = new THREE.AmbientLight(0x3a4b68, 0.55);
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.85);
+      directionalLight.position.set(5, 3, 5);
+      scene.add(ambientLight, directionalLight);
 
-      const strandPoints = 480;
-      const turns = 6.5;
-      const helixHeight = 6.5;
-      const radius = 1.15;
+      const globeGroup = new THREE.Group();
+      scene.add(globeGroup);
 
-      const colorStart = new THREE.Color('#a5b2d6');
-      const colorEnd = new THREE.Color('#dce1f0');
+      const globeRadius = 2.4;
+      const globeSurface = new THREE.Mesh(
+        new THREE.SphereGeometry(globeRadius, 96, 96),
+        new THREE.MeshPhongMaterial({
+          color: 0x0a1120,
+          emissive: 0x04060c,
+          shininess: 22,
+          transparent: true,
+          opacity: 0.92,
+        })
+      );
+      globeGroup.add(globeSurface);
 
-      const pointPositions = new Float32Array(strandPoints * 2 * 3);
-      const pointColors = new Float32Array(strandPoints * 2 * 3);
-      const strandLinePositions = [];
-      const strandLineColors = [];
-      const rungPositions = [];
-      const rungColors = [];
+      const controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.08;
+      controls.enablePan = false;
+      controls.rotateSpeed = 0.35;
+      controls.zoomSpeed = 0.6;
+      controls.minDistance = globeRadius + 1.25;
+      controls.maxDistance = globeRadius + 5;
 
-      let positionIndex = 0;
-      let colorIndex = 0;
-      let previousVertices = null;
-      let previousColor = null;
+      const outlineMaterial = new THREE.LineBasicMaterial({
+        color: new THREE.Color('white'),
+        transparent: true,
+        opacity: 0.38,
+      });
 
-      for (let i = 0; i < strandPoints; i++) {
-        const progress = i / (strandPoints - 1);
-        const angle = progress * Math.PI * 2 * turns;
-        const y = (progress - 0.5) * helixHeight;
-
-        const x1 = Math.cos(angle) * radius;
-        const z1 = Math.sin(angle) * radius;
-        const x2 = -x1;
-        const z2 = -z1;
-
-        const mixColor = colorStart.clone().lerp(colorEnd, progress);
-
-        pointPositions[positionIndex++] = x1;
-        pointPositions[positionIndex++] = y;
-        pointPositions[positionIndex++] = z1;
-        pointColors[colorIndex++] = mixColor.r;
-        pointColors[colorIndex++] = mixColor.g;
-        pointColors[colorIndex++] = mixColor.b;
-
-        pointPositions[positionIndex++] = x2;
-        pointPositions[positionIndex++] = y;
-        pointPositions[positionIndex++] = z2;
-        pointColors[colorIndex++] = mixColor.r;
-        pointColors[colorIndex++] = mixColor.g;
-        pointColors[colorIndex++] = mixColor.b;
-
-        if (previousVertices) {
-          const prevColor = previousColor;
-          strandLinePositions.push(
-            previousVertices[0],
-            previousVertices[1],
-            previousVertices[2],
-            x1,
-            y,
-            z1,
-            previousVertices[3],
-            previousVertices[4],
-            previousVertices[5],
-            x2,
-            y,
-            z2
-          );
-
-          strandLineColors.push(
-            prevColor.r,
-            prevColor.g,
-            prevColor.b,
-            mixColor.r,
-            mixColor.g,
-            mixColor.b,
-            prevColor.r,
-            prevColor.g,
-            prevColor.b,
-            mixColor.r,
-            mixColor.g,
-            mixColor.b
-          );
-        }
-
-        if (i % 9 === 0) {
-          rungPositions.push(x1, y, z1, x2, y, z2);
-          rungColors.push(
-            mixColor.r,
-            mixColor.g,
-            mixColor.b,
-            mixColor.r,
-            mixColor.g,
-            mixColor.b
-          );
-        }
-
-        previousVertices = [x1, y, z1, x2, y, z2];
-        previousColor = mixColor.clone();
-      }
-
-      const pointsGeometry = new THREE.BufferGeometry();
-      pointsGeometry.setAttribute('position', new THREE.BufferAttribute(pointPositions, 3));
-      pointsGeometry.setAttribute('color', new THREE.BufferAttribute(pointColors, 3));
-
-      const helixMaterial = new THREE.PointsMaterial({
-        size: 0.045,
+      const glowMaterial = new THREE.PointsMaterial({
+        color: 0x8baaff,
+        size: 0.08,
         sizeAttenuation: true,
         transparent: true,
-        opacity: 0.85,
-        vertexColors: true,
-        depthWrite: false,
-        blending: THREE.AdditiveBlending,
-      });
-
-      const helixPoints = new THREE.Points(pointsGeometry, helixMaterial);
-      helixGroup.add(helixPoints);
-
-      const strandGeometry = new THREE.BufferGeometry();
-      strandGeometry.setAttribute(
-        'position',
-        new THREE.Float32BufferAttribute(strandLinePositions, 3)
-      );
-      strandGeometry.setAttribute(
-        'color',
-        new THREE.Float32BufferAttribute(strandLineColors, 3)
-      );
-
-      const rungGeometry = new THREE.BufferGeometry();
-      rungGeometry.setAttribute(
-        'position',
-        new THREE.Float32BufferAttribute(rungPositions, 3)
-      );
-      rungGeometry.setAttribute(
-        'color',
-        new THREE.Float32BufferAttribute(rungColors, 3)
-      );
-
-      const lineMaterial = new THREE.LineBasicMaterial({
-        vertexColors: true,
-        transparent: true,
-        opacity: 0.18,
+        opacity: 0.92,
         blending: THREE.AdditiveBlending,
         depthWrite: false,
       });
 
-      const strandLines = new THREE.LineSegments(strandGeometry, lineMaterial);
-      const rungLines = new THREE.LineSegments(rungGeometry, lineMaterial.clone());
-      helixGroup.add(strandLines, rungLines);
+      const fallbackActivities = [
+        { coordinates: [22.3193, 114.1694], name: 'Hong Kong Ride' },
+        { coordinates: [37.7749, -122.4194], name: 'San Francisco Run' },
+        { coordinates: [48.8566, 2.3522], name: 'Paris Ride' },
+        { coordinates: [59.9139, 10.7522], name: 'Oslo Loop' },
+        { coordinates: [35.6762, 139.6503], name: 'Tokyo Tempo' },
+        { coordinates: [-33.4489, -70.6693], name: 'Santiago Spin' },
+      ];
 
-      helixGroup.scale.set(1.6, 1.6, 1.6);
+      const globeContainer = canvas.parentElement;
 
-      const baseTiltX = 0;
-      const baseRotationY = Math.PI / 4;
-      const baseRotationZ = Math.PI / 4;
-
-      const resizeRenderer = () => {
-        const width = canvas.clientWidth;
-        const height = canvas.clientHeight;
-        if (width === 0 || height === 0) return;
-        renderer.setSize(width, height, false);
-        camera.aspect = width / height;
-        camera.updateProjectionMatrix();
-      };
-
-      const handlePixelRatio = () => {
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        resizeRenderer();
-      };
-
-      if ('ResizeObserver' in window) {
-        const observer = new ResizeObserver(handlePixelRatio);
-        observer.observe(canvas);
+      function latLonToVector3(lat, lon, radius) {
+        // Map latitude/longitude into spherical coordinates and then 3D Cartesian space on the sphere surface.
+        const phi = THREE.MathUtils.degToRad(90 - lat);
+        const theta = THREE.MathUtils.degToRad(lon + 180);
+        const x = radius * Math.sin(phi) * Math.cos(theta);
+        const y = radius * Math.cos(phi);
+        const z = radius * Math.sin(phi) * Math.sin(theta);
+        return new THREE.Vector3(x, y, z);
       }
-      window.addEventListener('resize', handlePixelRatio);
 
-      let autoRotation = 0;
-      let scrollTarget = 0;
-      let scrollBlend = 0;
-      let lastScrollY = window.scrollY;
+      async function buildCountryOutlines() {
+        // Fetch the TopoJSON world atlas and convert into GeoJSON feature collections for each country outline.
+        const response = await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json');
+        const topoJson = await response.json();
+        const countries = feature(topoJson, topoJson.objects.countries);
 
-      const clamp = THREE.MathUtils.clamp;
+        const addRing = (ring) => {
+          // Convert each TopoJSON ring into a Three.js line geometry to render a thin outline around the globe.
+          const vertices = ring.map(([lon, lat]) => latLonToVector3(lat, lon, globeRadius + 0.003));
+          if (vertices.length < 2) return;
+          const geometry = new THREE.BufferGeometry().setFromPoints(vertices);
+          globeGroup.add(new THREE.LineLoop(geometry, outlineMaterial));
+        };
 
-      const updateFromScroll = () => {
-        const currentY = window.scrollY;
-        const delta = currentY - lastScrollY;
-        scrollTarget = clamp(scrollTarget + delta * 0.0004, -0.3, 0.3);
-        lastScrollY = currentY;
+        countries.features.forEach((country) => {
+          if (!country.geometry) return;
+          if (country.geometry.type === 'Polygon') {
+            country.geometry.coordinates.forEach(addRing);
+          } else if (country.geometry.type === 'MultiPolygon') {
+            country.geometry.coordinates.forEach((polygon) => polygon.forEach(addRing));
+          }
+        });
+      }
 
-        const maxScroll = document.body.scrollHeight - window.innerHeight;
-        const ratio = maxScroll > 0 ? currentY / maxScroll : 0;
-        const baseOpacity = 0.52;
-        const faded = clamp(baseOpacity - ratio * 0.22, 0.24, baseOpacity);
-        canvas.style.opacity = faded.toFixed(2);
-      };
+      async function addActivityPoints() {
+        let activities = fallbackActivities;
+        try {
+          const response = await fetch('assets/activities.json');
+          if (!response.ok) throw new Error('Unable to load activities.json');
+          const data = await response.json();
+          if (Array.isArray(data.activities) && data.activities.length) {
+            activities = data.activities.map((activity) => ({
+              coordinates: activity.coordinates,
+              name: activity.name,
+            }));
+          }
+        } catch (error) {
+          console.warn('Using fallback activity data for globe markers.', error);
+        }
 
-      window.addEventListener('scroll', updateFromScroll, { passive: true });
-      updateFromScroll();
+        // To customise data points for other narratives (recipes, events, locations), update assets/activities.json with new latitude/longitude pairs or swap in your own dataset here.
+        const positions = new Float32Array(activities.length * 3);
+        activities.forEach((activity, index) => {
+          const point = latLonToVector3(activity.coordinates[0], activity.coordinates[1], globeRadius + 0.06);
+          positions.set(point.toArray(), index * 3);
+        });
 
-      handlePixelRatio();
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        const glowingPoints = new THREE.Points(geometry, glowMaterial);
+        globeGroup.add(glowingPoints);
+      }
 
-      const animate = () => {
+      function handleResize() {
+        const { clientWidth, clientHeight } = globeContainer;
+        renderer.setSize(clientWidth, clientHeight, false);
+        camera.aspect = clientWidth / clientHeight || 1;
+        camera.updateProjectionMatrix();
+      }
+
+      function animate() {
         requestAnimationFrame(animate);
-        autoRotation += 0.0009;
-        scrollBlend += (scrollTarget - scrollBlend) * 0.08;
-
-        helixGroup.rotation.set(
-          baseTiltX,
-          baseRotationY + autoRotation + scrollBlend,
-          baseRotationZ
-        );
-
+        globeGroup.rotation.y += 0.0004;
+        controls.update();
         renderer.render(scene, camera);
-      };
+      }
 
+      handleResize();
+      window.addEventListener('resize', handleResize);
+      buildCountryOutlines().catch((error) => console.error('Unable to draw country outlines.', error));
+      addActivityPoints();
       animate();
     </script>
   </body>
