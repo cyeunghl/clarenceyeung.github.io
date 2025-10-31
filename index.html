@@ -3,7 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Clarence Yeung · Portfolio</title>
+    <title>Clarence Yeung · Lab & Larder</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="style.css" />
     <script type="importmap">
       {
@@ -19,8 +25,9 @@
     <main class="page">
       <!-- Visual Placeholder Column -->
       <section class="visual-column">
-        <div class="visual-container" role="presentation">
-          <div class="visual-stage" id="globe-stage" aria-hidden="true"></div>
+        <div class="visual-container" role="presentation" aria-hidden="true">
+          <div class="recipe-label">Chef's Atlas</div>
+          <div class="visual-stage" id="globe-stage"></div>
           <div
             class="visual-tooltip"
             id="globe-tooltip"
@@ -28,6 +35,7 @@
             aria-live="polite"
             hidden
           ></div>
+          <div class="visual-footer">Routes simmered from Strava JSON</div>
         </div>
       </section>
 
@@ -36,45 +44,111 @@
         <header class="page-header">
           <div class="header-inner">
             <div class="hero-portrait" aria-hidden="true">
+              <span>Portrait</span>
             </div>
-            <h1>Clarence Yeung</h1>
+            <div class="hero-copy">
+              <p class="eyebrow">Clarence Yeung</p>
+              <h1>Scientist, cyclist, and experimental cook</h1>
+              <p class="hero-blurb">
+                I study genetic networks at Hexagon Bio while testing recipes that blend lab precision with
+                kitchen warmth. This site pairs research adventures with slow-crafted meals and miles logged
+                on two wheels.
+              </p>
+              <nav aria-label="Personal links" class="hero-links">
+                <a href="https://www.linkedin.com/in/clarence-yeung-8454237a/" target="_blank" rel="noopener"
+                  >LinkedIn</a
+                >
+                <a href="https://github.com/cyeunghl" target="_blank" rel="noopener">GitHub</a>
+                <a href="https://scholar.google.com/citations?user=sMj4W4EAAAAJ&hl=en&oi=ao" target="_blank" rel="noopener"
+                  >Google Scholar</a
+                >
+                <a href="https://clarenceyeung.substack.com" target="_blank" rel="noopener">Substack</a>
+              </nav>
+            </div>
           </div>
         </header>
 
         <!-- About Section -->
         <section class="content-section" id="about">
-          <h2>About Me</h2>
-          <nav aria-label="Primary links" class="about-links">
-            <a href="https://www.linkedin.com/in/clarence-yeung-8454237a/" target="_blank" rel="noopener">LinkedIn</a>
-            <span aria-hidden="true">·</span>
-            <a href="https://scholar.google.com/citations?user=sMj4W4EAAAAJ&hl=en&oi=ao" target="_blank" rel="noopener"
-              >Google Scholar</a
-            >
-            <span aria-hidden="true">·</span>
-            <a href="https://github.com/cyeunghl" target="_blank" rel="noopener">GitHub</a>
-          </nav>
+          <h2>Mise en Place</h2>
+          <div class="section-grid">
+            <div>
+              <h3>Pantry Staples</h3>
+              <ul class="lined-list">
+                <li>Genomics &amp; systems biology research</li>
+                <li>Computational pipelines for variant interpretation</li>
+                <li>Collaborative lab leadership &amp; mentorship</li>
+                <li>Recipe development &amp; fermentation experiments</li>
+              </ul>
+            </div>
+            <div>
+              <h3>Current Kitchen</h3>
+              <p>
+                Senior Scientist at Hexagon Bio guiding oncology discovery programs. Formerly at the University
+                of Toronto studying how mutations reshape phenotype landscapes.
+              </p>
+              <p>
+                Outside the lab you will find me coaxing laminated doughs, brewing broths, and mapping Bay Area
+                climbs.
+              </p>
+            </div>
+          </div>
         </section>
 
-        <!-- INTRO SECTION -->
+        <!-- Projects Section -->
         <section class="content-section" id="projects">
-          <h2>INTRO</h2>
+          <h2>Tasting Menu</h2>
           <ul class="project-list">
             <li>
+              <h3>Genome Fermentation</h3>
               <p>
-                I am a scientist, biker and baker. I got my PhD at the University of Toronto studying genetic
-                networks and the impact of mutations on phenotypes. I currently am in the Bay Area working as a 
-                cancer geneticist at Hexagon Bio.
+                Investigating microbial pathways that unlock novel therapeutics. My notebook reads like a
+                kitchen logbook—each experiment annotated with temperature, timing, and texture.
+              </p>
+            </li>
+            <li>
+              <h3>Community Suppers</h3>
+              <p>
+                Hosting pop-up dinners that pair seasonal menus with short talks on precision medicine.
+                Designed to make complex science as approachable as a family recipe card.
+              </p>
+            </li>
+            <li>
+              <h3>Field Notes</h3>
+              <p>
+                Essays weaving together lab breakthroughs, travel rides, and the comfort foods that fueled
+                them—all curated on my Substack.
               </p>
             </li>
           </ul>
         </section>
 
+        <!-- Strava Section -->
+        <section class="content-section" id="strava">
+          <h2>Ride Pantry</h2>
+          <div class="strava-grid">
+            <div class="strava-summary" id="ride-summary" aria-live="polite">
+              Loading seasonal stats…
+            </div>
+            <figure class="strava-heatmap">
+              <canvas id="ride-heatmap" width="360" height="220" aria-label="Heatmap of logged rides"></canvas>
+              <figcaption>Heatmap generated directly from Strava JSON activity coordinates.</figcaption>
+            </figure>
+            <div class="strava-list">
+              <h3>Featured Rides</h3>
+              <ol id="ride-feature-list" class="lined-list" aria-live="polite">
+                <li>Awaiting route cards…</li>
+              </ol>
+            </div>
+          </div>
+        </section>
+
         <!-- Contact Section -->
         <section class="content-section" id="contact">
-          <h2>Contact</h2>
+          <h2>Say Hello</h2>
           <p>
-            Reach out for collaborations, research inquiries, or to swap ride routes:
-            <a href="mailto:clarencehlyeung at gmail dot com">clarencehlyeung at gmail dot com</a>
+            Write to <a href="mailto:clarencehlyeung@gmail.com">clarencehlyeung@gmail.com</a> for
+            collaborations, ride suggestions, or a favourite family recipe.
           </p>
           <p class="contact-links">
             <a href="https://www.linkedin.com/in/clarence-yeung-8454237a/" target="_blank" rel="noopener">LinkedIn</a>
@@ -351,17 +425,187 @@
         globeCamera.updateProjectionMatrix();
       };
 
+      const generateActivityId = () => {
+        if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+          return crypto.randomUUID();
+        }
+        return `ride-${Math.random().toString(36).slice(2, 10)}`;
+      };
+
+      const normalizeActivity = (activity) => {
+        if (!activity || typeof activity !== 'object') return null;
+        const getValue = (keys, fallback = null) => {
+          for (const key of keys) {
+            const value = activity[key];
+            if (value !== undefined && value !== null && value !== '') {
+              return value;
+            }
+          }
+          return fallback;
+        };
+
+        const parseCoordinate = (value) => {
+          if (typeof value === 'number') return value;
+          if (typeof value !== 'string') return null;
+          const match = value.match(/-?\d+\.\d+/);
+          if (!match) return null;
+          return parseFloat(match[0]);
+        };
+
+        const lat = parseCoordinate(getValue(['lat', 'activities.lat']));
+        const lon = parseCoordinate(getValue(['lon', 'activities.lon']));
+        if (lat === null || lon === null) return null;
+
+        const id = getValue(['id', 'activities.id']);
+        const resolvedId = id ?? generateActivityId();
+        const name = getValue(['name', 'activities.name'], 'Ride');
+        const type = getValue(['type', 'activities.type'], 'Ride');
+        const distance = Number.parseFloat(getValue(['distance', 'activities.distance'], 0)) || 0;
+        const startDate = getValue(['start_date', 'activities.start_date'], null);
+
+        return { id: resolvedId, name, type, distance, startDate, lat, lon };
+      };
+
+      const rideSummary = document.getElementById('ride-summary');
+      const rideFeatureList = document.getElementById('ride-feature-list');
+      const heatmapCanvas = document.getElementById('ride-heatmap');
+
+      const formatDistance = (meters) => {
+        const kilometers = meters / 1000;
+        if (kilometers >= 100) return `${kilometers.toFixed(0)} km`;
+        if (kilometers >= 10) return `${kilometers.toFixed(1)} km`;
+        return `${kilometers.toFixed(2)} km`;
+      };
+
+      const formatDate = (isoString) => {
+        if (!isoString) return 'Date TBC';
+        const date = new Date(isoString);
+        if (Number.isNaN(date.getTime())) return 'Date TBC';
+        return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+      };
+
+      const renderSummary = (activities) => {
+        if (!Array.isArray(activities) || activities.length === 0) {
+          rideSummary.textContent = 'No routes in the pantry yet. Drop in a Strava JSON to season this section.';
+          rideFeatureList.innerHTML = '<li>Upload rides to see featured cards.</li>';
+          return;
+        }
+
+        const rides = activities.filter((item) => (item.type || '').toLowerCase().includes('ride'));
+        const runs = activities.filter((item) => (item.type || '').toLowerCase().includes('run'));
+
+        const totalDistance = activities.reduce((sum, item) => sum + (item.distance || 0), 0);
+        const maxRide = rides.reduce((acc, item) => (item.distance > (acc?.distance ?? 0) ? item : acc), null);
+
+        const now = new Date();
+        const twelveMonthsAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+        const recentActivities = activities.filter((item) => {
+          if (!item.startDate) return false;
+          const date = new Date(item.startDate);
+          return date >= twelveMonthsAgo && date <= now;
+        });
+        const recentDistance = recentActivities.reduce((sum, item) => sum + (item.distance || 0), 0);
+
+        rideSummary.innerHTML = `
+          <div class="summary-pair">
+            <span class="summary-label">Total distance</span>
+            <span class="summary-value">${formatDistance(totalDistance)}</span>
+          </div>
+          <div class="summary-pair">
+            <span class="summary-label">12-month distance</span>
+            <span class="summary-value">${formatDistance(recentDistance)}</span>
+          </div>
+          <div class="summary-pair">
+            <span class="summary-label">Rides logged</span>
+            <span class="summary-value">${rides.length}</span>
+          </div>
+          <div class="summary-pair">
+            <span class="summary-label">Runs logged</span>
+            <span class="summary-value">${runs.length}</span>
+          </div>
+        `;
+
+        const featured = [...rides]
+          .sort((a, b) => b.distance - a.distance)
+          .slice(0, 5);
+
+        if (featured.length) {
+          rideFeatureList.innerHTML = featured
+            .map(
+              (item) => `
+                <li>
+                  <span class="feature-title">${item.name}</span>
+                  <span class="feature-meta">${formatDistance(item.distance)} · ${formatDate(item.startDate)}</span>
+                </li>
+              `
+            )
+            .join('');
+        } else {
+          rideFeatureList.innerHTML = '<li>No ride data yet—time to clip in.</li>';
+        }
+      };
+
+      const drawHeatmap = (activities) => {
+        if (!heatmapCanvas) return;
+        const context = heatmapCanvas.getContext('2d');
+        if (!context) return;
+
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const width = heatmapCanvas.clientWidth || heatmapCanvas.width || 360;
+        const height = heatmapCanvas.clientHeight || heatmapCanvas.height || 220;
+        heatmapCanvas.width = width * dpr;
+        heatmapCanvas.height = height * dpr;
+        context.scale(dpr, dpr);
+
+        context.clearRect(0, 0, width, height);
+        context.fillStyle = '#f7f4eb';
+        context.fillRect(0, 0, width, height);
+
+        const points = activities
+          .filter((item) => typeof item.lat === 'number' && typeof item.lon === 'number')
+          .map((item) => ({
+            x: ((item.lon + 180) / 360) * width,
+            y: ((90 - item.lat) / 180) * height,
+            weight: Math.min(Math.max(item.distance / 100000, 0.4), 2.2),
+          }));
+
+        points.forEach((point) => {
+          const radius = 18 * point.weight;
+          const gradient = context.createRadialGradient(point.x, point.y, 0, point.x, point.y, radius);
+          gradient.addColorStop(0, 'rgba(99, 107, 47, 0.42)');
+          gradient.addColorStop(1, 'rgba(99, 107, 47, 0)');
+          context.fillStyle = gradient;
+          context.beginPath();
+          context.arc(point.x, point.y, radius, 0, Math.PI * 2);
+          context.fill();
+        });
+
+        context.strokeStyle = 'rgba(99, 107, 47, 0.18)';
+        context.lineWidth = 1;
+        context.strokeRect(0.5, 0.5, width - 1, height - 1);
+      };
+
       const loadActivities = async () => {
         try {
           const response = await fetch('assets/activities.json');
           if (!response.ok) throw new Error('Failed to load activities');
           const data = await response.json();
+
+          const normalized = (data.activities || [])
+            .map(normalizeActivity)
+            .filter(Boolean);
+
           resetHover();
           markerGroup.clear();
           markerMeshes.length = 0;
-          (data.activities || []).forEach(createMarker);
+          normalized.forEach(createMarker);
+
+          renderSummary(normalized);
+          drawHeatmap(normalized);
         } catch (error) {
           console.warn(error);
+          rideSummary.textContent = 'Unable to reduce rides into view right now. Please refresh the page.';
+          rideFeatureList.innerHTML = '<li>Heatmap paused—check your network connection.</li>';
         }
       };
 
