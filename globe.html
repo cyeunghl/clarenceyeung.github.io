@@ -39,7 +39,6 @@
         </div>
       </section>
     </main>
-
     <script type="module">
       import * as THREE from 'three';
       import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
@@ -75,18 +74,20 @@
 
       const globeRadius = 3.2;
 
-      const oceanMaterial = new THREE.MeshLambertMaterial({ color: '#C7E6F4' });
-      const oceanMesh = new THREE.Mesh(new THREE.SphereGeometry(globeRadius, 128, 128), oceanMaterial);
-      globeGroup.add(oceanMesh);
 
-      const landMaterial = new THREE.MeshLambertMaterial({
-        color: '#C9D6C1',
-        transparent: true,
-        opacity: 0.85,
-        side: THREE.DoubleSide,
-      });
-      const landGroup = new THREE.Group();
-      globeGroup.add(landGroup);
+      // Create canvas for country fill texture
+      const canvasWidth = 4096;
+      const canvasHeight = 2048;
+      const countryCanvas = document.createElement('canvas');
+      countryCanvas.width = canvasWidth;
+      countryCanvas.height = canvasHeight;
+      const ctx = countryCanvas.getContext('2d');
+      
+      // Set background to transparent
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+      
+      // Country fill color
+      const countryColor = '#636B2F';
 
       const markerGroup = new THREE.Group();
       globeGroup.add(markerGroup);
@@ -117,82 +118,118 @@
 
       globeGroup.rotation.x = THREE.MathUtils.degToRad(18);
 
-      const convertLatLonToXYZ = (lat, lon, radius) => {
-        const phi = THREE.MathUtils.degToRad(90 - lat);
-        const theta = THREE.MathUtils.degToRad(lon + 180);
-        const x = -radius * Math.sin(phi) * Math.cos(theta);
-        const z = radius * Math.sin(phi) * Math.sin(theta);
-        const y = radius * Math.cos(phi);
-        return new THREE.Vector3(x, y, z);
+      // Convert lat/lon to 3D Vector3 on sphere surface
+      const latLonToVector3 = (lat, lon, radius) => {
+        const phi = (90 - lat) * Math.PI / 180;
+        const theta = (lon + 180) * Math.PI / 180;
+        return new THREE.Vector3(
+          -radius * Math.sin(phi) * Math.cos(theta),
+          radius * Math.cos(phi),
+          radius * Math.sin(phi) * Math.sin(theta)
+        );
       };
 
-      const buildPolygon = (rings) => {
+      // Keep convertLatLonToXYZ for marker compatibility
+      const convertLatLonToXYZ = (lat, lon, radius) => {
+        return latLonToVector3(lat, lon, radius);
+      };
+
+      // Convert lat/lon to equirectangular UV coordinates for canvas
+      const latLonToUV = (lat, lon) => {
+        const u = ((lon + 180) / 360) * canvasWidth;
+        const v = ((90 - lat) / 180) * canvasHeight;
+        return { u, v };
+      };
+
+      // Draw a polygon ring on the canvas
+      const drawPolygonOnCanvas = (rings) => {
         if (!Array.isArray(rings) || rings.length === 0) return;
         const [outer, ...holes] = rings;
-        if (!outer || outer.length < 3) return;
+        if (!outer || outer.length < 2) return;
 
-        const shape = new THREE.Shape();
-        outer.forEach(([lon, lat], index) => {
-          if (index === 0) {
-            shape.moveTo(lon, lat);
-          } else {
-            shape.lineTo(lon, lat);
-          }
-        });
-
-        const holePaths = holes
-          .filter((hole) => Array.isArray(hole) && hole.length >= 3)
-          .map((hole) => {
-            const path = new THREE.Path();
-            hole.forEach(([lon, lat], index) => {
-              if (index === 0) {
-                path.moveTo(lon, lat);
-              } else {
-                path.lineTo(lon, lat);
-              }
-            });
-            return path;
-          });
-
-        const geometry = new THREE.ShapeGeometry(shape, holePaths);
-        const position = geometry.attributes.position;
-        const landRadius = globeRadius + 0.01;
-        for (let i = 0; i < position.count; i++) {
-          const lon = position.getX(i);
-          const lat = position.getY(i);
-          const vertex = convertLatLonToXYZ(lat, lon, landRadius);
-          position.setXYZ(i, vertex.x, vertex.y, vertex.z);
+        ctx.beginPath();
+        
+        // Draw outer ring
+        const firstPoint = latLonToUV(outer[0][1], outer[0][0]);
+        ctx.moveTo(firstPoint.u, firstPoint.v);
+        
+        for (let i = 1; i < outer.length; i++) {
+          const point = latLonToUV(outer[i][1], outer[i][0]);
+          ctx.lineTo(point.u, point.v);
         }
-        position.needsUpdate = true;
-        geometry.computeVertexNormals();
-
-        const mesh = new THREE.Mesh(geometry, landMaterial);
-        landGroup.add(mesh);
+        
+        // Close the path
+        ctx.closePath();
+        
+        // Draw holes (subtract from fill)
+        for (const hole of holes) {
+          if (!Array.isArray(hole) || hole.length < 2) continue;
+          const firstHolePoint = latLonToUV(hole[0][1], hole[0][0]);
+          ctx.moveTo(firstHolePoint.u, firstHolePoint.v);
+          
+          for (let i = 1; i < hole.length; i++) {
+            const point = latLonToUV(hole[i][1], hole[i][0]);
+            ctx.lineTo(point.u, point.v);
+          }
+          
+          ctx.closePath();
+        }
+        
+        // Fill the polygon
+        ctx.fillStyle = countryColor;
+        ctx.fill('evenodd'); // Use even-odd rule to handle holes correctly
       };
 
-      const loadLandPolygons = async () => {
+      // Load and render country boundaries as polylines and fill texture
+      const loadCountryBoundaries = async () => {
         try {
           const response = await fetch(
             'https://raw.githubusercontent.com/datasets/geo-boundaries-world-110m/master/countries.geojson'
           );
-          if (!response.ok) throw new Error('Failed to load land GeoJSON');
+          if (!response.ok) throw new Error('Failed to load country boundaries GeoJSON');
           const data = await response.json();
           const features = Array.isArray(data.features) ? data.features : [];
+          
+          // First pass: Draw all polygons on canvas
           features.forEach((feature) => {
             const geometry = feature && feature.geometry;
             if (!geometry) return;
+            
             if (geometry.type === 'Polygon') {
-              buildPolygon(geometry.coordinates);
+              drawPolygonOnCanvas(geometry.coordinates);
             } else if (geometry.type === 'MultiPolygon') {
-              geometry.coordinates.forEach(buildPolygon);
+              // MultiPolygon is an array of Polygons
+              geometry.coordinates.forEach((polygon) => {
+                drawPolygonOnCanvas(polygon);
+              });
             }
           });
+          
+          // Create texture from canvas
+          const countryTexture = new THREE.CanvasTexture(countryCanvas);
+          countryTexture.wrapS = THREE.ClampToEdgeWrapping;
+          countryTexture.wrapT = THREE.ClampToEdgeWrapping;
+          countryTexture.needsUpdate = true;
+          
+          // Create ocean material with country texture as emissive map
+          const oceanMaterial = new THREE.MeshStandardMaterial({
+            color: '#C7E6F4',
+            emissive: new THREE.Color(countryColor),
+            emissiveMap: countryTexture,
+            emissiveIntensity: 0.6,
+          });
+          
+          const oceanMesh = new THREE.Mesh(
+            new THREE.SphereGeometry(globeRadius, 128, 128),
+            oceanMaterial
+          );
+          globeGroup.add(oceanMesh);
         } catch (error) {
-          console.error('Unable to build land polygons', error);
+          console.error('Unable to load country boundaries', error);
         }
       };
 
-      loadLandPolygons();
+      loadCountryBoundaries();
 
       const markerMeshes = [];
       let hoveredMarker = null;
@@ -247,7 +284,7 @@
           roughness: 0.45,
           metalness: 0.08,
         });
-        const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.06, 28, 28), material);
+        const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.03, 16, 16), material);
         mesh.position.copy(position);
         mesh.lookAt(new THREE.Vector3(0, 0, 0));
         mesh.userData = {
